@@ -1,23 +1,53 @@
-import 'package:flashform_app/features/signin_page.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flashform_app/core/app_theme.dart';
+import 'package:flashform_app/core/router_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(ProviderScope(child: const MyApp()));
+  await EasyLocalization.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://bilgviofjcaoxeruzita.supabase.co',
+    anonKey: 'sb_publishable_dc9-9PshZxrcJYs85GE3fw_h3YsHQz6',
+    authOptions: FlutterAuthClientOptions(
+      authFlowType: AuthFlowType.pkce,
+    ),
+  );
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('ru'), Locale('kk')],
+      path: '/translations',
+      saveLocale: true,
+      fallbackLocale: const Locale('ru'),
+      startLocale: const Locale('ru'),
+      child: ProviderScope(child: const MyApp()),
+    ),
+  );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final routerConfig = ref.watch(routerProvider);
+    return MaterialApp.router(
+      routerConfig: routerConfig,
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       title: 'FlashForm',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        fontFamily: 'GoogleSans',
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.green,
+          primary: AppTheme.primary,
+        ),
       ),
-      home: SigninPage(),
     );
   }
 }

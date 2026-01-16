@@ -45,5 +45,17 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+	<string>https</string>
+	<string>http</string>
+	<string>whatsapp</string>
+	<string>tg</string>
+	</array>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>ru</string>
+		<string>kk</string>
+	</array>
 </dict>
 </plist>

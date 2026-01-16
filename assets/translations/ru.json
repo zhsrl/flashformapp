@@ -1,0 +1,30 @@
+{
+    "auth" : {
+        "signin-title": "Войти в Flashform",
+        "signup-title": "Присоединиться к Flashform",
+        "forgot-password": "Забыли пароль?",
+        "are-you-first": "Вы здесь впервые?",
+        "signup-text": "Присоединиться!",
+        "do-you-have-account": "У вас есть аккаунт?",
+        "signin-text": "Войти"
+    },
+    "forgot-password" : {
+        "title": "Возникли проблемы?",
+        "subtitle": "Напишите в поддержку"
+    },
+    "button" : {
+        "signin": "Войти",
+        "signup": "Зарегистрироваться"
+        
+    },
+    "field": {
+        "email": "Эл. почта",
+        "name": "Ваше имя",
+        "password": "Пароль"
+    },
+    "global": {
+        "language": "Язык",
+        "lang-ru": "Русский",
+        "lang-kz": "Қазақ тілі"
+    }
+}

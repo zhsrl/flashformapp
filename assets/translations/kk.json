@@ -1,0 +1,31 @@
+{
+    "auth" : {
+        "signin-title": "Flashform-ға кіру",
+        "signup-title": "Flashform-ға қосылу",
+        "forgot-password": "Құпия сөзіңізді ұмыттыңыз ба?",
+        "are-you-first": "Жаңадан келдіңіз бе?",
+        "signup-text": "Қосылыңыз!",
+        "do-you-have-account": "Сізде аккаунт бар ма?",
+        "signin-text": "Кіру"
+    },
+    "forgot-password" : {
+        "title": "Қиындықтар туындап жатыр ма?",
+        "subtitle": "Қолдау қызметіне хабарласыңыз"
+    },
+
+    "button" : {
+        "signin": "Кіру",
+        "signup": "Тіркелу"
+
+    },
+    "field": {
+        "email": "Эл. пошта",
+        "name": "Сіздің атыңыз",
+        "password": "Құпия сөз"
+    },
+    "global": {
+        "language": "Тіл",
+        "lang-ru": "Русский",
+        "lang-kz": "Қазақ тілі"
+    }
+}

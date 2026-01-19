@@ -18,7 +18,7 @@ class AuthRepository {
         password: password,
       );
     } on AuthException catch (e) {
-      throw Exception(e.message);
+      throw Exception(e.code);
     }
   }
 

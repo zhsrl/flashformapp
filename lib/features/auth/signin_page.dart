@@ -43,7 +43,7 @@ class _SigninPageState extends ConsumerState<SigninPage> {
 
       if (currentUser != null) {
         if (mounted) {
-          context.push('/');
+          context.replace('/');
         }
       }
     } catch (e) {

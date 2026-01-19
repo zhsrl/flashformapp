@@ -26,5 +26,14 @@
         "language": "Язык",
         "lang-ru": "Русский",
         "lang-kz": "Қазақ тілі"
+    },
+    "errors": {
+        "invalid_credentials": "Қате эл. пошта немесе құпия сөз",
+        "user_already_registered": "Электрондық пошта бойынша пайдаланушы бұрыннан бар",
+        "anonymous_provider_disabled": "Жасырын кіру өшірілген",
+        "weak_password": "weak_password",
+        "email_not_confirmed": "Электрондық пошта расталмады. Поштаңызды тексеріңіз",
+        "over_email_send_rate_limit": "Сұраныстар тым көп. Сәл күте тұрыңыз",
+        "429": "Тым көп әрекеттер. Кейінірек қайталап көріңіз"
     }
 }

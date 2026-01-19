@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flashform_app/features/auth/confirm_email.dart';
 import 'package:flashform_app/features/auth/signup_page.dart';
-import 'package:flashform_app/features/home_page.dart';
+import 'package:flashform_app/features/home/home_page.dart';
 import 'package:flashform_app/features/auth/signin_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

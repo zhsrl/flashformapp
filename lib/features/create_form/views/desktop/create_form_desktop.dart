@@ -68,6 +68,7 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
           .toList();
 
       final Map<String, dynamic> data = {
+        'id': widget.formId,
         'user_id': user.id,
         'title': title,
         'form_title': formTitle,
@@ -77,7 +78,7 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
         'is_active': true,
       };
 
-      ref.read(formControllerProvider.notifier).publishForm(data);
+      await ref.read(formControllerProvider.notifier).publishForm(data);
 
       if (!mounted) return;
 

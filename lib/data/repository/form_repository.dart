@@ -27,9 +27,12 @@ class FormRepository {
 
   Future<FormModel> updateForm(Map<String, dynamic> data) async {
     final supabaseClient = _supabase.client;
+
+    final id = data['id'];
     final repsonse = await supabaseClient
         .from('forms')
         .update(data)
+        .eq('id', id)
         .select()
         .single();
 

@@ -41,109 +41,127 @@ class _SettingsPanelViewState extends State<SettingsPanelView> {
         String fieldLabel = '';
         String fieldType = 'name';
 
-        return AlertDialog(
-          title: const Text('Добавить поле'),
-          backgroundColor: AppTheme.background,
-          content: SizedBox(
-            width: 350,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FFTextField(
-                  hintText: 'Название поля',
-                  onChanged: (value) => fieldLabel = value,
-                ),
+        // Используем StatefulBuilder, чтобы обновлять состояние внутри диалога
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Добавить поле'),
+              backgroundColor: AppTheme.background,
+              content: SizedBox(
+                width: 350,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Показываем поле ввода только если это НЕ телефон
+                    if (fieldType != 'phone') ...[
+                      FFTextField(
+                        hintText: 'Название поля',
+                        onChanged: (value) => fieldLabel = value,
+                      ),
+                      const SizedBox(height: 16),
+                    ],
 
-                const SizedBox(height: 16),
-                DropdownButtonFormField<String>(
-                  dropdownColor: AppTheme.fourty,
-                  style: TextStyle(color: AppTheme.secondary),
-                  initialValue: fieldType,
-                  decoration: const InputDecoration(labelText: 'Тип поля'),
-                  items: const [
-                    DropdownMenuItem(
-                      value: 'name',
-                      child: Row(
-                        children: [
-                          HeroIcon(HeroIcons.user, size: 20),
-                          SizedBox(width: 8),
-                          Text('Имя'),
-                        ],
-                      ),
-                    ),
-                    DropdownMenuItem(
-                      value: 'email',
-                      child: Row(
-                        children: [
-                          HeroIcon(HeroIcons.envelope, size: 20),
-                          SizedBox(width: 8),
-                          Text('Email'),
-                        ],
-                      ),
-                    ),
-                    DropdownMenuItem(
-                      value: 'phone',
-                      child: Row(
-                        children: [
-                          HeroIcon(HeroIcons.phone, size: 20),
-                          SizedBox(width: 8),
-                          Text('Номер телефона'),
-                        ],
-                      ),
-                    ),
-                    DropdownMenuItem(
-                      value: 'text',
-                      child: Row(
-                        children: [
-                          HeroIcon(
-                            HeroIcons.chatBubbleOvalLeftEllipsis,
-                            size: 20,
+                    DropdownButtonFormField<String>(
+                      dropdownColor: AppTheme.fourty,
+                      style: TextStyle(color: AppTheme.secondary),
+                      value:
+                          fieldType, // Используем value вместо initialValue для реактивности
+                      decoration: const InputDecoration(labelText: 'Тип поля'),
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'name',
+                          child: Row(
+                            children: [
+                              HeroIcon(HeroIcons.user, size: 20),
+                              SizedBox(width: 8),
+                              Text('Имя'),
+                            ],
                           ),
-                          SizedBox(width: 8),
-                          Text('Текст (многострочный)'),
-                        ],
-                      ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'email',
+                          child: Row(
+                            children: [
+                              HeroIcon(HeroIcons.envelope, size: 20),
+                              SizedBox(width: 8),
+                              Text('Email'),
+                            ],
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'phone',
+                          child: Row(
+                            children: [
+                              HeroIcon(HeroIcons.phone, size: 20),
+                              SizedBox(width: 8),
+                              Text('Номер телефона'),
+                            ],
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'text',
+                          child: Row(
+                            children: [
+                              HeroIcon(
+                                HeroIcons.chatBubbleOvalLeftEllipsis,
+                                size: 20,
+                              ),
+                              SizedBox(width: 8),
+                              Text('Текст (многострочный)'),
+                            ],
+                          ),
+                        ),
+                      ],
+                      onChanged: (value) {
+                        // Обновляем состояние диалога через setState из StatefulBuilder
+                        setState(() {
+                          if (value != null) fieldType = value;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'Максимум 25 символов',
+                      style: TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
-                  onChanged: (value) {
-                    setState(() {
-                      if (value != null) fieldType = value;
-                    });
-                  },
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  'Максимум 25 символов',
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              actions: [
+                FFButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  text: 'Отмена',
+                ),
+                FFButton(
+                  secondTheme: true,
+                  onPressed: () {
+                    // Если выбран телефон, задаем название автоматически,
+                    // так как поле ввода скрыто
+                    // if (fieldType == 'phone') {
+                    //   fieldLabel = 'Телефон';
+                    // }
+
+                    if (fieldLabel.isNotEmpty) {
+                      // Используем setState родительского виджета (SettingsPanelView),
+                      // чтобы обновить список полей на главном экране
+                      this.setState(() {
+                        widget.fields?.add(
+                          FormFields(
+                            label: fieldLabel,
+                            type: fieldType,
+                          ),
+                        );
+                      });
+                      Navigator.pop(context);
+                    }
+                  },
+                  text: 'Добавить',
                 ),
               ],
-            ),
-          ),
-          actions: [
-            FFButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              text: 'Отмена',
-            ),
-            FFButton(
-              secondTheme: true,
-              onPressed: () {
-                if (fieldLabel.isNotEmpty) {
-                  setState(() {
-                    widget.fields?.add(
-                      FormFields(
-                        label: fieldLabel,
-                        type: fieldType,
-                      ),
-                    );
-                  });
-                  Navigator.pop(context);
-                }
-              },
-              text: 'Добавить',
-            ),
-          ],
+            );
+          },
         );
       },
     );

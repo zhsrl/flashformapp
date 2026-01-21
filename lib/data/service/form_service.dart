@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flashform_app/data/model/form_model.dart';
 import 'package:flashform_app/data/repository/auth_repository.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
@@ -38,7 +40,35 @@ class FormService {
   }
 
   String _generateSlug(String title) {
-    // Простая логика транслитерации или очистки для URL
-    return 'form${DateTime.now().millisecondsSinceEpoch}';
+    const String chars =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        'abcdefghijklmnopqrstuvwxyz'
+        '0123456789';
+
+    final Random random = Random.secure();
+    return 'form-${String.fromCharCodes(
+      Iterable.generate(
+        5,
+        (_) => chars.codeUnitAt(random.nextInt(chars.length)),
+      ),
+    )}';
+  }
+
+  String encodeBase62(int number) {
+    const String chars =
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+        'abcdefghijklmnopqrstuvwxyz'
+        '0123456789';
+    if (number == 0) return chars[0];
+
+    final base = chars.length;
+    final buffer = StringBuffer();
+
+    while (number > 0) {
+      buffer.write(chars[number % base]);
+      number ~/= base;
+    }
+
+    return buffer.toString().split('').reversed.join();
   }
 }

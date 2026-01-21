@@ -44,6 +44,7 @@ dependencies:
   country_flags: ^4.1.1
   url_launcher: ^6.3.2
   easy_localization: ^3.0.8
+  flutter_html: ^3.0.0
 
 dev_dependencies:
   flutter_test:

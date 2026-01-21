@@ -44,6 +44,12 @@ class AppValidators {
     return null;
   }
 
+  static String? validatorForEmpty(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Empty field';
+    }
+  }
+
   // Валидация OTP (строго 6 цифр)
   static String? otp(String? value) {
     if (value == null || value.isEmpty) {

@@ -7,12 +7,22 @@ class FFButton extends StatefulWidget {
   final VoidCallback onPressed;
   final String text;
   final bool isLoading;
+  final bool secondTheme;
+  final double marginLeft;
+  final double marginRight;
+  final double marginTop;
+  final double marginBottom;
 
   const FFButton({
     super.key,
     required this.onPressed,
     required this.text,
     this.isLoading = false,
+    this.secondTheme = false,
+    this.marginTop = 0,
+    this.marginBottom = 10,
+    this.marginLeft = 0,
+    this.marginRight = 0,
   });
 
   @override
@@ -26,7 +36,10 @@ class _FFButtonState extends State<FFButton> {
       height: 45,
       // width: context.screenWidth,
       margin: EdgeInsets.only(
-        bottom: 10,
+        bottom: widget.marginBottom,
+        top: widget.marginTop,
+        left: widget.marginLeft,
+        right: widget.marginRight,
       ),
       child: ElevatedButton(
         onPressed: widget.isLoading ? null : widget.onPressed,
@@ -34,7 +47,9 @@ class _FFButtonState extends State<FFButton> {
           disabledBackgroundColor: AppTheme.secondary.withAlpha(200),
 
           elevation: 0,
-          backgroundColor: AppTheme.secondary,
+          backgroundColor: widget.secondTheme
+              ? AppTheme.primary
+              : AppTheme.secondary,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadiusGeometry.circular(15),
@@ -48,7 +63,9 @@ class _FFButtonState extends State<FFButton> {
             : Text(
                 widget.text,
                 style: TextStyle(
-                  color: AppTheme.primary,
+                  color: widget.secondTheme
+                      ? AppTheme.secondary
+                      : AppTheme.primary,
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),

@@ -23,10 +23,13 @@ class FormModel {
   final String? userId;
   final String slug;
   final String title;
+  final String name;
+  final String formTitle;
   final String subtitle;
   final String theme; // 'light' или 'dark'
   final List<FormFields> fields;
   final bool isActive;
+  final String? heroImage;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -35,6 +38,9 @@ class FormModel {
     this.userId,
     required this.slug,
     required this.title,
+    this.heroImage,
+    this.name = '',
+    this.formTitle = '',
     this.subtitle = '',
     this.theme = 'light',
     this.fields = const [],
@@ -46,8 +52,11 @@ class FormModel {
   Map<String, dynamic> toJson() => {
     if (id != null) 'id': id,
     if (userId != null) 'user_id': userId,
+    if (heroImage != null) 'hero_image': heroImage,
     'slug': slug,
     'title': title,
+    'form_title': formTitle,
+    'name': name,
     'subtitle': subtitle,
     'theme': theme,
     'fields': fields.map((f) => f.toJson()).toList(),
@@ -59,6 +68,9 @@ class FormModel {
   factory FormModel.fromJson(Map<String, dynamic> json) => FormModel(
     id: json['id'] as String?,
     userId: json['user_id'] as String?,
+    heroImage: json['hero_image'] as String?,
+    formTitle: json['form_title'] as String,
+    name: json['name'] as String,
     slug: json['slug'] as String,
     title: json['title'] as String,
     subtitle: json['subtitle'] as String? ?? '',

@@ -23,7 +23,7 @@ class FFTextField extends StatefulWidget {
   final TextEditingController? controller;
   final Widget? suffixIcon;
   final Widget? prefixIcon;
-  final void Function(String?)? onChanged;
+  final void Function(String)? onChanged;
   final TextInputType? keyboardType;
   final bool? isPassword;
   final double? bottomPadding;

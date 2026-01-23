@@ -8,6 +8,18 @@ final formRepoProvider = Provider<FormRepository>(
   (ref) => FormRepository(ref.watch(supabaseAuthProvider)),
 );
 
+final currentFormIdProvider = Provider<String>((ref) {
+  throw UnimplementedError(
+    'Нужно обернуть виджет на ProviderScope и передать formId',
+  );
+});
+
+final currentFormNameProvider = Provider<String>((ref) {
+  throw UnimplementedError(
+    'Нужно обернуть виджет на ProviderScope и передать formName',
+  );
+});
+
 class FormRepository {
   FormRepository(this._supabase);
 

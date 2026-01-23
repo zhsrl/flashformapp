@@ -1,6 +1,7 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
 import 'package:flashform_app/data/model/form_model.dart';
+import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/features/create_form/views/desktop/settings_panel_view.dart';
 import 'package:flashform_app/features/home/widgets/editor_app_bar.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
@@ -27,12 +28,16 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
   final _subtitleController = TextEditingController();
   final _formTitleController = TextEditingController();
   final List<FormFields> _fields = [];
+  String? _heroImageUrl;
 
   bool _isDarkTheme = false;
+
+  bool _isPublishing = false;
 
   @override
   void dispose() {
     _titleController.dispose();
+
     _subtitleController.dispose();
     _formTitleController.dispose();
     super.dispose();
@@ -40,6 +45,8 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
 
   Future<void> _submitForm() async {
     if (!_formKey.currentState!.validate()) return;
+
+    final formId = ref.read(currentFormIdProvider);
 
     if (_fields.isEmpty) {
       showSnackbar(
@@ -52,6 +59,10 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
     final user = Supabase.instance.client.auth.currentUser;
 
     if (user == null) return;
+
+    setState(() {
+      _isPublishing = true;
+    });
 
     try {
       String title = _titleController.text.trim();
@@ -68,11 +79,12 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
           .toList();
 
       final Map<String, dynamic> data = {
-        'id': widget.formId,
+        'id': formId,
         'user_id': user.id,
         'title': title,
         'form_title': formTitle,
         'subtitle': subtitle,
+        'hero_image': _heroImageUrl,
         'theme': _isDarkTheme ? 'dark' : 'light',
         'fields': fieldsData,
         'is_active': true,
@@ -95,6 +107,12 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
         type: SnackbarType.error,
         message: 'Ошибка при публикации формы',
       );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPublishing = false;
+        });
+      }
     }
   }
 
@@ -108,8 +126,9 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: EditorAppBar(
-        formId: widget.formId,
+        formId: ref.watch(currentFormIdProvider),
         automaticallyImplyLeading: true,
+        isPublishing: _isPublishing,
         onPublish: () async {
           await _submitForm();
         },
@@ -127,11 +146,17 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
                   formKey: _formKey,
                   titleController: _titleController,
                   isDarkTheme: _isDarkTheme,
+                  heroImageUrl: _heroImageUrl,
                   subtitleController: _subtitleController,
                   formTitleController: _formTitleController,
-                  onThemeChanged: (value) {
+                  onHeroImageChanged: (url) {
                     setState(() {
-                      _isDarkTheme = value;
+                      _heroImageUrl = url;
+                    });
+                  },
+                  onThemeChanged: (isDarkTheme) {
+                    setState(() {
+                      _isDarkTheme = isDarkTheme;
                     });
                   },
                 ),
@@ -141,8 +166,11 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
                 ),
                 Container(
                   width: 350,
-                  height: 200,
-                  color: Colors.grey,
+                  height: 500,
+                  color: AppTheme.fourty,
+                  child: Center(
+                    child: Text('Preview'),
+                  ),
                 ),
               ],
             ),

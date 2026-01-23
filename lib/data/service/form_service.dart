@@ -33,6 +33,7 @@ class FormService {
       'name': name,
       'slug': slug,
       'title': 'Untitled',
+      'is_active': false,
     };
     final response = await _repository.createNewForm(data);
 

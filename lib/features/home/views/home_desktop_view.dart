@@ -2,12 +2,10 @@ import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/app_validator.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
 import 'package:flashform_app/features/home/widgets/home_appbar.dart';
-import 'package:flashform_app/features/home/widgets/subscription_widget.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
@@ -35,78 +33,83 @@ class _HomePageDesktopViewState extends State<HomePageDesktopView> {
       context: context,
 
       builder: (context) {
-        return AlertDialog(
-          backgroundColor: AppTheme.background,
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: AppTheme.background,
 
-          title: Text(
-            'Create new form',
-            style: TextStyle(
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          content: Consumer(
-            builder: (context, ref, child) {
-              return SizedBox(
-                width: 350,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Form(
-                      key: _formKey,
-                      child: FFTextField(
-                        prefixIcon: HeroIcon(HeroIcons.listBullet),
-                        hintText: 'Enter form name',
-                        controller: _formTitleController,
-                        validator: AppValidators.validatorForEmpty,
-                      ),
-                    ),
-
-                    SizedBox(
-                      width: double.infinity,
-                      child: FFButton(
-                        isLoading: _isCreatingForm,
-                        onPressed: () async {
-                          try {
-                            if (_formKey.currentState!.validate()) {
-                              setState(() {
-                                _isCreatingForm = true;
-                              });
-
-                              String name = _formTitleController.text.trim();
-                              final newFormId = await ref
-                                  .read(formControllerProvider.notifier)
-                                  .createNewForm(name);
-
-                              if (!context.mounted) return;
-
-                              debugPrint('Form created! ID: $newFormId');
-
-                              if (newFormId != null) {
-                                Navigator.pop(context);
-
-                                setState(() {
-                                  _isCreatingForm = false;
-                                });
-
-                                context.go('/create-form/$newFormId');
-                              }
-                            }
-                          } finally {
-                            if (mounted) {
-                              setState(() {
-                                _isCreatingForm = false;
-                              });
-                            }
-                          }
-                        },
-                        text: 'Create',
-                      ),
-                    ),
-                  ],
+              title: Text(
+                'Create new form',
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
                 ),
-              );
-            },
-          ),
+              ),
+              content: Consumer(
+                builder: (context, ref, child) {
+                  return SizedBox(
+                    width: 350,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Form(
+                          key: _formKey,
+                          child: FFTextField(
+                            prefixIcon: HeroIcon(HeroIcons.listBullet),
+                            hintText: 'Enter form name',
+                            controller: _formTitleController,
+                            validator: AppValidators.validatorForEmpty,
+                          ),
+                        ),
+
+                        SizedBox(
+                          width: double.infinity,
+                          child: FFButton(
+                            isLoading: _isCreatingForm,
+                            onPressed: () async {
+                              try {
+                                if (_formKey.currentState!.validate()) {
+                                  setDialogState(() {
+                                    _isCreatingForm = true;
+                                  });
+
+                                  String name = _formTitleController.text
+                                      .trim();
+                                  final newFormId = await ref
+                                      .read(formControllerProvider.notifier)
+                                      .createNewForm(name);
+
+                                  if (!context.mounted) return;
+
+                                  debugPrint('Form created! ID: $newFormId');
+
+                                  if (newFormId != null) {
+                                    Navigator.pop(context);
+
+                                    setDialogState(() {
+                                      _isCreatingForm = false;
+                                    });
+
+                                    context.go('/create-form/$newFormId');
+                                  }
+                                }
+                              } finally {
+                                if (mounted) {
+                                  setDialogState(() {
+                                    _isCreatingForm = false;
+                                  });
+                                }
+                              }
+                            },
+                            text: 'Create',
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          },
         );
       },
     );

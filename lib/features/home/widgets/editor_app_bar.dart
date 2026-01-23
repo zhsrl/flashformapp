@@ -2,6 +2,7 @@ import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:heroicons/heroicons.dart';
 
 class EditorAppBar extends StatefulWidget implements PreferredSizeWidget {
   const EditorAppBar({
@@ -9,11 +10,13 @@ class EditorAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.formId = '',
     this.automaticallyImplyLeading,
     required this.onPublish,
+    this.isPublishing,
   });
 
   final String? formId;
   final bool? automaticallyImplyLeading;
   final VoidCallback onPublish;
+  final bool? isPublishing;
 
   @override
   State<EditorAppBar> createState() => _EditorAppBarState();
@@ -27,6 +30,9 @@ class _EditorAppBarState extends State<EditorAppBar> {
   Widget build(BuildContext context) {
     return AppBar(
       backgroundColor: AppTheme.background,
+      elevation: 0,
+
+      surfaceTintColor: AppTheme.background,
       automaticallyImplyLeading: widget.automaticallyImplyLeading ?? false,
       centerTitle: false,
       title: Row(
@@ -71,20 +77,43 @@ class _EditorAppBarState extends State<EditorAppBar> {
       actionsPadding: EdgeInsets.only(right: 10),
 
       actions: [
-        FFButton(
-          onPressed: widget.onPublish,
-          text: 'Опубликовать',
-          secondTheme: true,
-          marginBottom: 0,
+        IconButton.outlined(
+          onPressed: () {},
+          icon: Icon(Icons.link),
         ),
         const SizedBox(
           width: 8,
         ),
-        FFButton(
-          onPressed: () {},
-          text: 'Сохранить',
-          marginBottom: 0,
+        SizedBox(
+          width: 170,
+          child: FFButton(
+            onPressed: widget.onPublish,
+            isLoading: widget.isPublishing ?? false,
+            text: 'Опубликовать',
+            secondTheme: true,
+            marginBottom: 0,
+          ),
         ),
+        const SizedBox(
+          width: 8,
+        ),
+        IconButton.outlined(
+          onPressed: () {},
+          style: IconButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadiusGeometry.circular(10),
+            ),
+          ),
+
+          icon: HeroIcon(
+            HeroIcons.arrowRight,
+          ),
+        ),
+        // FFButton(
+        //   onPressed: () {},
+        //   text: 'Закрыть',
+        //   marginBottom: 0,
+        // ),
         const SizedBox(
           width: 8,
         ),

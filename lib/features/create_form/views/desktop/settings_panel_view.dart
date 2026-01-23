@@ -1,13 +1,16 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/data/model/form_model.dart';
+import 'package:flashform_app/data/repository/form_repository.dart';
+import 'package:flashform_app/features/create_form/widgets/image_picker_widget.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
 
 class SettingsPanelView extends StatefulWidget {
-  SettingsPanelView({
+  const SettingsPanelView({
     super.key,
     this.fields,
     this.formKey,
@@ -16,11 +19,15 @@ class SettingsPanelView extends StatefulWidget {
     this.titleController,
     required this.onThemeChanged,
     this.isDarkTheme = false,
+    this.heroImageUrl,
+    this.onHeroImageChanged,
   });
 
   final List<FormFields>? fields;
   final GlobalKey<FormState>? formKey;
   final bool isDarkTheme;
+  final String? heroImageUrl;
+  final ValueChanged<String?>? onHeroImageChanged;
   final ValueChanged<bool> onThemeChanged;
   final TextEditingController? titleController;
   final TextEditingController? subtitleController;
@@ -137,11 +144,9 @@ class _SettingsPanelViewState extends State<SettingsPanelView> {
                 FFButton(
                   secondTheme: true,
                   onPressed: () {
-                    // Если выбран телефон, задаем название автоматически,
-                    // так как поле ввода скрыто
-                    // if (fieldType == 'phone') {
-                    //   fieldLabel = 'Телефон';
-                    // }
+                    if (fieldType == 'phone') {
+                      fieldLabel = 'Телефон';
+                    }
 
                     if (fieldLabel.isNotEmpty) {
                       // Используем setState родительского виджета (SettingsPanelView),
@@ -174,61 +179,49 @@ class _SettingsPanelViewState extends State<SettingsPanelView> {
   }
 
   Widget _buildImageBlock() {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          width: 1.5,
-          color: AppTheme.border,
-        ),
-      ),
-      margin: EdgeInsets.only(bottom: 16),
-      padding: EdgeInsets.all(
-        16,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Изображения',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
+    return Consumer(
+      builder: (context, ref, child) {
+        debugPrint('Current form id: ${ref.watch(currentFormIdProvider)}');
+        return Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              width: 1.5,
+              color: AppTheme.border,
             ),
           ),
-          const SizedBox(
-            height: 16,
+          margin: EdgeInsets.only(bottom: 16),
+          padding: EdgeInsets.all(
+            16,
           ),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              color: AppTheme.fourty,
-            ),
-            height: 100,
-            width: double.infinity,
-            child: Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  HeroIcon(
-                    HeroIcons.photo,
-                    color: AppTheme.secondary.withAlpha(50),
-                  ),
-                  SizedBox(
-                    width: 5,
-                  ),
-                  Text(
-                    'Добавить изображения',
-                    style: TextStyle(
-                      color: AppTheme.secondary.withAlpha(50),
-                    ),
-                  ),
-                ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Изображения',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
+              const SizedBox(
+                height: 16,
+              ),
+              ImagePickerWidget(
+                folder: ref.watch(currentFormIdProvider),
+                imageUrl: widget.heroImageUrl,
+                onImageUploaded: (imageUrl) =>
+                    widget.onHeroImageChanged!(imageUrl),
+                onImageDeleted: () {
+                  if (widget.onHeroImageChanged != null) {
+                    widget.onHeroImageChanged!(null);
+                  }
+                },
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 

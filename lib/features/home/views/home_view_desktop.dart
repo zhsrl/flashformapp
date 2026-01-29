@@ -1,22 +1,27 @@
+import 'package:dashed_border/dashed_border.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/app_validator.dart';
+import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
 import 'package:flashform_app/features/home/widgets/home_appbar.dart';
+import 'package:flashform_app/features/home/widgets/shared/form_card.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-class HomePageDesktopView extends StatefulWidget {
+class HomePageDesktopView extends ConsumerStatefulWidget {
   const HomePageDesktopView({super.key});
 
   @override
-  State<HomePageDesktopView> createState() => _HomePageDesktopViewState();
+  ConsumerState<HomePageDesktopView> createState() =>
+      _HomePageDesktopViewState();
 }
 
-class _HomePageDesktopViewState extends State<HomePageDesktopView> {
+class _HomePageDesktopViewState extends ConsumerState<HomePageDesktopView> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _formTitleController;
 
@@ -117,6 +122,8 @@ class _HomePageDesktopViewState extends State<HomePageDesktopView> {
 
   @override
   Widget build(BuildContext context) {
+    final formsAsync = ref.watch(formControllerProvider);
+
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: HomeAppBar(),
@@ -129,6 +136,78 @@ class _HomePageDesktopViewState extends State<HomePageDesktopView> {
         child: HeroIcon(
           HeroIcons.plus,
           color: AppTheme.primary,
+        ),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: formsAsync.when(
+          data: (forms) {
+            if (forms.isEmpty) {
+              return Center(
+                child: InkWell(
+                  onTap: () {},
+                  borderRadius: BorderRadius.circular(20),
+                  child: Container(
+                    width: 200,
+                    height: 200,
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      border: DashedBorder(
+                        color: AppTheme.secondary.withAlpha(100),
+                      ),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Center(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          HeroIcon(
+                            HeroIcons.plusCircle,
+                            color: AppTheme.secondary.withAlpha(100),
+                            size: 50,
+                          ),
+                          Text(
+                            'Создать вашу первую форму!',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: AppTheme.secondary.withAlpha(100),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            }
+            return GridView.builder(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                mainAxisExtent: 150,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                crossAxisCount: context.isDesktop
+                    ? 4
+                    : context.isTablet
+                    ? 2
+                    : 1,
+              ),
+              itemCount: forms.length,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                return FormCard(form: forms[index]);
+              },
+            );
+          },
+          error: (er, st) {
+            throw Exception(er.toString());
+          },
+          loading: () => Center(
+            child: LoadingAnimationWidget.waveDots(
+              color: AppTheme.primary,
+              size: 40,
+            ),
+          ),
         ),
       ),
     );

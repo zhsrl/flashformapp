@@ -1,4 +1,4 @@
-import 'package:flashform_app/features/home/views/home_desktop_view.dart';
+import 'package:flashform_app/features/home/views/home_view_desktop.dart';
 import 'package:flashform_app/features/widgets/responsive_layout.dart';
 import 'package:flutter/material.dart';
 

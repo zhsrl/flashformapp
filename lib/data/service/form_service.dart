@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flashform_app/data/model/form_model.dart';
 import 'package:flashform_app/data/repository/auth_repository.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
+import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -32,7 +33,24 @@ class FormService {
       'user_id': user.id,
       'name': name,
       'slug': slug,
-      'title': 'Untitled',
+      'data': {
+        'title': {
+          'text': 'Заголовок',
+          'font-size': 42,
+        },
+        'subtitle': {
+          'text': 'Описание',
+          'font-size': 24,
+        },
+        'content-type': 'image',
+        'action-type': 'url',
+        'button': {
+          'color': 'd0f20b',
+          'text': 'Кнопка',
+          'url': '',
+        },
+        'success-text': '',
+      },
       'is_active': false,
     };
     final response = await _repository.createNewForm(data);

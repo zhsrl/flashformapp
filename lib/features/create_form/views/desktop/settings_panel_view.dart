@@ -1,45 +1,161 @@
 import 'package:flashform_app/core/app_theme.dart';
+import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/model/form_model.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/features/create_form/widgets/image_picker_widget.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
+import 'package:flashform_app/features/widgets/ff_tabbar.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
 
 class SettingsPanelView extends StatefulWidget {
   const SettingsPanelView({
     super.key,
+
+    required this.tabIndex,
+
     this.fields,
+    this.onFieldsChanged,
     this.formKey,
     this.formTitleController,
     this.subtitleController,
     this.titleController,
+    this.titleFontSize = 42,
+    this.subtitleFontSize = 22,
+    this.titleFontSizeChanged,
+    this.subtitleFontSizeChanged,
+
     required this.onThemeChanged,
-    this.isDarkTheme = false,
+    this.formTheme = 'light',
+    this.buttonColor,
+    this.actionType = 'button-url',
+    this.onActionTypeChanged,
+    this.onButtonColorChanged,
+    this.formButtonColor,
+    this.onFormButtonColorChanged,
+    this.formButtonTextController,
     this.heroImageUrl,
     this.onHeroImageChanged,
+    this.buttonTextController,
+    this.successTextController,
+
+    // redirect url
+    this.hasRedirectUrl = false,
+    this.onRedirectUrlValueChanged,
+    this.focusNode,
   });
 
   final List<FormFields>? fields;
+  final VoidCallback? onFieldsChanged;
   final GlobalKey<FormState>? formKey;
-  final bool isDarkTheme;
+
   final String? heroImageUrl;
+
   final ValueChanged<String?>? onHeroImageChanged;
-  final ValueChanged<bool> onThemeChanged;
+  final ValueChanged<String?> onThemeChanged;
+
   final TextEditingController? titleController;
+  final double titleFontSize;
+  final ValueChanged<double>? titleFontSizeChanged;
+
   final TextEditingController? subtitleController;
+  final double subtitleFontSize;
+  final ValueChanged<double>? subtitleFontSizeChanged;
   final TextEditingController? formTitleController;
+
+  final String formTheme;
+  final TextEditingController? buttonTextController;
+  final TextEditingController? formButtonTextController;
+  final Color? formButtonColor;
+  final ValueChanged<Color>? onFormButtonColorChanged;
+  final String actionType;
+  final ValueChanged<String?>? onActionTypeChanged;
+
+  final Color? buttonColor;
+  final ValueChanged<Color>? onButtonColorChanged;
+
+  // form redirect url
+  final bool hasRedirectUrl;
+  final ValueChanged<bool>? onRedirectUrlValueChanged;
+
+  // success text field options
+  final FocusNode? focusNode;
+  final TextEditingController? successTextController;
+
+  // tab
+  final int tabIndex;
 
   @override
   State<SettingsPanelView> createState() => _SettingsPanelViewState();
 }
 
 class _SettingsPanelViewState extends State<SettingsPanelView> {
-  // final List<FormFields> _fields = [];
-  int _tabIndex = 0;
+  int _mainContentTabIndex = 0;
+
+  Widget _buildThemeBlock() {
+    return Container(
+      width: context.screenWidth,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          width: 1.5,
+          color: AppTheme.border,
+        ),
+      ),
+      margin: EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.all(
+        16,
+      ),
+
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Выберите тему',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(
+            height: 8,
+          ),
+          DropdownMenu(
+            width: context.screenWidth,
+            initialSelection: widget.formTheme,
+            onSelected: (value) => widget.onThemeChanged(value),
+            inputDecorationTheme: InputDecorationTheme(
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: AppTheme.border,
+                ),
+                borderRadius: BorderRadius.circular(15),
+              ),
+            ),
+            menuStyle: MenuStyle(
+              backgroundColor: WidgetStatePropertyAll(Colors.white),
+              maximumSize: WidgetStatePropertyAll(Size(300, 300)),
+              shape: WidgetStatePropertyAll(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.circular(10),
+                  side: BorderSide.none,
+                ),
+              ),
+            ),
+
+            dropdownMenuEntries: [
+              DropdownMenuEntry(value: 'dark', label: 'Темная тема'),
+              DropdownMenuEntry(value: 'light', label: 'Светлая тема'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
 
   void _addField() {
     showDialog(
@@ -71,7 +187,7 @@ class _SettingsPanelViewState extends State<SettingsPanelView> {
                     DropdownButtonFormField<String>(
                       dropdownColor: AppTheme.fourty,
                       style: TextStyle(color: AppTheme.secondary),
-                      value:
+                      initialValue:
                           fieldType, // Используем value вместо initialValue для реактивности
                       decoration: const InputDecoration(labelText: 'Тип поля'),
                       items: const [
@@ -151,7 +267,7 @@ class _SettingsPanelViewState extends State<SettingsPanelView> {
                     if (fieldLabel.isNotEmpty) {
                       // Используем setState родительского виджета (SettingsPanelView),
                       // чтобы обновить список полей на главном экране
-                      this.setState(() {
+                      setState(() {
                         widget.fields?.add(
                           FormFields(
                             label: fieldLabel,
@@ -159,6 +275,7 @@ class _SettingsPanelViewState extends State<SettingsPanelView> {
                           ),
                         );
                       });
+                      widget.onFieldsChanged?.call();
                       Navigator.pop(context);
                     }
                   },
@@ -178,47 +295,52 @@ class _SettingsPanelViewState extends State<SettingsPanelView> {
     });
   }
 
-  Widget _buildImageBlock() {
+  Widget _buildMainContentBlock() {
     return Consumer(
       builder: (context, ref, child) {
         debugPrint('Current form id: ${ref.watch(currentFormIdProvider)}');
-        return Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              width: 1.5,
-              color: AppTheme.border,
+        return DefaultTabController(
+          length: 2,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                width: 1.5,
+                color: AppTheme.border,
+              ),
             ),
-          ),
-          margin: EdgeInsets.only(bottom: 16),
-          padding: EdgeInsets.all(
-            16,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Изображения',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+            margin: EdgeInsets.only(bottom: 16),
+            padding: EdgeInsets.all(
+              16,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Контент',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              ImagePickerWidget(
-                folder: ref.watch(currentFormIdProvider),
-                imageUrl: widget.heroImageUrl,
-                onImageUploaded: (imageUrl) =>
-                    widget.onHeroImageChanged!(imageUrl),
-                onImageDeleted: () {
-                  if (widget.onHeroImageChanged != null) {
-                    widget.onHeroImageChanged!(null);
-                  }
-                },
-              ),
-            ],
+
+                const SizedBox(
+                  height: 16,
+                ),
+
+                ImagePickerWidget(
+                  folder: ref.watch(currentFormIdProvider),
+                  imageUrl: widget.heroImageUrl,
+                  onImageUploaded: (imageUrl) =>
+                      widget.onHeroImageChanged!(imageUrl),
+                  onImageDeleted: () {
+                    if (widget.onHeroImageChanged != null) {
+                      widget.onHeroImageChanged!(null);
+                    }
+                  },
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -242,9 +364,9 @@ class _SettingsPanelViewState extends State<SettingsPanelView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Оффер и текст',
+            'Заголовок',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -252,19 +374,57 @@ class _SettingsPanelViewState extends State<SettingsPanelView> {
             height: 16,
           ),
           FFTextField(
-            hintText: 'Оффер',
+            hintText: 'Напишите заголовок',
             controller: widget.titleController,
           ),
-          FFTextField(
-            hintText: 'Текст (дополнительный)',
-            controller: widget.subtitleController,
+          const SizedBox(
+            width: 8,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Размер текст',
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    width: 1.5,
+                    color: AppTheme.border,
+                  ),
+                ),
+                padding: EdgeInsets.all(8),
+                child: Text(
+                  '${widget.titleFontSize} px',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Slider(
+            value: widget.titleFontSize,
+            allowedInteraction: SliderInteraction.tapAndSlide,
+            max: 42,
+            min: 24,
+            divisions: 18,
+            thumbColor: AppTheme.secondary,
+            padding: EdgeInsets.only(top: 16),
+            label: widget.titleFontSize.toString(),
+            onChanged: widget.titleFontSizeChanged,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFormTitleBlock() {
+  Widget _buildDescriptionBlock() {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -281,9 +441,9 @@ class _SettingsPanelViewState extends State<SettingsPanelView> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Заголовок формы',
+            'Описание',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -291,11 +451,455 @@ class _SettingsPanelViewState extends State<SettingsPanelView> {
             height: 16,
           ),
           FFTextField(
-            hintText: 'Заголовок формы',
-            controller: widget.formTitleController,
+            hintText: 'Напишите описание',
+            controller: widget.subtitleController,
+          ),
+          const SizedBox(
+            width: 8,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Размер текст',
+                style: TextStyle(
+                  fontSize: 16,
+                ),
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  border: Border.all(
+                    width: 1.5,
+                    color: AppTheme.border,
+                  ),
+                ),
+                padding: EdgeInsets.all(8),
+                child: Text(
+                  '${widget.subtitleFontSize} px',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Slider(
+            value: widget.subtitleFontSize,
+            allowedInteraction: SliderInteraction.tapAndSlide,
+            max: 22,
+            min: 12,
+            divisions: 10,
+            thumbColor: AppTheme.secondary,
+            padding: EdgeInsets.only(top: 16),
+            label: widget.subtitleFontSize.toString(),
+            onChanged: widget.subtitleFontSizeChanged!,
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildActionTypeBlock() {
+    return Container(
+      width: context.screenWidth,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          width: 1.5,
+          color: AppTheme.border,
+        ),
+      ),
+      margin: EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.all(
+        16,
+      ),
+
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Выберите тип действии',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(
+            height: 8,
+          ),
+          DropdownMenu(
+            width: context.screenWidth,
+            initialSelection: widget.actionType,
+            onSelected: (value) => widget.onActionTypeChanged!(value),
+            inputDecorationTheme: InputDecorationTheme(
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: AppTheme.border,
+                ),
+                borderRadius: BorderRadius.circular(15),
+              ),
+            ),
+            menuStyle: MenuStyle(
+              backgroundColor: WidgetStatePropertyAll(Colors.white),
+              maximumSize: WidgetStatePropertyAll(Size(300, 300)),
+              shape: WidgetStatePropertyAll(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadiusGeometry.circular(10),
+                  side: BorderSide.none,
+                ),
+              ),
+            ),
+
+            dropdownMenuEntries: [
+              DropdownMenuEntry(
+                value: 'button-url',
+                label: 'Кнопка сo ссылкой',
+              ),
+              DropdownMenuEntry(
+                value: 'form',
+                label: 'Форма',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionTypeWidget() {
+    // BUTTON-URL
+    Widget buttonUrlWidget() {
+      return Container(
+        width: context.screenWidth,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            width: 1.5,
+            color: AppTheme.border,
+          ),
+        ),
+
+        margin: EdgeInsets.only(bottom: 16),
+        padding: EdgeInsets.all(
+          16,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Настройки кнопки',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(
+              height: 8,
+            ),
+            FFTextField(
+              hintText: 'Текст в кнопке',
+              controller: widget.buttonTextController,
+              maxLength: 30,
+              prefixIcon: HeroIcon(
+                HeroIcons.listBullet,
+              ),
+            ),
+            FFTextField(
+              hintText: 'URL (ссылка)',
+              prefixIcon: HeroIcon(
+                HeroIcons.link,
+              ),
+            ),
+
+            InkWell(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      backgroundColor: AppTheme.background,
+                      title: Text(
+                        'Выберите цвет',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      content: BlockPicker(
+                        pickerColor: widget.buttonColor,
+                        onColorChanged: (value) {
+                          widget.onButtonColorChanged!(value);
+
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        availableColors: [
+                          Colors.red,
+                          Colors.pink,
+                          Colors.purple,
+                          Colors.deepPurple,
+
+                          Colors.indigo,
+                          Colors.blue,
+                          Colors.lightBlue,
+                          Colors.cyan,
+                          Colors.teal,
+                          Colors.green,
+                          Colors.lightGreen,
+                          Colors.orange,
+                          Colors.deepOrange,
+                          Colors.brown,
+                          Colors.amber,
+                          Colors.blueAccent,
+                          Colors.blueGrey,
+                          Colors.black,
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+              borderRadius: BorderRadius.circular(15),
+              child: Padding(
+                padding: EdgeInsets.all(8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Выберите цвет',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+                    Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: widget.buttonColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    Widget formWidget() {
+      return Container(
+        width: context.screenWidth,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+
+          border: Border.all(
+            width: 1.5,
+            color: AppTheme.border,
+          ),
+        ),
+
+        margin: EdgeInsets.only(bottom: 16),
+        padding: EdgeInsets.all(
+          16,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Настройки формы',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(
+              height: 8,
+            ),
+            FFTextField(
+              prefixIcon: HeroIcon(HeroIcons.documentText),
+              hintText: 'Заполните форму ...',
+              title: 'Заголовoк формы',
+              controller: widget.formTitleController,
+            ),
+            _buildInputsBlock(),
+
+            FFTextField(
+              hintText: 'например, Регистрация',
+              title: 'Текст в кнопке',
+              controller: widget.formButtonTextController,
+              maxLength: 30,
+              prefixIcon: HeroIcon(
+                HeroIcons.bold,
+              ),
+            ),
+            FFTextField(
+              hintText: '',
+              title: 'Сообщение после успешной отправки формы',
+
+              focusNode: widget.focusNode,
+              controller: widget.successTextController,
+
+              prefixIcon: HeroIcon(
+                HeroIcons.bold,
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 200,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Redirect URL',
+                        style: TextStyle(
+                          fontSize: 16,
+                        ),
+                      ),
+                      Tooltip(
+                        margin: EdgeInsets.only(right: 1000, left: 16),
+                        message:
+                            'Автоматическая переадресация позволяет мгновенно переводить клиента в удобный мессенджер (WhatsApp, Telegram) или на страницу с бонусом сразу после того, как он оставил свои данные. Это сокращает путь клиента и повышает вероятность успешной сделки.',
+
+                        child: Opacity(
+                          opacity: 0.5,
+                          child: Row(
+                            children: [
+                              HeroIcon(
+                                HeroIcons.informationCircle,
+                                size: 15,
+                              ),
+                              const SizedBox(
+                                width: 4,
+                              ),
+                              Text(
+                                'Для чего это нужно?',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                CupertinoSwitch(
+                  value: widget.hasRedirectUrl,
+                  activeTrackColor: AppTheme.primary,
+
+                  onChanged: widget.onRedirectUrlValueChanged,
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            if (widget.hasRedirectUrl == true)
+              FFTextField(
+                hintText: 'например, WhatsApp, Telegram',
+                title: 'Ссылка на перенаправление',
+
+                prefixIcon: HeroIcon(
+                  HeroIcons.link,
+                ),
+              ),
+
+            InkWell(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      backgroundColor: AppTheme.background,
+                      title: Text(
+                        'Выберите цвет кнопки',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      content: BlockPicker(
+                        pickerColor: widget.formButtonColor,
+                        onColorChanged: (value) {
+                          widget.onFormButtonColorChanged!(value);
+
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        },
+                        availableColors: [
+                          Colors.red,
+                          Colors.pink,
+                          Colors.purple,
+                          Colors.deepPurple,
+
+                          Colors.indigo,
+                          Colors.blue,
+                          Colors.lightBlue,
+                          Colors.cyan,
+                          Colors.teal,
+                          Colors.green,
+                          Colors.lightGreen,
+                          Colors.orange,
+                          Colors.deepOrange,
+                          Colors.brown,
+                          Colors.amber,
+                          Colors.blueAccent,
+                          Colors.blueGrey,
+                          Colors.black,
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+              borderRadius: BorderRadius.circular(15),
+              child: Padding(
+                padding: EdgeInsets.all(8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Выберите цвет',
+                      style: TextStyle(
+                        fontSize: 16,
+                      ),
+                    ),
+                    Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: widget.formButtonColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return AnimatedCrossFade(
+      // Action type == button-url
+      firstChild: buttonUrlWidget(),
+      // Action type == form
+      secondChild: formWidget(),
+      crossFadeState: widget.actionType == 'button-url'
+          ? CrossFadeState.showFirst
+          : CrossFadeState.showSecond,
+      duration: Duration(milliseconds: 100),
     );
   }
 
@@ -322,7 +926,7 @@ class _SettingsPanelViewState extends State<SettingsPanelView> {
               Text(
                 'Поля формы',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -401,7 +1005,7 @@ class _SettingsPanelViewState extends State<SettingsPanelView> {
     );
   }
 
-  Widget _buildThemeBlock() {
+  Widget _buildSuccessTextBlock() {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -414,27 +1018,22 @@ class _SettingsPanelViewState extends State<SettingsPanelView> {
       padding: EdgeInsets.all(
         16,
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            'Темная тема',
+            'Текст успешной формы',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
-          SizedBox(width: 20),
-          CupertinoSwitch(
-            value: widget.isDarkTheme,
-
-            activeTrackColor: AppTheme.primary,
-            thumbColor: AppTheme.secondary,
-
-            onChanged: (value) {
-              widget.onThemeChanged(value);
-            },
+          const SizedBox(
+            height: 16,
+          ),
+          FFTextField(
+            hintText: 'Введите текст',
+            controller: widget.successTextController,
           ),
         ],
       ),
@@ -443,81 +1042,38 @@ class _SettingsPanelViewState extends State<SettingsPanelView> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      initialIndex: _tabIndex,
-      child: Form(
-        key: widget.formKey,
-        child: SizedBox(
-          width: 350,
-          child: Column(
+    int tabIndex = widget.tabIndex;
+    return Form(
+      key: widget.formKey,
+      child: SizedBox(
+        width: 350,
+        child: AnimatedCrossFade(
+          duration: const Duration(milliseconds: 300),
+          crossFadeState: tabIndex == 0
+              ? CrossFadeState.showFirst
+              : CrossFadeState.showSecond,
+
+          firstChild: Column(
             mainAxisSize: MainAxisSize.min,
 
             children: [
-              Container(
-                height: 40,
+              _buildThemeBlock(),
+              _buildMainContentBlock(),
+              _buildOfferBlock(),
+              _buildDescriptionBlock(),
+              _buildActionTypeBlock(),
+              _buildActionTypeWidget(),
+              // _buildFormTitleBlock(),
+              // _buildInputsBlock(),
+              // _buildButtonSettingsBlock(),
+              // _buildSuccessTextBlock(),
+            ],
+          ),
 
-                decoration: BoxDecoration(
-                  color: AppTheme.fourty,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                child: TabBar(
-                  labelStyle: TextStyle(
-                    fontWeight: FontWeight.w800,
-
-                    fontFamily: 'GoogleSans',
-                  ),
-
-                  overlayColor: WidgetStatePropertyAll(Colors.transparent),
-                  indicatorSize: TabBarIndicatorSize.tab,
-                  dividerColor: Colors.transparent,
-                  labelColor: AppTheme.secondary,
-                  unselectedLabelColor: AppTheme.secondary.withAlpha(50),
-                  onTap: (value) {
-                    setState(() {
-                      _tabIndex = value;
-                    });
-                  },
-                  indicator: BoxDecoration(
-                    color: AppTheme.primary,
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  tabs: [
-                    Text('Контент'),
-                    Text('Интеграция'),
-                  ],
-                ),
-              ),
-
-              const SizedBox(
-                height: 16,
-              ),
-
-              AnimatedCrossFade(
-                duration: const Duration(milliseconds: 300),
-                crossFadeState: _tabIndex == 0
-                    ? CrossFadeState.showFirst
-                    : CrossFadeState.showSecond,
-
-                firstChild: Column(
-                  mainAxisSize: MainAxisSize.min,
-
-                  children: [
-                    _buildThemeBlock(),
-                    _buildImageBlock(),
-                    _buildOfferBlock(),
-                    _buildFormTitleBlock(),
-                    _buildInputsBlock(),
-                  ],
-                ),
-
-                secondChild: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Center(child: Text("Настройки интеграций тут")),
-                  ],
-                ),
-              ),
+          secondChild: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Center(child: Text("Настройки интеграций тут")),
             ],
           ),
         ),

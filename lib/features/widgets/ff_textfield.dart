@@ -17,6 +17,10 @@ class FFTextField extends StatefulWidget {
     this.bottomPadding,
     this.validator,
     this.formatters,
+    this.height,
+    this.title,
+    this.focusNode,
+    this.maxLength,
   });
 
   final String? hintText;
@@ -28,9 +32,12 @@ class FFTextField extends StatefulWidget {
   final bool? isPassword;
   final double? bottomPadding;
   final List<TextInputFormatter>? formatters;
-
+  final double? height;
   final bool? enabled;
+  final String? title;
   final String? Function(String? value)? validator;
+  final int? maxLength;
+  final FocusNode? focusNode;
 
   @override
   State<FFTextField> createState() => _FFTextFieldState();
@@ -47,80 +54,101 @@ class _FFTextFieldState extends State<FFTextField> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // height: 55,
-      padding: EdgeInsets.only(bottom: widget.bottomPadding ?? 0),
-      margin: EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(15)),
-      child: TextFormField(
-        obscureText: widget.isPassword == false ? false : _obscured,
-        controller: widget.controller,
-        keyboardType: widget.keyboardType,
-        onChanged: widget.onChanged,
-        enabled: widget.enabled,
-        validator: widget.validator,
-        style: TextStyle(
-          fontWeight: FontWeight.w500,
-          fontSize: 16,
-        ),
-        maxLines: widget.isPassword == true ? 1 : null,
-
-        inputFormatters: widget.formatters,
-        cursorColor: AppTheme.secondary,
-        decoration: InputDecoration(
-          hintMaxLines: 1,
-          suffixIcon: widget.isPassword == true
-              ? GestureDetector(
-                  onTap: _togglePassword,
-                  child: !_obscured
-                      ? HeroIcon(
-                          HeroIcons.eye,
-                          // color: AppColor.color79,
-                        )
-                      : HeroIcon(
-                          HeroIcons.eyeSlash,
-                          // color: AppColor.color79,
-                        ),
-                )
-              : widget.suffixIcon,
-          prefixIcon: widget.prefixIcon,
-          prefixIconColor: AppTheme.tertiary,
-          filled: true,
-
-          fillColor: AppTheme.fourty,
-          hintStyle: TextStyle(
-            color: AppTheme.tertiary,
-            fontWeight: FontWeight.w500,
-          ),
-
-          hintText: widget.hintText,
-          contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide.none,
-            borderRadius: BorderRadius.circular(15),
-          ),
-          border: OutlineInputBorder(
-            borderSide: BorderSide.none,
-            borderRadius: BorderRadius.circular(15),
-          ),
-
-          disabledBorder: OutlineInputBorder(
-            borderSide: BorderSide.none,
-            borderRadius: BorderRadius.circular(15),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.redAccent),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: AppTheme.border,
-              width: 1,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (widget.title != null) ...[
+          Text(
+            widget.title ?? '',
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
             ),
-            borderRadius: BorderRadius.circular(15),
+          ),
+          const SizedBox(
+            height: 8,
+          ),
+        ],
+        Container(
+          padding: EdgeInsets.only(bottom: widget.bottomPadding ?? 0),
+          margin: EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(15)),
+          child: TextFormField(
+            obscureText: widget.isPassword == false ? false : _obscured,
+            controller: widget.controller,
+            keyboardType: widget.keyboardType,
+            focusNode: widget.focusNode,
+            onChanged: widget.onChanged,
+            enabled: widget.enabled,
+            validator: widget.validator,
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+              height: widget.height,
+            ),
+            maxLines: widget.isPassword == true ? 1 : null,
+            maxLength: widget.maxLength,
+            inputFormatters: widget.formatters,
+            cursorColor: AppTheme.secondary,
+            decoration: InputDecoration(
+              hintMaxLines: 1,
+              suffixIcon: widget.isPassword == true
+                  ? GestureDetector(
+                      onTap: _togglePassword,
+                      child: !_obscured
+                          ? HeroIcon(
+                              HeroIcons.eye,
+                              // color: AppColor.color79,
+                            )
+                          : HeroIcon(
+                              HeroIcons.eyeSlash,
+                              // color: AppColor.color79,
+                            ),
+                    )
+                  : widget.suffixIcon,
+              prefixIcon: widget.prefixIcon,
+              prefixIconColor: AppTheme.tertiary,
+              filled: true,
+
+              fillColor: AppTheme.fourty,
+              hintStyle: TextStyle(
+                color: AppTheme.tertiary,
+                fontWeight: FontWeight.w500,
+              ),
+
+              hintText: widget.hintText,
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 15,
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide.none,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              border: OutlineInputBorder(
+                borderSide: BorderSide.none,
+                borderRadius: BorderRadius.circular(15),
+              ),
+
+              disabledBorder: OutlineInputBorder(
+                borderSide: BorderSide.none,
+                borderRadius: BorderRadius.circular(15),
+              ),
+              errorBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.redAccent),
+                borderRadius: BorderRadius.circular(15),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: AppTheme.border,
+                  width: 1,
+                ),
+                borderRadius: BorderRadius.circular(15),
+              ),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }

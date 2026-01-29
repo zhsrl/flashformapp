@@ -49,6 +49,8 @@ dependencies:
   flutter_image_compress: ^2.4.0
   uuid: ^4.5.2
   image_picker: ^1.2.1
+  dashed_border: ^1.0.2
+  flutter_colorpicker: ^1.1.0
 
 dev_dependencies:
   flutter_test:

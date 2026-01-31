@@ -190,7 +190,7 @@ class _SigninPageState extends ConsumerState<SignupPage> {
                   SizedBox(
                     width: double.infinity,
                     child: FFButton(
-                      isLoading: ref.watch(authControllerProvider),
+                      isLoading: ref.watch(authControllerProvider).isLoading,
                       onPressed: () {
                         String name = _nameController.text;
                         String email = _emailController.text;

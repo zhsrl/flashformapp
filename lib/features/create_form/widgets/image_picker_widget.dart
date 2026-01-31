@@ -1,11 +1,11 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/data/controller/image_controller.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
+import 'package:flashform_app/features/create_form/create_form_page.dart'; // Import for currentFormIdProvider
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
 
-/// Виджет для выбора и загрузки изображения
 class ImagePickerWidget extends ConsumerWidget {
   const ImagePickerWidget({
     super.key,
@@ -18,26 +18,26 @@ class ImagePickerWidget extends ConsumerWidget {
     this.borderRadius = 12,
   });
 
-  /// Текущий URL изображения (если есть)
   final String? imageUrl;
-
-  /// Callback при успешной загрузке
-  final Function(String imageUrl)? onImageUploaded;
-
-  /// Callback при удалении изображения
+  final ValueChanged<String>? onImageUploaded;
   final VoidCallback? onImageDeleted;
-
-  /// Папка в storage для загрузки
   final String? folder;
-
-  /// Размеры виджета
   final double width;
   final double height;
   final double borderRadius;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // В идеале ImageController должен возвращать AsyncValue или сложный стейт
     final imageState = ref.watch(imageControllerProvider);
+    final formId = ref.watch(currentFormIdProvider);
+    final notifier = ref.read(imageControllerProvider.notifier);
+
+    final displayUrl = imageState.imageUrl ?? imageUrl;
+    final hasImage = displayUrl != null || imageState.localImageBytes != null;
+
+    // Слушаем ошибки контроллера (если реализовано через StateNotifier)
+    // ref.listen(imageControllerProvider, (previous, next) { ... });
 
     return Container(
       width: width,
@@ -45,215 +45,85 @@ class ImagePickerWidget extends ConsumerWidget {
       decoration: BoxDecoration(
         color: AppTheme.fourty,
         borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(
-          color: AppTheme.border,
-          width: 2,
-        ),
+        border: Border.all(color: AppTheme.border, width: 2),
       ),
       child: Stack(
+        fit: StackFit.expand,
         children: [
-          // Показываем изображение
-          if (imageState.imageUrl != null || imageUrl != null)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(borderRadius - 2),
-              child: Image.network(
-                imageState.imageUrl ?? imageUrl!,
-                width: width,
-                height: height,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return _buildPlaceholder();
-                },
-              ),
-            )
-          // Показываем предпросмотр локального изображения
-          else if (imageState.localImageBytes != null)
-            ClipRRect(
-              borderRadius: BorderRadius.circular(borderRadius - 2),
-              child: Image.memory(
-                imageState.localImageBytes!,
-                width: width,
-                height: height,
-                fit: BoxFit.cover,
-              ),
-            )
-          // Показываем placeholder
-          else
-            _buildPlaceholder(),
+          // 1. Content Layer
+          _buildContent(displayUrl, imageState.localImageBytes),
 
-          // Overlay для загрузки
+          // 2. Loading Overlay
           if (imageState.isLoading)
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(borderRadius - 2),
-              ),
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const CircularProgressIndicator(
-                      color: Colors.white,
-                    ),
-                    if (imageState.uploadProgress != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        '${imageState.uploadProgress!.toInt()}%',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
+            _buildLoadingOverlay(imageState.uploadProgress),
 
-          // Кнопки действий
+          // 3. Actions Layer
           if (!imageState.isLoading)
             Positioned(
               bottom: 8,
               right: 8,
               child: Row(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Кнопка выбора/замены изображения
                   _ActionButton(
-                    icon: imageState.imageUrl != null || imageUrl != null
-                        ? HeroIcons.arrowPath
-                        : HeroIcons.photo,
-                    onTap: () async {
-                      final hasExistingImage =
-                          imageState.imageUrl != null || imageUrl != null;
-
-                      if (hasExistingImage) {
-                        // ЗАМЕНА: используем updateImage
-                        final currentUrl = imageState.imageUrl ?? imageUrl;
-                        final newImageUrl = await ref
-                            .read(imageControllerProvider.notifier)
-                            .updateImage(
-                              oldImageUrl: currentUrl,
-                              formId: ref.read(currentFormIdProvider),
-                              folder: folder,
-                              quality: 85,
-                              maxWidth: 1920,
-                              maxHeight: 1080,
-                            );
-
-                        if (newImageUrl != null && onImageUploaded != null) {
-                          onImageUploaded!(newImageUrl);
-                        }
-                      } else {
-                        // НОВОЕ: используем pickAndUploadImage
-                        final newImageUrl = await ref
-                            .read(imageControllerProvider.notifier)
-                            .pickAndUploadImage(
-                              folder: folder,
-                              quality: 85,
-                              maxWidth: 1920,
-                              maxHeight: 1080,
-                            );
-
-                        if (newImageUrl != null && onImageUploaded != null) {
-                          onImageUploaded!(newImageUrl);
-                        }
-                      }
-                    },
+                    icon: hasImage ? HeroIcons.arrowPath : HeroIcons.photo,
+                    onTap: () => _handleUpload(notifier, displayUrl, formId),
                   ),
-
-                  // Кнопка удаления (если есть изображение)
-                  if (imageState.imageUrl != null || imageUrl != null) ...[
+                  if (hasImage) ...[
                     const SizedBox(width: 8),
                     _ActionButton(
                       icon: HeroIcons.trash,
                       color: Colors.red,
-                      onTap: () async {
-                        final urlToDelete = imageState.imageUrl ?? imageUrl!;
-
-                        debugPrint('🗑 Удаление изображения: $urlToDelete');
-
-                        try {
-                          await ref
-                              .read(imageControllerProvider.notifier)
-                              .deleteImage(urlToDelete);
-
-                          debugPrint('✅ Изображение удалено из Storage');
-
-                          ref.read(imageControllerProvider.notifier).reset();
-                          debugPrint('✅ Состояние контроллера очищено');
-
-                          if (onImageDeleted != null) {
-                            onImageDeleted!();
-                            debugPrint(
-                              '✅ Callback onImageDeleted вызван - _heroImageUrl = null',
-                            );
-                          } else {
-                            debugPrint(
-                              '⚠️ onImageDeleted == null - локальное состояние НЕ обновлено!',
-                            );
-                          }
-                        } catch (e) {
-                          debugPrint('❌ Ошибка при удалении: $e');
-
-                          // Показываем ошибку пользователю
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Ошибка при удалении: $e'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
-                        }
-                      },
+                      onTap: () => _handleDelete(context, notifier, displayUrl),
                     ),
                   ],
                 ],
               ),
             ),
 
-          // Показываем ошибку
+          // 4. Error Layer (Опционально, лучше через SnackBar)
           if (imageState.errorMessage != null)
-            Positioned(
-              top: 8,
-              left: 8,
-              right: 8,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.red.shade900,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  'Ошибка загрузки',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
+            _buildErrorBadge(imageState.errorMessage!),
         ],
       ),
     );
   }
 
+  Widget _buildContent(String? url, dynamic localBytes) {
+    if (localBytes != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius - 2),
+        child: Image.memory(localBytes, fit: BoxFit.cover),
+      );
+    }
+    if (url != null) {
+      return ClipRRect(
+        borderRadius: BorderRadius.circular(borderRadius - 2),
+        child: Image.network(
+          url,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildPlaceholder(),
+        ),
+      );
+    }
+    return _buildPlaceholder();
+  }
+
   Widget _buildPlaceholder() {
     return Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           HeroIcon(
             HeroIcons.photo,
             size: 48,
-            color: AppTheme.secondary.withAlpha(50),
+            color: AppTheme.secondary.withOpacity(0.5),
           ),
           const SizedBox(height: 8),
           Text(
             'Выберите изображение',
             style: TextStyle(
-              color: AppTheme.secondary.withAlpha(50),
+              color: AppTheme.secondary.withOpacity(0.5),
               fontSize: 14,
             ),
           ),
@@ -261,15 +131,110 @@ class ImagePickerWidget extends ConsumerWidget {
       ),
     );
   }
+
+  Widget _buildLoadingOverlay(double? progress) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.circular(borderRadius - 2),
+      ),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(color: Colors.white),
+            if (progress != null) ...[
+              const SizedBox(height: 8),
+              Text(
+                '${progress.toInt()}%',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorBadge(String error) {
+    return Positioned(
+      top: 8,
+      left: 8,
+      right: 8,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.red.shade900,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          error,
+          style: const TextStyle(color: Colors.white, fontSize: 12),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleUpload(
+    dynamic notifier,
+    String? currentUrl,
+    String formId,
+  ) async {
+    // Вся логика "if update else create" перенесена сюда или в контроллер
+    // Для чистоты кода в виджете, вызываем унифицированный метод (предложение):
+    /* await notifier.handleImagePick(
+          currentUrl: currentUrl,
+          formId: formId,
+          folder: folder,
+          onSuccess: onImageUploaded
+       );
+    */
+
+    // Если оставляем логику здесь (как временное решение):
+    String? newUrl;
+    if (currentUrl != null) {
+      newUrl = await notifier.updateImage(
+        oldImageUrl: currentUrl,
+        formId: formId,
+        folder: folder,
+        quality: 85,
+      );
+    } else {
+      newUrl = await notifier.pickAndUploadImage(folder: folder, quality: 85);
+    }
+
+    if (newUrl != null && onImageUploaded != null) {
+      onImageUploaded!(newUrl);
+    }
+  }
+
+  Future<void> _handleDelete(
+    BuildContext context,
+    dynamic notifier,
+    String? urlToDelete,
+  ) async {
+    if (urlToDelete == null) return;
+
+    try {
+      await notifier.deleteImage(urlToDelete);
+      notifier.reset();
+      onImageDeleted?.call();
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка удаления: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
 }
 
-/// Кнопка действия для ImagePicker
 class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.icon,
-    required this.onTap,
-    this.color,
-  });
+  const _ActionButton({required this.icon, required this.onTap, this.color});
 
   final HeroIcons icon;
   final VoidCallback onTap;
@@ -293,11 +258,7 @@ class _ActionButton extends StatelessWidget {
             ),
           ],
         ),
-        child: HeroIcon(
-          icon,
-          size: 20,
-          color: AppTheme.primary,
-        ),
+        child: HeroIcon(icon, size: 20, color: AppTheme.primary),
       ),
     );
   }

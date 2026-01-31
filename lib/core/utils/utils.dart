@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:url_launcher/url_launcher.dart';
 
 String countryCodeToEmoji(String countryCode) {
@@ -21,6 +23,10 @@ Future<void> openMessenger(String url) async {
   )) {
     throw 'Не удалось открыть $url';
   }
+}
+
+String colorToHex(Color color) {
+  return '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}';
 }
 
 String? handleAuthErrors(String errorCode, String lang) {

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flashform_app/data/model/form_model.dart';
 import 'package:flashform_app/data/repository/auth_repository.dart';
 import 'package:flutter/material.dart';
@@ -41,14 +43,14 @@ class FormRepository {
     final supabaseClient = _supabase.client;
 
     final id = data['id'];
+
     final repsonse = await supabaseClient
         .from('forms')
-        .update(data)
+        .update({'data': data})
         .eq('id', id)
         .select()
         .single();
 
-    debugPrint('Result: $repsonse');
     return FormModel.fromJson(repsonse);
   }
 
@@ -91,8 +93,4 @@ class FormRepository {
       throw Exception(e);
     }
   }
-
-  // Future<void> publishForm(Map<String, dynamic> data) async {
-  //   final supabaseAuth = _supabase
-  // }
 }

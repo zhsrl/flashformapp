@@ -1,30 +1,27 @@
 import 'package:flashform_app/data/repository/auth_repository.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
-final authControllerProvider = StateNotifierProvider<AuthController, bool>(
-  (ref) => AuthController(ref.watch(authRepoProvider)),
-);
+final authControllerProvider =
+    StateNotifierProvider<AuthController, AsyncValue<void>>(
+      (ref) => AuthController(ref.watch(authRepoProvider)),
+    );
 
-class AuthController extends StateNotifier<bool> {
-  AuthController(this._repository) : super(false);
+class AuthController extends StateNotifier<AsyncValue<void>> {
+  AuthController(this._repository) : super(const AsyncValue.data(null));
+
   final AuthRepository _repository;
 
   Future<void> signIn(String email, String password) async {
-    state = true;
-    try {
-      await _repository.signInWithEmailAndPassword(email, password);
-    } finally {
-      state = false;
-    }
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => _repository.signInWithEmailAndPassword(email, password),
+    );
   }
 
   Future<void> signUpWithOtp(String email) async {
-    state = true;
-    try {
-      await _repository.signUpWithOTP(email);
-    } finally {
-      state = false;
-    }
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => _repository.signUpWithOTP(email));
   }
 
   Future<void> signUpWithEmailAndPassword(
@@ -32,29 +29,19 @@ class AuthController extends StateNotifier<bool> {
     String password,
     String name,
   ) async {
-    state = true;
-    try {
-      await _repository.signUpWithEmailAndPassword(email, password, name);
-    } finally {
-      state = false;
-    }
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => _repository.signUpWithEmailAndPassword(email, password, name),
+    );
   }
 
   Future<void> verifyOtp(String email, String code) async {
-    state = true;
-    try {
-      await _repository.verifyOtp(email, code);
-    } finally {
-      state = false;
-    }
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => _repository.verifyOtp(email, code));
   }
 
   Future<void> signOut() async {
-    state = true;
-    try {
-      await _repository.signOut();
-    } finally {
-      state = false;
-    }
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => _repository.signOut());
   }
 }

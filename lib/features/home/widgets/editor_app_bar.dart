@@ -7,16 +7,18 @@ import 'package:heroicons/heroicons.dart';
 class EditorAppBar extends StatefulWidget implements PreferredSizeWidget {
   const EditorAppBar({
     super.key,
-    this.formId = '',
+    this.formName = '',
     this.automaticallyImplyLeading,
     required this.onPublish,
     this.isPublishing,
+    this.isSaving,
   });
 
-  final String? formId;
+  final String? formName;
   final bool? automaticallyImplyLeading;
   final VoidCallback onPublish;
   final bool? isPublishing;
+  final bool? isSaving;
 
   @override
   State<EditorAppBar> createState() => _EditorAppBarState();
@@ -61,8 +63,8 @@ class _EditorAppBarState extends State<EditorAppBar> {
             ),
             child: Center(
               child: Text(
-                // widget.formId!,
-                'Новая форма',
+                widget.formName ?? '',
+
                 style: TextStyle(
                   color: Colors.black,
                   fontSize: 16,
@@ -91,6 +93,19 @@ class _EditorAppBarState extends State<EditorAppBar> {
             isLoading: widget.isPublishing ?? false,
             text: 'Опубликовать',
             secondTheme: true,
+            marginBottom: 0,
+          ),
+        ),
+        const SizedBox(
+          width: 8,
+        ),
+        SizedBox(
+          width: 170,
+          child: FFButton(
+            onPressed: widget.onPublish,
+            isLoading: widget.isPublishing ?? false,
+            text: 'Сохранить',
+            secondTheme: false,
             marginBottom: 0,
           ),
         ),

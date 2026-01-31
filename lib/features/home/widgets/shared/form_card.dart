@@ -1,7 +1,6 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/data/model/form_model.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:heroicons/heroicons.dart';
 
 enum FormPublishState { active, disabled }
@@ -71,9 +70,10 @@ class _FormCardState extends State<FormCard> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               SizedBox(
-                width: 200,
+                width: 230,
                 child: Text(
                   widget.form.name,
+
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(

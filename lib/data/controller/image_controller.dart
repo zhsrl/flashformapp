@@ -53,7 +53,12 @@ class ImageController extends StateNotifier<ImageUploadState> {
 
   void reset() {
     debugPrint('🔄 [ImageController] Сброс состояния');
-    state = ImageUploadState();
+
+    state = ImageUploadState(
+      imageUrl: null,
+      localImageBytes: null,
+      isLoading: false,
+    );
   }
 
   final StorageRepository _repository;

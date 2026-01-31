@@ -54,13 +54,34 @@ class FormRepository {
     return FormModel.fromJson(repsonse);
   }
 
-  Future<void> publishForm(String formId) async {
+  Future<void> publishForm(Map<String, dynamic> data) async {
     final supabaseClient = _supabase.client;
+
+    final id = data['id'];
 
     await supabaseClient
         .from('forms')
-        .update({'is_active': true})
-        .eq('id', formId)
+        .update({
+          'is_active': true,
+          'data': data,
+        })
+        .eq('id', id)
+        .select()
+        .single();
+  }
+
+  Future<void> saveForm(Map<String, dynamic> data) async {
+    final supabaseClient = _supabase.client;
+
+    final id = data['id'];
+
+    await supabaseClient
+        .from('forms')
+        .update({
+          'is_active': false,
+          'data': data,
+        })
+        .eq('id', id)
         .select()
         .single();
   }
@@ -89,6 +110,25 @@ class FormRepository {
           .order('created_at', ascending: false);
 
       return response.map((json) => FormModel.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<FormModel> getSingleForm(String formId) async {
+    final supabaseAuth = _supabase.client.auth;
+    try {
+      if (supabaseAuth.currentUser == null) {
+        throw Exception('User is null');
+      }
+
+      final response = await _supabase.client
+          .from('forms')
+          .select()
+          .eq('id', formId)
+          .single();
+
+      return FormModel.fromJson(response);
     } catch (e) {
       throw Exception(e);
     }

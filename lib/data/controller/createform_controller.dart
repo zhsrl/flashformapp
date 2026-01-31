@@ -3,6 +3,7 @@ import 'package:flashform_app/data/controller/forms_controller.dart';
 import 'package:flashform_app/data/model/create_form_state.dart'
     show CreateFormState;
 import 'package:flashform_app/data/model/form_model.dart';
+import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -44,8 +45,10 @@ class CreateFormController extends StateNotifier<CreateFormState> {
       state = state.copyWith(redirectUrl: url);
   void updateFields(List<FormFields> fields) =>
       state = state.copyWith(fields: fields);
-  void updateIsPublishing(bool isPublished) =>
-      state = state.copyWith(isPublishing: isPublished);
+  void updateIsPublishing(bool isPublishing) =>
+      state = state.copyWith(isPublishing: isPublishing);
+  void updateIsSaving(bool isSaving) =>
+      state = state.copyWith(isPublishing: isSaving);
   void updateSuccessText(String successText) =>
       state = state.copyWith(successText: successText);
   void updateMetaPixelId(String id) => state = state.copyWith(metaPixelId: id);
@@ -103,7 +106,7 @@ class CreateFormController extends StateNotifier<CreateFormState> {
       return false;
     }
 
-    state = state.copyWith(isPublishing: true);
+    state = state.copyWith(isSaving: true);
     try {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) throw Exception("User not authenticated");
@@ -142,10 +145,9 @@ class CreateFormController extends StateNotifier<CreateFormState> {
           'meta-pixel-id': state.metaPixelId,
           'ya-metrika-id': state.yandexMetrikaId,
         },
-        'is_active': false,
       };
 
-      await ref.read(formControllerProvider.notifier).publishForm(data);
+      await ref.read(formControllerProvider.notifier).saveForm(data);
       return true;
     } catch (e) {
       debugPrint('Error publishing form: $e');
@@ -201,7 +203,6 @@ class CreateFormController extends StateNotifier<CreateFormState> {
           'meta-pixel-id': state.metaPixelId,
           'ya-metrika-id': state.yandexMetrikaId,
         },
-        'is_active': false,
       };
 
       debugPrint('Data to save: $data');

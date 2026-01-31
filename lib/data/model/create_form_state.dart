@@ -10,7 +10,7 @@ class CreateFormState {
   final String? successText;
   final String? heroImageUrl;
   final String theme; // 'light' | 'dark'
-  final String? actionType; // 'button-url' | 'form'
+  final String actionType; // 'button-url' | 'form'
   final Color buttonColor;
 
   final Color formButtonColor;
@@ -35,7 +35,7 @@ class CreateFormState {
     this.heroImageUrl,
     this.buttonUrl,
     this.theme = 'light',
-    this.actionType,
+    this.actionType = 'button-url',
     this.buttonColor = Colors.blue,
     this.formButtonColor = Colors.blue,
     this.titleFontSize = 42,
@@ -44,7 +44,8 @@ class CreateFormState {
     this.redirectUrl,
     this.fields = const [],
     this.isPublishing = false,
-    this.isSaving = true,
+    this.isSaving = false,
+
     this.metaPixelId,
     this.yandexMetrikaId,
   });
@@ -68,6 +69,7 @@ class CreateFormState {
     String? redirectUrl,
     List<FormFields>? fields,
     bool? isPublishing,
+    bool? isSaving,
     String? metaPixelId,
     String? yandexMetrikaId,
   }) {
@@ -79,7 +81,7 @@ class CreateFormState {
       formButtonText: formButtonText ?? this.formButtonText,
       successText: successText ?? this.successText,
       buttonUrl: buttonUrl ?? this.buttonUrl,
-      heroImageUrl: heroImageUrl ?? this.heroImageUrl,
+      heroImageUrl: heroImageUrl,
       theme: theme ?? this.theme,
       actionType: actionType ?? this.actionType,
       buttonColor: buttonColor ?? this.buttonColor,

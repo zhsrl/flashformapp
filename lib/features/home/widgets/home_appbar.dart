@@ -25,7 +25,8 @@ class _HomeAppBarState extends State<HomeAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: AppTheme.background,
+      backgroundColor: Colors.transparent,
+      elevation: 0,
       automaticallyImplyLeading: widget.automaticallyImplyLeading ?? false,
       centerTitle: false,
       title: Row(

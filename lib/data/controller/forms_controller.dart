@@ -15,6 +15,12 @@ class FormController extends AsyncNotifier<List<FormModel>> {
     return repository.getAllForms();
   }
 
+  Future<FormModel> fetchForm(String formId) async {
+    final repository = ref.watch(formRepoProvider);
+
+    return await repository.getSingleForm(formId);
+  }
+
   Future<String?> createNewForm(String name) async {
     state = const AsyncLoading();
     try {
@@ -40,7 +46,20 @@ class FormController extends AsyncNotifier<List<FormModel>> {
       () async {
         final repository = ref.read(formRepoProvider);
 
-        await repository.updateForm(data);
+        await repository.publishForm(data);
+
+        return repository.getAllForms();
+      },
+    );
+  }
+
+  Future<void> saveForm(Map<String, dynamic> data) async {
+    state = AsyncLoading();
+    state = await AsyncValue.guard(
+      () async {
+        final repository = ref.read(formRepoProvider);
+
+        await repository.saveForm(data);
 
         return repository.getAllForms();
       },

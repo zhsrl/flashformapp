@@ -1,5 +1,7 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
+import 'package:flashform_app/data/controller/forms_controller.dart';
+import 'package:flashform_app/data/model/create_form_state.dart';
 import 'package:flashform_app/features/create_form/views/desktop/preview_view.dart';
 import 'package:flashform_app/features/create_form/views/desktop/settings_panel_view.dart';
 import 'package:flashform_app/features/home/widgets/editor_app_bar.dart';
@@ -21,16 +23,21 @@ class CreateFormDesktopView extends ConsumerStatefulWidget {
 }
 
 class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
-  final _titleController = TextEditingController();
-  final _subtitleController = TextEditingController();
-  final _formTitleController = TextEditingController();
-  final _successTextController = TextEditingController();
-  final _buttonTextController = TextEditingController();
+  final _titleController = TextEditingController(text: 'Заголовок');
+  final _subtitleController = TextEditingController(text: 'Описание');
+  final _formTitleController = TextEditingController(text: 'Заголовок формы');
+  final _successTextController = TextEditingController(text: 'Успешная форма');
+  final _buttonTextController = TextEditingController(text: 'Кнопка');
   final _formButtonTextController = TextEditingController(
     text: 'Оставить заявку',
   );
 
   final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   void dispose() {
@@ -45,14 +52,43 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(createFormProvider);
+    final controller = ref.watch(createFormProvider.notifier);
+
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: EditorAppBar(
         formName: widget.formId,
         automaticallyImplyLeading: true,
         isPublishing: formState.isPublishing,
+        isSaving: formState.isSaving,
+        onSave: () async {
+          controller.updateIsSaving(true);
+          final success = await ref
+              .read(createFormProvider.notifier)
+              .saveForm(widget.formId);
 
+          if (context.mounted) {
+            if (success) {
+              controller.updateIsSaving(false);
+              showSnackbar(
+                context,
+                type: SnackbarType.success,
+                message: 'Успешно сохранен!',
+              );
+            } else {
+              controller.updateIsSaving(false);
+              showSnackbar(
+                context,
+                type: SnackbarType.error,
+                message: 'Ошибка при сохранении',
+              );
+            }
+          }
+
+          controller.updateIsSaving(false);
+        },
         onPublish: () async {
+          controller.updateIsPublishing(true);
           final success = await ref
               .read(createFormProvider.notifier)
               .publishForm(widget.formId);
@@ -71,6 +107,7 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
               );
             }
           }
+          controller.updateIsPublishing(false);
         },
       ),
       body: Padding(

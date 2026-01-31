@@ -138,7 +138,7 @@ class _HomePageDesktopViewState extends ConsumerState<HomePageDesktopView> {
           color: AppTheme.primary,
         ),
       ),
-      body: Padding(
+      body: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16.0),
         child: formsAsync.when(
           data: (forms) {

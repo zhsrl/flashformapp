@@ -1,6 +1,8 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
+import 'package:flashform_app/data/controller/image_controller.dart';
+import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/features/create_form/widgets/image_picker_widget.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_tabbar.dart';
@@ -109,7 +111,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
                         _buildDescriptionBlock(context, formState, controller),
                         _buildActionTypeBlock(
                           context,
-                          formState.actionType!,
+                          formState.actionType,
                           controller,
                         ),
                         _buildActionTypeWidget(context, formState, controller),
@@ -186,6 +188,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
     WidgetRef ref,
     String? heroImageUrl,
   ) {
+    final currentFormId = ref.read(currentFormIdProvider);
     return DefaultTabController(
       length: 2,
       child: Container(
@@ -205,11 +208,14 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
             // но мы передаем текущий URL и колбэки для обновления стейта редактора
             ImagePickerWidget(
               // folder: formId - можно получить из провайдера, если нужно
+              folder: currentFormId,
               imageUrl: heroImageUrl,
               onImageUploaded: (url) =>
                   ref.read(createFormProvider.notifier).updateHeroImage(url),
-              onImageDeleted: () =>
-                  ref.read(createFormProvider.notifier).updateHeroImage(null),
+              onImageDeleted: () {
+                ref.read(createFormProvider.notifier).updateHeroImage(null);
+                ref.read(imageControllerProvider.notifier).reset();
+              },
             ),
           ],
         ),

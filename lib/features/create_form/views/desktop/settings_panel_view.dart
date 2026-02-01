@@ -62,6 +62,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
   Widget build(BuildContext context) {
     // Подписываемся на стейт
     final formState = ref.watch(createFormProvider);
+
     final controller = ref.read(createFormProvider.notifier);
 
     return SizedBox(

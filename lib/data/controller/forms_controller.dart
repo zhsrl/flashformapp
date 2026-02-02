@@ -52,17 +52,4 @@ class FormController extends AsyncNotifier<List<FormModel>> {
       },
     );
   }
-
-  Future<void> saveForm(Map<String, dynamic> data) async {
-    state = AsyncLoading();
-    state = await AsyncValue.guard(
-      () async {
-        final repository = ref.read(formRepoProvider);
-
-        await repository.saveForm(data);
-
-        return repository.getAllForms();
-      },
-    );
-  }
 }

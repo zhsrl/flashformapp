@@ -1,9 +1,12 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/data/repository/storage_repository.dart';
 import 'package:flashform_app/data/service/image_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ImageUploadState {
   final bool isLoading;
@@ -32,24 +35,30 @@ class ImageUploadState {
       imageUrl: imageUrl ?? this.imageUrl,
       uploadProgress: uploadProgress ?? this.uploadProgress,
       errorMessage: errorMessage ?? this.errorMessage,
-      localImageBytes: localImageBytes,
+      localImageBytes: localImageBytes ?? this.localImageBytes,
     );
   }
 }
 
 final imageControllerProvider =
-    StateNotifierProvider<ImageController, ImageUploadState>((ref) {
+    StateNotifierProvider.autoDispose<ImageController, ImageUploadState>((ref) {
       return ImageController(
         ref.watch(storageRepoProvider),
         ref.watch(imageServiceProvider),
+        ref.watch(formRepoProvider),
       );
     });
 
 class ImageController extends StateNotifier<ImageUploadState> {
   ImageController(
-    this._repository,
+    this._storageRepository,
     this._service,
+    this._formRepository,
   ) : super(ImageUploadState());
+
+  final StorageRepository _storageRepository;
+  final ImageService _service;
+  final FormRepository _formRepository;
 
   void reset() {
     debugPrint('🔄 [ImageController] Сброс состояния');
@@ -61,12 +70,17 @@ class ImageController extends StateNotifier<ImageUploadState> {
     );
   }
 
-  final StorageRepository _repository;
-  final ImageService _service;
+  void resetPickedImage() {
+    debugPrint('🔄 [ImageController] Сброс состояния выбранное изображение');
 
-  Future<String?> pickAndUploadImage({
-    String? folder,
-    int quality = 85,
+    state = ImageUploadState(
+      localImageBytes: null,
+      isLoading: false,
+    );
+  }
+
+  Future<Uint8List?> pickImage({
+    int quality = 50,
     int maxWidth = 1920,
     int maxHeight = 1080,
   }) async {
@@ -83,7 +97,6 @@ class ImageController extends StateNotifier<ImageUploadState> {
         maxImageWidth: maxWidth,
       );
 
-      // If user cancel upload
       if (compressedBytes == null) {
         state = state.copyWith(
           isLoading: false,
@@ -92,19 +105,43 @@ class ImageController extends StateNotifier<ImageUploadState> {
         return null;
       }
 
-      // Показываем размер до и после сжатия (для отладки)
       final sizeInMB = _service.getImageSizeInMB(compressedBytes);
       debugPrint(
         'Размер сжатого изображения: ${sizeInMB.toStringAsFixed(2)} MB',
       );
 
       state = state.copyWith(
+        isLoading: false,
         localImageBytes: compressedBytes,
-        uploadProgress: 50,
       );
 
-      final imageUrl = await _repository.uploadImage(
-        compressedBytes,
+      return compressedBytes;
+    } catch (e) {
+      throw Exception(e);
+    }
+  }
+
+  Future<String?> uploadImage({
+    String? folder,
+    Uint8List? bytes,
+  }) async {
+    try {
+      state = state.copyWith(
+        isLoading: true,
+        errorMessage: null,
+        uploadProgress: 0,
+      );
+
+      if (bytes == null) {
+        state = state.copyWith(
+          isLoading: false,
+        );
+
+        return null;
+      }
+
+      final imageUrl = await _storageRepository.uploadImage(
+        bytes,
         folder: folder,
       );
 
@@ -112,6 +149,7 @@ class ImageController extends StateNotifier<ImageUploadState> {
         isLoading: false,
         imageUrl: imageUrl,
         uploadProgress: 100,
+        localImageBytes: null,
       );
 
       return imageUrl;
@@ -127,13 +165,21 @@ class ImageController extends StateNotifier<ImageUploadState> {
     }
   }
 
-  Future<void> deleteImage(String imageUrl) async {
+  Future<void> deleteImage(String imageUrl, {String? formId}) async {
     try {
       state = state.copyWith(isLoading: true, errorMessage: null);
 
-      await _repository.deleteImage(
-        imageUrl,
-      );
+      // 1. Обновляем БД только если есть ID формы
+      if (formId != null) {
+        debugPrint('Удаляем ссылку из БД...');
+        await _formRepository.removeImageReference(formId).then((v) {
+          debugPrint('ссылка удалена');
+        });
+      }
+
+      // 2. Удаляем файл из хранилища (выполняется всегда)
+      debugPrint('Удаляем файл из Storage...');
+      await _storageRepository.deleteImage(imageUrl);
 
       state = state.copyWith(
         isLoading: false,
@@ -142,70 +188,8 @@ class ImageController extends StateNotifier<ImageUploadState> {
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
-
-      throw Exception('Delete image exception: $e');
-    }
-  }
-
-  Future<String?> updateImage({
-    required String? oldImageUrl,
-    required String formId,
-    String? folder,
-    int quality = 85,
-    int maxWidth = 1920,
-    int maxHeight = 1080,
-  }) async {
-    try {
-      state = state.copyWith(
-        isLoading: true,
-        errorMessage: null,
-        uploadProgress: 0,
-      );
-
-      final compressedBytes = await _service.pickAndCompressImage(
-        quality: quality,
-        maxImageHeight: maxHeight,
-        maxImageWidth: maxWidth,
-      );
-
-      // If user cancel upload
-      if (compressedBytes == null) {
-        state = state.copyWith(
-          isLoading: false,
-        );
-
-        return null;
-      }
-
-      state = state.copyWith(
-        localImageBytes: compressedBytes,
-        uploadProgress: 50,
-      );
-
-      final newImageUrl = await _repository.updateImage(
-        oldImageUrl,
-        formId,
-        compressedBytes,
-
-        folder: folder,
-      );
-
-      state = state.copyWith(
-        isLoading: false,
-        imageUrl: newImageUrl,
-        uploadProgress: 100,
-      );
-
-      return newImageUrl;
-    } catch (e) {
-      state = state.copyWith(
-        isLoading: false,
-        errorMessage: e.toString(),
-        uploadProgress: null,
-        localImageBytes: null,
-      );
-
-      throw Exception('Update image exception: $e');
+      // Лучше использовать rethrow, чтобы UI мог обработать ошибку (показать снекбар)
+      rethrow;
     }
   }
 }

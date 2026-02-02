@@ -44,13 +44,6 @@ class StorageRepository {
           .from(_bucketName)
           .getPublicUrl(filePath);
 
-      // await _supabase
-      //     .from('forms')
-      //     .update({
-      //       'hero_image': publicUrl,
-      //     })
-      //     .eq('user_id', user.id);
-
       return publicUrl;
     } on StorageException catch (e) {
       throw Exception('Exception upload image: ${e.message}');
@@ -83,12 +76,7 @@ class StorageRepository {
 
       debugPrint('🔍 Извлеченный путь к файлу: $filePath');
 
-      await _supabase.storage.from(_bucketName).remove([filePath]).onError((
-        error,
-        stackTrace,
-      ) {
-        throw Exception(error);
-      });
+      await _supabase.storage.from(_bucketName).remove([filePath]);
 
       debugPrint('Удалили успешно...');
     } on StorageException catch (e) {
@@ -98,43 +86,36 @@ class StorageRepository {
     }
   }
 
-  Future<String> updateImage(
-    String? oldImageUrl,
-    String formId,
-    Uint8List newImageBytes, {
-    String? folder,
-  }) async {
-    try {
-      final user = _supabase.auth.currentUser;
+  // Future<String> updateImage(
+  //   String? oldImageUrl,
+  //   String formId,
+  //   Uint8List newImageBytes, {
+  //   String? folder,
+  // }) async {
+  //   try {
+  //     final user = _supabase.auth.currentUser;
 
-      if (user == null) {
-        throw Exception('User is null');
-      }
+  //     if (user == null) {
+  //       throw Exception('User is null');
+  //     }
 
-      if (oldImageUrl != null && oldImageUrl.isNotEmpty) {
-        await deleteImage(oldImageUrl);
-      }
+  //     if (oldImageUrl != null && oldImageUrl.isNotEmpty) {
+  //       await deleteImage(oldImageUrl);
+  //     }
 
-      final newImageUrl = await uploadImage(
-        newImageBytes,
+  //     final newImageUrl = await uploadImage(
+  //       newImageBytes,
 
-        folder: folder,
-      );
+  //       folder: folder,
+  //     );
 
-      // await _supabase
-      //     .from('forms')
-      //     .update({
-      //       'hero_image': newImageUrl,
-      //     })
-      //     .eq('user_id', user.id);
-
-      return newImageUrl;
-    } on StorageException catch (e) {
-      throw Exception('Exception at deleting old image: ${e.message}');
-    } catch (e) {
-      throw Exception('Exception at deleting old image: $e');
-    }
-  }
+  //     return newImageUrl;
+  //   } on StorageException catch (e) {
+  //     throw Exception('Exception at deleting old image: ${e.message}');
+  //   } catch (e) {
+  //     throw Exception('Exception at deleting old image: $e');
+  //   }
+  // }
 
   Future<void> ensureBucketExists() async {
     try {

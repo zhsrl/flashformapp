@@ -11,17 +11,18 @@ class EditorAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.formName = '',
     this.automaticallyImplyLeading,
     required this.onPublish,
-    required this.onSave,
+
     this.isPublishing,
-    this.isSaving,
+
+    required this.onBack,
   });
 
   final String? formName;
   final bool? automaticallyImplyLeading;
   final VoidCallback onPublish;
-  final VoidCallback onSave;
+
+  final VoidCallback onBack;
   final bool? isPublishing;
-  final bool? isSaving;
 
   @override
   State<EditorAppBar> createState() => _EditorAppBarState();
@@ -43,27 +44,21 @@ class _EditorAppBarState extends State<EditorAppBar> {
       title: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          IconButton.outlined(
-            onPressed: () {
-              if (context.canPop()) {
-                context.pop();
-              } else {
-                context.go('/');
-              }
-            },
-            style: IconButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadiusGeometry.circular(10),
-              ),
-            ),
+          // IconButton.outlined(
+          //   onPressed: widget.onBack,
+          //   style: IconButton.styleFrom(
+          //     shape: RoundedRectangleBorder(
+          //       borderRadius: BorderRadiusGeometry.circular(10),
+          //     ),
+          //   ),
 
-            icon: HeroIcon(
-              HeroIcons.arrowLeft,
-            ),
-          ),
-          const SizedBox(
-            width: 10,
-          ),
+          //   icon: HeroIcon(
+          //     HeroIcons.arrowLeft,
+          //   ),
+          // ),
+          // const SizedBox(
+          //   width: 10,
+          // ),
           SvgPicture.asset(
             'assets/images/logo-short.svg',
             width: 40,
@@ -123,22 +118,12 @@ class _EditorAppBarState extends State<EditorAppBar> {
         const SizedBox(
           width: 8,
         ),
-        SizedBox(
-          width: 170,
-          child: FFButton(
-            onPressed: widget.onSave,
-            isLoading: widget.isSaving ?? false,
-            text: 'Сохранить',
-            secondTheme: false,
-            marginBottom: 0,
-          ),
-        ),
-        const SizedBox(
-          width: 8,
-        ),
+        FFButton(
+          onPressed: widget.onBack,
 
-        const SizedBox(
-          width: 8,
+          text: 'Закрыть',
+          secondTheme: false,
+          marginBottom: 0,
         ),
       ],
     );

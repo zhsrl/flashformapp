@@ -1,6 +1,6 @@
-import 'dart:ui';
-
-import 'package:adaptive_will_pop_scope/widget.dart';
+// ignore: depend_on_referenced_packages
+import 'package:flashform_app/data/controller/image_controller.dart';
+import 'package:web/web.dart' as web;
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
@@ -9,10 +9,10 @@ import 'package:flashform_app/features/create_form/views/desktop/settings_panel_
 import 'package:flashform_app/features/home/widgets/editor_app_bar.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'dart:js_interop';
 
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
@@ -56,6 +56,7 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
     _formTitleController.dispose();
     _buttonTextController.dispose();
     _successTextController.dispose();
+
     super.dispose();
   }
 
@@ -88,8 +89,80 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
     }
   }
 
-  void _markAsChanged() {
-    ref.read(createFormProvider.notifier).updateHasChanges(true);
+  Future<void> _handlePublish(String formId) async {
+    final imageNotifier = ref.read(imageControllerProvider.notifier);
+    final formNotifier = ref.read(createFormProvider.notifier);
+
+    final imageState = ref.read(imageControllerProvider);
+
+    try {
+      String? imageUrl = ref.read(createFormProvider).heroImageUrl;
+
+      if (imageState.localImageBytes != null) {
+        final uploadImageUrl = await imageNotifier.uploadImage(
+          folder: formId,
+          bytes: imageState.localImageBytes,
+        );
+
+        if (uploadImageUrl != null) {
+          imageUrl = uploadImageUrl;
+          debugPrint('URL to fetch: $imageUrl');
+          formNotifier.updateHeroImage(imageUrl);
+        } else {
+          throw Exception('Не удалось загрузить изображение');
+        }
+
+        final success = await formNotifier.publishForm(formId);
+
+        if (mounted) {
+          if (success) {
+            imageNotifier.resetPickedImage();
+
+            showSnackbar(
+              context,
+              type: SnackbarType.success,
+              message: 'Опубликовано!',
+            );
+            formNotifier.clearChanges();
+          } else {
+            showSnackbar(
+              context,
+              type: SnackbarType.error,
+              message: 'Ошибка публикации',
+            );
+          }
+        }
+      } else {
+        final success = await formNotifier.publishForm(formId);
+
+        if (mounted) {
+          if (success) {
+            imageNotifier.resetPickedImage();
+
+            showSnackbar(
+              context,
+              type: SnackbarType.success,
+              message: 'Опубликовано!',
+            );
+            formNotifier.clearChanges();
+          } else {
+            showSnackbar(
+              context,
+              type: SnackbarType.error,
+              message: 'Ошибка публикации',
+            );
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error chain: $e');
+      if (mounted) {
+        showSnackbar(context, type: SnackbarType.error, message: 'Ошибка: $e');
+      }
+      throw Exception(e);
+    } finally {
+      formNotifier.updateIsPublishing(false);
+    }
   }
 
   void _showUnsavedChangesDialog() {
@@ -104,170 +177,122 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
         actions: [
           FFButton(
             onPressed: () => Navigator.pop(context),
-            text: 'Cancel',
+            text: 'Отмена',
           ),
           FFButton(
             onPressed: () {
               Navigator.pop(context);
               _discardChanges();
             },
-            text: 'Discard',
+            text: 'Выход без изменении',
           ),
           FFButton(
             secondTheme: true,
             onPressed: () async {
               Navigator.pop(context);
-              await _saveAndLeave();
+              await _publishAndLeave();
             },
-            text: 'Save',
+            text: 'Опубликовать',
           ),
         ],
       ),
     );
   }
 
-  Future<void> _saveAndLeave() async {
-    final success = await ref
-        .read(createFormProvider.notifier)
-        .saveForm(widget.formId);
-
+  Future<void> _publishAndLeave() async {
     if (mounted) {
-      if (success) {
-        context.pop();
-      } else {
-        showSnackbar(
-          context,
-          type: SnackbarType.error,
-          message: 'Error saving form',
-        );
-      }
+      _handlePublish(widget.formId);
+      context.pop();
+
+      showSnackbar(
+        context,
+        type: SnackbarType.error,
+        message: 'Error saving form',
+      );
     }
   }
 
   void _discardChanges() {
     ref.read(createFormProvider.notifier).updateHasChanges(false);
-    context.pop();
+    if (context.canPop()) {
+      context.pop();
+    } else {
+      context.go('/');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(createFormProvider);
-    final controller = ref.watch(createFormProvider.notifier);
 
-    return PopScope(
-      // canPop: !formState.hasChanges,
-      onPopInvokedWithResult: (didPop, result) async {
-        // // if (!didPop && formState.hasChanges) {
-        // //   _showUnsavedChangesDialog();
-        // // }
-        debugPrint('POPED');
-        _showUnsavedChangesDialog();
-      },
-      child: Scaffold(
-        backgroundColor: AppTheme.background,
-        appBar: EditorAppBar(
-          formName: widget.formId,
-          automaticallyImplyLeading: true,
-          isPublishing: formState.isPublishing,
-          isSaving: formState.isSaving,
-          onSave: () async {
-            setState(() {
-              controller.updateIsSaving(true);
-            });
-            final success = await ref
-                .read(createFormProvider.notifier)
-                .saveForm(widget.formId);
-
-            if (context.mounted) {
-              if (success) {
-                controller.updateIsSaving(false);
-                showSnackbar(
-                  context,
-                  type: SnackbarType.success,
-                  message: 'Успешно сохранен!',
-                );
-              } else {
-                controller.updateIsSaving(false);
-                showSnackbar(
-                  context,
-                  type: SnackbarType.error,
-                  message: 'Ошибка при сохранении',
-                );
-              }
+    return Scaffold(
+      backgroundColor: AppTheme.background,
+      appBar: EditorAppBar(
+        formName: widget.formId,
+        automaticallyImplyLeading: true,
+        isPublishing: formState.isPublishing,
+        onBack: () {
+          if (formState.hasChanges) {
+            _showUnsavedChangesDialog();
+          } else {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go('/');
             }
+          }
+        },
 
-            setState(() {
-              controller.updateIsSaving(false);
-            });
-          },
-          onPublish: () async {
-            controller.updateIsPublishing(true);
-            final success = await ref
-                .read(createFormProvider.notifier)
-                .publishForm(widget.formId);
-            if (context.mounted) {
-              if (success) {
-                showSnackbar(
-                  context,
-                  type: SnackbarType.success,
-                  message: 'Опубликовано!',
-                );
-              } else {
-                showSnackbar(
-                  context,
-                  type: SnackbarType.error,
-                  message: 'Ошибка публикации',
-                );
-              }
-            }
-            controller.updateIsPublishing(false);
-          },
-        ),
+        onPublish: () async {
+          await _handlePublish(widget.formId);
+        },
+      ),
 
-        body: _isloadingInitialData
-            ? Center(
-                child: LoadingAnimationWidget.waveDots(
-                  color: AppTheme.secondary,
-                  size: 40,
-                ),
-              )
-            : Padding(
-                padding: EdgeInsetsGeometry.all(16),
-                child: Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SettingsPanelView(
-                        titleController: _titleController,
-                        onChanged: _markAsChanged,
-                        formButtonTextController: _formButtonTextController,
-                        subtitleController: _subtitleController,
-                        formTitleController: _formTitleController,
+      body: _isloadingInitialData
+          ? Center(
+              child: LoadingAnimationWidget.waveDots(
+                color: AppTheme.secondary,
+                size: 40,
+              ),
+            )
+          : Padding(
+              padding: EdgeInsetsGeometry.all(16),
+              child: Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SettingsPanelView(
+                      titleController: _titleController,
+                      onChanged: ref
+                          .read(createFormProvider.notifier)
+                          .markAsChanged,
+                      formButtonTextController: _formButtonTextController,
+                      subtitleController: _subtitleController,
+                      formTitleController: _formTitleController,
 
-                        focusNode: _focusNode,
+                      focusNode: _focusNode,
 
-                        successTextController: _successTextController,
-                        buttonTextController: _buttonTextController,
-                      ),
+                      successTextController: _successTextController,
+                      buttonTextController: _buttonTextController,
+                    ),
 
-                      const SizedBox(
-                        width: 16,
-                      ),
-                      PreviewView(
-                        titleController: _titleController,
-                        subtitleController: _subtitleController,
-                        formTitleController: _formTitleController,
-                        buttonTextController: _buttonTextController,
-                        formButtonTextController: _formButtonTextController,
-                        successTextController: _successTextController,
-                        focusNode: _focusNode,
-                      ),
-                    ],
-                  ),
+                    const SizedBox(
+                      width: 16,
+                    ),
+                    PreviewView(
+                      titleController: _titleController,
+                      subtitleController: _subtitleController,
+                      formTitleController: _formTitleController,
+                      buttonTextController: _buttonTextController,
+                      formButtonTextController: _formButtonTextController,
+                      successTextController: _successTextController,
+                      focusNode: _focusNode,
+                    ),
+                  ],
                 ),
               ),
-      ),
+            ),
     );
   }
 }

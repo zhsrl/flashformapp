@@ -1,7 +1,9 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
+import 'package:flashform_app/data/controller/image_controller.dart';
 import 'package:flashform_app/data/model/create_form_state.dart';
+import 'package:flashform_app/data/service/image_service.dart';
 import 'package:flashform_app/features/widgets/ff_tabbar.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/material.dart';
@@ -59,6 +61,7 @@ class _PreviewViewState extends ConsumerState<PreviewView>
   Widget build(BuildContext context) {
     // 1. Подписываемся на стейт формы
     final formState = ref.watch(createFormProvider);
+    final imageState = ref.watch(imageControllerProvider);
 
     return Expanded(
       child: Column(
@@ -99,7 +102,7 @@ class _PreviewViewState extends ConsumerState<PreviewView>
           // 3. Основной контент превью
           Expanded(
             child: SingleChildScrollView(
-              child: _buildDeviceFrame(formState),
+              child: _buildDeviceFrame(formState, imageState),
             ),
           ),
         ],
@@ -107,7 +110,10 @@ class _PreviewViewState extends ConsumerState<PreviewView>
     );
   }
 
-  Widget _buildDeviceFrame(CreateFormState formState) {
+  Widget _buildDeviceFrame(
+    CreateFormState formState,
+    ImageUploadState imageState,
+  ) {
     final isDesktop = _tabIndex == 1;
 
     return AnimatedContainer(
@@ -129,7 +135,7 @@ class _PreviewViewState extends ConsumerState<PreviewView>
           Column(
             children: [
               // Hero Image
-              _buildHeroImage(formState),
+              _buildHeroImage(formState, imageState),
               const SizedBox(height: 8),
 
               SizedBox(
@@ -249,7 +255,23 @@ class _PreviewViewState extends ConsumerState<PreviewView>
     );
   }
 
-  Widget _buildHeroImage(CreateFormState formState) {
+  Widget _buildHeroImage(
+    CreateFormState formState,
+    ImageUploadState imageState,
+  ) {
+    if (imageState.localImageBytes != null) {
+      return Container(
+        clipBehavior: Clip.hardEdge,
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(15)),
+        child: Image.memory(
+          imageState.localImageBytes!,
+          width: 318,
+          height: 318,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => _buildPlaceholder(formState),
+        ),
+      );
+    }
     if (formState.heroImageUrl != null) {
       return Container(
         clipBehavior: Clip.hardEdge,
@@ -263,6 +285,7 @@ class _PreviewViewState extends ConsumerState<PreviewView>
         ),
       );
     }
+
     return _buildPlaceholder(formState);
   }
 

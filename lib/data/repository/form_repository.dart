@@ -70,21 +70,6 @@ class FormRepository {
         .single();
   }
 
-  Future<void> saveForm(Map<String, dynamic> data) async {
-    final supabaseClient = _supabase.client;
-
-    final id = data['id'];
-
-    await supabaseClient
-        .from('forms')
-        .update({
-          'data': data,
-        })
-        .eq('id', id)
-        .select()
-        .single();
-  }
-
   Future<void> unpublishForm(String formId) async {
     final supabaseClient = _supabase.client;
 
@@ -131,5 +116,30 @@ class FormRepository {
     } catch (e) {
       throw Exception(e);
     }
+  }
+
+  Future<void> removeImageReference(String formId) async {
+    // 1. Читаем текущие данные (чтобы не стереть заголовок и кнопки)
+    final response = await _supabase.client
+        .from('forms')
+        .select('data')
+        .eq('id', formId)
+        .single();
+
+    if (response['data'] == null) return;
+
+    // 2. Делаем копию данных
+    final currentData = Map<String, dynamic>.from(response['data'] as Map);
+
+    // 3. Ставим image = null (или удаляем ключ)
+    currentData['image'] = null;
+
+    // 4. Обновляем запись в базе
+    await _supabase.client
+        .from('forms')
+        .update({
+          'data': currentData, // Записываем обновленный JSON с null картинкой
+        })
+        .eq('id', formId);
   }
 }

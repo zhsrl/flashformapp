@@ -1,9 +1,8 @@
-import 'package:flashform_app/core/utils/utils.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
 import 'package:flashform_app/data/model/create_form_state.dart'
     show CreateFormState;
 import 'package:flashform_app/data/model/form_model.dart';
-import 'package:flashform_app/data/repository/form_repository.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -21,6 +20,20 @@ class CreateFormController extends StateNotifier<CreateFormState> {
   final Ref ref;
 
   CreateFormController(this.ref) : super(const CreateFormState());
+
+  bool _hasUnsavedChanges = false;
+
+  void markAsChanged() {
+    _hasUnsavedChanges = true;
+    state = state.copyWith(hasChanges: true);
+  }
+
+  void clearChanges() {
+    _hasUnsavedChanges = false;
+    state = state.copyWith(hasChanges: false);
+  }
+
+  bool get hasUnsavedChanges => _hasUnsavedChanges;
 
   // Setters for UI
   void updateTitle(String value) => state = state.copyWith(title: value);
@@ -104,62 +117,6 @@ class CreateFormController extends StateNotifier<CreateFormState> {
   void removeField(int index) {
     final newFields = List<FormFields>.from(state.fields)..removeAt(index);
     state = state.copyWith(fields: newFields);
-  }
-
-  Future<bool> saveForm(String formId) async {
-    if (state.fields.isEmpty && state.actionType == 'form') {
-      return false;
-    }
-
-    state = state.copyWith(isSaving: true);
-    try {
-      final user = Supabase.instance.client.auth.currentUser;
-      if (user == null) throw Exception("User not authenticated");
-
-      final data = {
-        'id': formId,
-        'title': {
-          'text': state.title,
-          'size': state.titleFontSize,
-        },
-        'subtitle': {
-          'text': state.subtitle,
-          'size': state.subtitleFontSize,
-        },
-
-        'content': 'image',
-        'image': state.heroImageUrl,
-        'action_type': state.actionType,
-        'button': {
-          'color': state.buttonColor.toHexString(),
-          'text': state.buttonText,
-          'url': state.buttonUrl,
-        },
-        'form': {
-          'title': state.formTitle,
-          'fields': state.fields.map((e) => e.toJson()).toList(),
-          'button': {
-            'text': state.formButtonText,
-            'color': state.formButtonColor.toHexString(),
-
-            'redirect-url': state.redirectUrl,
-          },
-        },
-        'theme': state.theme,
-        'settings': {
-          'meta-pixel-id': state.metaPixelId,
-          'ya-metrika-id': state.yandexMetrikaId,
-        },
-      };
-
-      await ref.read(formControllerProvider.notifier).saveForm(data);
-      return true;
-    } catch (e) {
-      debugPrint('Error publishing form: $e');
-      return false;
-    } finally {
-      state = state.copyWith(isPublishing: false);
-    }
   }
 
   Future<bool> publishForm(String formId) async {

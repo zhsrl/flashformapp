@@ -170,6 +170,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
             onSelected: (value) {
               if (value != null) controller.updateTheme(value);
               widget.onChanged();
+              ref.read(createFormProvider.notifier).markAsChanged();
             },
             inputDecorationTheme: InputDecorationTheme(
               enabledBorder: OutlineInputBorder(
@@ -208,17 +209,17 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
             ),
             const SizedBox(height: 16),
 
-            // ImagePicker сам внутри работает с контроллерами,
-            // но мы передаем текущий URL и колбэки для обновления стейта редактора
             ImagePickerWidget(
-              // folder: formId - можно получить из провайдера, если нужно
               folder: currentFormId,
+              formId: currentFormId,
               imageUrl: heroImageUrl,
-              onImageUploaded: (url) =>
-                  ref.read(createFormProvider.notifier).updateHeroImage(url),
-              onImageDeleted: () {
-                ref.read(imageControllerProvider.notifier).reset();
+              // onImageUpdated: (url) {
+              //   ref.read(createFormProvider.notifier).updateHeroImage(url);
+              //   ref.read(createFormProvider.notifier).markAsChanged();
+              // },
+              onImageDeleted: () async {
                 ref.read(createFormProvider.notifier).updateHeroImage(null);
+                ref.read(imageControllerProvider.notifier).reset();
               },
             ),
           ],
@@ -249,6 +250,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
             onChanged: (value) {
               widget.onChanged();
               controller.updateTitle(value);
+              ref.read(createFormProvider.notifier).markAsChanged();
             },
             controller: widget
                 .titleController, // Используем контроллер переданный из родителя
@@ -259,7 +261,10 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
             value: formState.titleFontSize,
             max: 42,
             min: 24,
-            onChanged: (val) => controller.updateTitleFontSize(val),
+            onChanged: (val) => {
+              controller.updateTitleFontSize(val),
+              ref.read(createFormProvider.notifier).markAsChanged(),
+            },
           ),
         ],
       ),
@@ -288,6 +293,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
             controller: widget.subtitleController,
             onChanged: (value) {
               controller.updateSubtitle(value);
+              ref.read(createFormProvider.notifier).markAsChanged();
             },
           ),
           const SizedBox(width: 8),
@@ -296,7 +302,10 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
             value: formState.subtitleFontSize,
             max: 22,
             min: 12,
-            onChanged: (val) => controller.updateSubtitleFontSize(val),
+            onChanged: (val) => {
+              controller.updateSubtitleFontSize(val),
+              ref.read(createFormProvider.notifier).markAsChanged(),
+            },
           ),
         ],
       ),
@@ -328,6 +337,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
             initialSelection: currentType,
             onSelected: (value) {
               if (value != null) controller.updateActionType(value);
+              ref.read(createFormProvider.notifier).markAsChanged();
             },
             menuStyle: MenuStyle(
               backgroundColor: WidgetStatePropertyAll(AppTheme.background),
@@ -392,7 +402,10 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
           FFTextField(
             hintText: 'Текст в кнопке',
             controller: widget.buttonTextController,
-            onChanged: (value) => controller.updateButtonText(value),
+            onChanged: (value) => {
+              controller.updateButtonText(value),
+              ref.read(createFormProvider.notifier).markAsChanged(),
+            },
             maxLength: 30,
             prefixIcon: const HeroIcon(HeroIcons.listBullet),
           ),
@@ -400,12 +413,18 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
             hintText: 'URL (ссылка)',
             prefixIcon: const HeroIcon(HeroIcons.link),
             controller: widget.buttonUrlController,
-            onChanged: (value) => controller.updateButtonUrl(value),
+            onChanged: (value) => {
+              controller.updateButtonUrl(value),
+              ref.read(createFormProvider.notifier).markAsChanged(),
+            },
           ),
           _buildColorPickerRow(
             context: context,
             currentColor: formState.buttonColor,
-            onColorChanged: (color) => controller.updateButtonColor(color),
+            onColorChanged: (color) => {
+              controller.updateButtonColor(color),
+              ref.read(createFormProvider.notifier).markAsChanged(),
+            },
           ),
         ],
       ),
@@ -437,7 +456,10 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
             hintText: 'Заполните форму ...',
             title: 'Заголовок формы',
             controller: widget.formTitleController,
-            onChanged: (value) => controller.updateFormTitle(value),
+            onChanged: (value) => {
+              controller.updateFormTitle(value),
+              ref.read(createFormProvider.notifier).markAsChanged(),
+            },
           ),
 
           _buildFieldsList(context, formState.fields, controller),
@@ -446,7 +468,10 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
             hintText: 'например, Регистрация',
             title: 'Текст в кнопке',
             controller: widget.formButtonTextController,
-            onChanged: (value) => controller.updateFormButtonText(value),
+            onChanged: (value) => {
+              controller.updateFormButtonText(value),
+              ref.read(createFormProvider.notifier).markAsChanged(),
+            },
             maxLength: 30,
             prefixIcon: const HeroIcon(HeroIcons.bold),
           ),
@@ -455,7 +480,10 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
             title: 'Сообщение после успешной отправки',
             focusNode: widget.focusNode,
             controller: widget.successTextController,
-            onChanged: (value) => controller.updateSuccessText(value),
+            onChanged: (value) => {
+              controller.updateSuccessText(value),
+              ref.read(createFormProvider.notifier).markAsChanged(),
+            },
             prefixIcon: const HeroIcon(HeroIcons.bold),
           ),
 
@@ -473,7 +501,10 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
               CupertinoSwitch(
                 value: formState.hasRedirectUrl,
                 activeTrackColor: AppTheme.primary,
-                onChanged: (val) => controller.updateHasRedirectUrl(val),
+                onChanged: (val) => {
+                  controller.updateHasRedirectUrl(val),
+                  ref.read(createFormProvider.notifier).markAsChanged(),
+                },
               ),
             ],
           ),
@@ -484,14 +515,20 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
               hintText: 'например, WhatsApp...',
               title: 'Ссылка на перенаправление',
               prefixIcon: const HeroIcon(HeroIcons.link),
-              onChanged: (value) => controller.updateFormRedirectUrl(value),
+              onChanged: (value) => {
+                controller.updateFormRedirectUrl(value),
+                ref.read(createFormProvider.notifier).markAsChanged(),
+              },
               // onChanged: (val) => controller.updateRedirectUrl(val),
             ),
 
           _buildColorPickerRow(
             context: context,
             currentColor: formState.formButtonColor,
-            onColorChanged: (color) => controller.updateFormButtonColor(color),
+            onColorChanged: (color) => {
+              controller.updateFormButtonColor(color),
+              ref.read(createFormProvider.notifier).markAsChanged(),
+            },
           ),
         ],
       ),

@@ -7,6 +7,7 @@ class CreateFormState {
   final String? formTitle;
   final String? buttonText;
   final String? formButtonText;
+  final bool hasChanges;
   final String? successText;
   final String? heroImageUrl;
   final String theme; // 'light' | 'dark'
@@ -30,6 +31,7 @@ class CreateFormState {
     this.subtitle,
     this.formTitle,
     this.buttonText,
+    this.hasChanges = false,
     this.formButtonText,
     this.successText = '',
     this.heroImageUrl,
@@ -61,6 +63,7 @@ class CreateFormState {
     String? heroImageUrl,
     String? theme,
     String? actionType,
+    bool? hasChanges,
     Color? buttonColor,
     Color? formButtonColor,
     double? titleFontSize,
@@ -78,10 +81,11 @@ class CreateFormState {
       subtitle: subtitle ?? this.subtitle,
       formTitle: formTitle ?? this.formTitle,
       buttonText: buttonText ?? this.buttonText,
+      hasChanges: hasChanges ?? this.hasChanges,
       formButtonText: formButtonText ?? this.formButtonText,
       successText: successText ?? this.successText,
       buttonUrl: buttonUrl ?? this.buttonUrl,
-      heroImageUrl: heroImageUrl,
+      heroImageUrl: heroImageUrl ?? this.heroImageUrl,
       theme: theme ?? this.theme,
       actionType: actionType ?? this.actionType,
       buttonColor: buttonColor ?? this.buttonColor,

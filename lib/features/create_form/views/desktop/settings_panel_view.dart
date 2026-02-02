@@ -20,6 +20,7 @@ class SettingsPanelView extends ConsumerStatefulWidget {
     // Контроллеры оставляем, так как они управляются родителем для синхронизации
     required this.titleController,
     required this.subtitleController,
+    required this.onChanged,
     this.formTitleController,
     this.buttonTextController,
     this.formButtonTextController,
@@ -36,6 +37,7 @@ class SettingsPanelView extends ConsumerStatefulWidget {
   final TextEditingController? successTextController;
   final TextEditingController? buttonUrlController;
   final FocusNode focusNode;
+  final VoidCallback onChanged;
 
   @override
   ConsumerState<SettingsPanelView> createState() => _SettingsPanelViewState();
@@ -167,6 +169,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
             ),
             onSelected: (value) {
               if (value != null) controller.updateTheme(value);
+              widget.onChanged();
             },
             inputDecorationTheme: InputDecorationTheme(
               enabledBorder: OutlineInputBorder(
@@ -214,8 +217,8 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
               onImageUploaded: (url) =>
                   ref.read(createFormProvider.notifier).updateHeroImage(url),
               onImageDeleted: () {
-                ref.read(createFormProvider.notifier).updateHeroImage(null);
                 ref.read(imageControllerProvider.notifier).reset();
+                ref.read(createFormProvider.notifier).updateHeroImage(null);
               },
             ),
           ],
@@ -243,7 +246,10 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
           const SizedBox(height: 16),
           FFTextField(
             hintText: 'Напишите заголовок',
-            onChanged: (value) => controller.updateTitle(value),
+            onChanged: (value) {
+              widget.onChanged();
+              controller.updateTitle(value);
+            },
             controller: widget
                 .titleController, // Используем контроллер переданный из родителя
           ),

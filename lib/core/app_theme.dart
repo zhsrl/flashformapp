@@ -10,3 +10,22 @@ class AppTheme {
   static Color secondary = Color(0xFF0b1a05);
   static const Color fourty = Color(0xFFf7f7f7);
 }
+
+extension HexColor on String {
+  Color toColor() {
+    final hexString = replaceAll('#', '');
+    final buffer = StringBuffer();
+    if (hexString.length == 6) {
+      buffer.write('ff');
+    }
+    buffer.write(hexString);
+    return Color(int.parse(buffer.toString(), radix: 16));
+  }
+}
+
+extension ColorToHex on Color {
+  String toHex() {
+    // ignore: deprecated_member_use
+    return '#${value.toRadixString(16).padLeft(8, '0').substring(2)}';
+  }
+}

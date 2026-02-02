@@ -5,6 +5,7 @@ import 'package:flashform_app/data/model/create_form_state.dart'
 import 'package:flashform_app/data/model/form_model.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -29,6 +30,10 @@ class CreateFormController extends StateNotifier<CreateFormState> {
   void updateTheme(String value) => state = state.copyWith(theme: value);
   void updateHeroImage(String? url) =>
       state = state.copyWith(heroImageUrl: url);
+  void updateHasChanges(bool hasChanges) {
+    state = state.copyWith(hasChanges: hasChanges);
+  }
+
   void updateActionType(String value) =>
       state = state.copyWith(actionType: value);
   void updateButtonColor(Color color) =>
@@ -76,8 +81,8 @@ class CreateFormController extends StateNotifier<CreateFormState> {
       buttonText: data['button']['text'],
       buttonUrl: data['button']['url'],
       formButtonText: data['form']['button']['text'],
-      buttonColor: data['button']['color'],
-      formButtonColor: data['form']['button']['color'],
+      buttonColor: (data['button']['color'] as String).toColor(),
+      formButtonColor: (data['form']['button']['color'] as String).toColor(),
       successText: data['success_text'],
       titleFontSize: data['title']['size'],
       subtitleFontSize: data['subtitle']['size'],
@@ -126,7 +131,7 @@ class CreateFormController extends StateNotifier<CreateFormState> {
         'image': state.heroImageUrl,
         'action_type': state.actionType,
         'button': {
-          'color': state.buttonColor,
+          'color': state.buttonColor.toHexString(),
           'text': state.buttonText,
           'url': state.buttonUrl,
         },
@@ -135,7 +140,7 @@ class CreateFormController extends StateNotifier<CreateFormState> {
           'fields': state.fields.map((e) => e.toJson()).toList(),
           'button': {
             'text': state.formButtonText,
-            'color': state.formButtonColor,
+            'color': state.formButtonColor.toHexString(),
 
             'redirect-url': state.redirectUrl,
           },
@@ -184,7 +189,7 @@ class CreateFormController extends StateNotifier<CreateFormState> {
         'image': state.heroImageUrl,
         'action_type': state.actionType,
         'button': {
-          'color': colorToHex(state.buttonColor),
+          'color': state.buttonColor.toHexString(),
           'text': state.buttonText,
           'url': state.buttonUrl,
         },
@@ -193,7 +198,7 @@ class CreateFormController extends StateNotifier<CreateFormState> {
           'fields': state.fields.map((e) => e.toJson()).toList(),
           'button': {
             'text': state.formButtonText,
-            'color': colorToHex(state.formButtonColor),
+            'color': state.formButtonColor.toHexString(),
 
             'redirect-url': state.redirectUrl,
           },

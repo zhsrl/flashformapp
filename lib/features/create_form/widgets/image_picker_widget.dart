@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
 
-class ImagePickerWidget extends ConsumerWidget {
+class ImagePickerWidget extends ConsumerStatefulWidget {
   const ImagePickerWidget({
     super.key,
     this.imageUrl,
@@ -27,24 +27,42 @@ class ImagePickerWidget extends ConsumerWidget {
   final double borderRadius;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ImagePickerWidget> createState() => _ImagePickerWidgetState();
+}
+
+class _ImagePickerWidgetState extends ConsumerState<ImagePickerWidget> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(imageControllerProvider.notifier).reset();
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     // В идеале ImageController должен возвращать AsyncValue или сложный стейт
     final imageState = ref.watch(imageControllerProvider);
     final formId = ref.watch(currentFormIdProvider);
     final notifier = ref.read(imageControllerProvider.notifier);
 
-    final displayUrl = imageState.imageUrl ?? imageUrl;
+    final displayUrl = imageState.imageUrl ?? widget.imageUrl;
     final hasImage = displayUrl != null || imageState.localImageBytes != null;
 
     // Слушаем ошибки контроллера (если реализовано через StateNotifier)
     // ref.listen(imageControllerProvider, (previous, next) { ... });
 
     return Container(
-      width: width,
-      height: height,
+      width: widget.width,
+      height: widget.height,
       decoration: BoxDecoration(
         color: AppTheme.fourty,
-        borderRadius: BorderRadius.circular(borderRadius),
+        borderRadius: BorderRadius.circular(widget.borderRadius),
         border: Border.all(color: AppTheme.border, width: 2),
       ),
       child: Stack(
@@ -92,13 +110,13 @@ class ImagePickerWidget extends ConsumerWidget {
   Widget _buildContent(String? url, dynamic localBytes) {
     if (localBytes != null) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius - 2),
+        borderRadius: BorderRadius.circular(widget.borderRadius - 2),
         child: Image.memory(localBytes, fit: BoxFit.cover),
       );
     }
     if (url != null) {
       return ClipRRect(
-        borderRadius: BorderRadius.circular(borderRadius - 2),
+        borderRadius: BorderRadius.circular(widget.borderRadius - 2),
         child: Image.network(
           url,
           fit: BoxFit.cover,
@@ -136,7 +154,7 @@ class ImagePickerWidget extends ConsumerWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.black54,
-        borderRadius: BorderRadius.circular(borderRadius - 2),
+        borderRadius: BorderRadius.circular(widget.borderRadius - 2),
       ),
       child: Center(
         child: Column(
@@ -183,13 +201,12 @@ class ImagePickerWidget extends ConsumerWidget {
   ) async {
     // Вся логика "if update else create" перенесена сюда или в контроллер
     // Для чистоты кода в виджете, вызываем унифицированный метод (предложение):
-    /* await notifier.handleImagePick(
-          currentUrl: currentUrl,
-          formId: formId,
-          folder: folder,
-          onSuccess: onImageUploaded
-       );
-    */
+    // await notifier.handleImagePick(
+    //       currentUrl: currentUrl,
+    //       formId: formId,
+    //       folder: folder,
+    //       onSuccess: onImageUploaded
+    //    );
 
     // Если оставляем логику здесь (как временное решение):
     String? newUrl;
@@ -197,21 +214,24 @@ class ImagePickerWidget extends ConsumerWidget {
       newUrl = await notifier.updateImage(
         oldImageUrl: currentUrl,
         formId: formId,
-        folder: folder,
+        folder: widget.folder,
         quality: 85,
       );
     } else {
-      newUrl = await notifier.pickAndUploadImage(folder: folder, quality: 85);
+      newUrl = await notifier.pickAndUploadImage(
+        folder: widget.folder,
+        quality: 85,
+      );
     }
 
-    if (newUrl != null && onImageUploaded != null) {
-      onImageUploaded!(newUrl);
+    if (newUrl != null && widget.onImageUploaded != null) {
+      widget.onImageUploaded!(newUrl);
     }
   }
 
   Future<void> _handleDelete(
     BuildContext context,
-    dynamic notifier,
+    ImageController notifier,
     String? urlToDelete,
   ) async {
     if (urlToDelete == null) return;
@@ -219,7 +239,7 @@ class ImagePickerWidget extends ConsumerWidget {
     try {
       await notifier.deleteImage(urlToDelete);
       notifier.reset();
-      onImageDeleted?.call();
+      widget.onImageDeleted?.call();
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

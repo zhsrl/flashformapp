@@ -17,6 +17,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.0"
+  adaptive_will_pop_scope:
+    dependency: "direct main"
+    description:
+      name: adaptive_will_pop_scope
+      sha256: f266f8f525bda33c11a4f5a22a3c60539e29f6edfbf7b5744d1c08f4c2f5709a
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.4"
   analyzer:
     dependency: transitive
     description:

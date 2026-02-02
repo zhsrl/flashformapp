@@ -78,7 +78,6 @@ class FormRepository {
     await supabaseClient
         .from('forms')
         .update({
-          'is_active': false,
           'data': data,
         })
         .eq('id', id)

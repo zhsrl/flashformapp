@@ -32,7 +32,7 @@ class ImageUploadState {
       imageUrl: imageUrl ?? this.imageUrl,
       uploadProgress: uploadProgress ?? this.uploadProgress,
       errorMessage: errorMessage ?? this.errorMessage,
-      localImageBytes: localImageBytes ?? this.localImageBytes,
+      localImageBytes: localImageBytes,
     );
   }
 }
@@ -141,7 +141,7 @@ class ImageController extends StateNotifier<ImageUploadState> {
         localImageBytes: null,
       );
     } catch (e) {
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
 
       throw Exception('Delete image exception: $e');
     }

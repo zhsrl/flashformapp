@@ -83,7 +83,12 @@ class StorageRepository {
 
       debugPrint('🔍 Извлеченный путь к файлу: $filePath');
 
-      await _supabase.storage.from(_bucketName).remove([filePath]);
+      await _supabase.storage.from(_bucketName).remove([filePath]).onError((
+        error,
+        stackTrace,
+      ) {
+        throw Exception(error);
+      });
 
       debugPrint('Удалили успешно...');
     } on StorageException catch (e) {

@@ -1,6 +1,8 @@
 import 'package:flashform_app/data/model/form_model.dart';
 import 'package:flutter/material.dart';
 
+const _undefined = Object();
+
 class CreateFormState {
   final String? title;
   final String? subtitle;
@@ -60,7 +62,7 @@ class CreateFormState {
     String? formButtonText,
     String? successText,
     String? buttonUrl,
-    String? heroImageUrl,
+    Object? heroImageUrl = _undefined,
     String? theme,
     String? actionType,
     bool? hasChanges,
@@ -85,7 +87,9 @@ class CreateFormState {
       formButtonText: formButtonText ?? this.formButtonText,
       successText: successText ?? this.successText,
       buttonUrl: buttonUrl ?? this.buttonUrl,
-      heroImageUrl: heroImageUrl ?? this.heroImageUrl,
+      heroImageUrl: heroImageUrl == _undefined
+          ? this.heroImageUrl
+          : heroImageUrl as String?,
       theme: theme ?? this.theme,
       actionType: actionType ?? this.actionType,
       buttonColor: buttonColor ?? this.buttonColor,

@@ -52,4 +52,34 @@ class FormController extends AsyncNotifier<List<FormModel>> {
       },
     );
   }
+
+  Future<void> unpublishForm(String formId) async {
+    state = AsyncLoading();
+
+    state = await AsyncValue.guard(
+      () async {
+        final repository = ref.read(formRepoProvider);
+
+        await repository.unpublishForm(formId);
+
+        return repository.getAllForms();
+      },
+    );
+  }
+
+  Future<void> updateFormName(
+    String name,
+    String id,
+  ) async {
+    state = AsyncLoading();
+    state = await AsyncValue.guard(
+      () async {
+        final repository = ref.read(formRepoProvider);
+
+        await repository.updateFormName(name, id);
+
+        return repository.getAllForms();
+      },
+    );
+  }
 }

@@ -1,6 +1,9 @@
 // ignore: depend_on_referenced_packages
+
 import 'package:flashform_app/data/controller/image_controller.dart';
-import 'package:web/web.dart' as web;
+import 'package:flashform_app/data/repository/form_repository.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:heroicons/heroicons.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
@@ -9,7 +12,7 @@ import 'package:flashform_app/features/create_form/views/desktop/settings_panel_
 import 'package:flashform_app/features/home/widgets/editor_app_bar.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -40,6 +43,7 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
   );
 
   bool _isloadingInitialData = true;
+  bool isFormNameChange = false;
 
   final FocusNode _focusNode = FocusNode();
 
@@ -89,6 +93,19 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
     }
   }
 
+  Future<void> _updateFormName(String name) async {
+    final formControllerNotifier = ref.read(formControllerProvider.notifier);
+    final createFormControllerNotifier = ref.read(createFormProvider.notifier);
+    await formControllerNotifier.updateFormName(name, widget.formId);
+
+    ref.invalidate(formControllerProvider);
+    createFormControllerNotifier.updateFormName(name);
+
+    setState(() {
+      isFormNameChange = false;
+    });
+  }
+
   Future<void> _handlePublish(String formId) async {
     final imageNotifier = ref.read(imageControllerProvider.notifier);
     final formNotifier = ref.read(createFormProvider.notifier);
@@ -97,6 +114,9 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
 
     try {
       String? imageUrl = ref.read(createFormProvider).heroImageUrl;
+
+      // Invalidate form status provider
+      ref.invalidate(formStatusProvider(formId));
 
       if (imageState.localImageBytes != null) {
         final uploadImageUrl = await imageNotifier.uploadImage(
@@ -117,12 +137,12 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
         if (mounted) {
           if (success) {
             imageNotifier.resetPickedImage();
-
-            showSnackbar(
-              context,
-              type: SnackbarType.success,
-              message: 'Опубликовано!',
-            );
+            _showLinkDialog(formId);
+            // showSnackbar(
+            //   context,
+            //   type: SnackbarType.success,
+            //   message: 'Опубликовано!',
+            // );
             formNotifier.clearChanges();
           } else {
             showSnackbar(
@@ -139,11 +159,7 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
           if (success) {
             imageNotifier.resetPickedImage();
 
-            showSnackbar(
-              context,
-              type: SnackbarType.success,
-              message: 'Опубликовано!',
-            );
+            _showLinkDialog(formId);
             formNotifier.clearChanges();
           } else {
             showSnackbar(
@@ -163,6 +179,151 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
     } finally {
       formNotifier.updateIsPublishing(false);
     }
+  }
+
+  Future<void> _showLinkDialog(
+    String formId,
+  ) async {
+    showDialog(
+      context: context,
+
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, child) {
+            final formStatusAsync = ref.watch(formStatusProvider(formId));
+            final formSlug = ref.watch(currentFormSlugProvider(formId));
+
+            return AlertDialog(
+              backgroundColor: AppTheme.background,
+              titlePadding: EdgeInsets.zero,
+              title: Container(
+                width: 350,
+                height: 50,
+
+                decoration: BoxDecoration(
+                  color: AppTheme.secondary,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(
+                      20,
+                    ),
+                  ),
+                ),
+                child: Center(
+                  child: SvgPicture.asset(
+                    'images/logo-dark.svg',
+                    width: 100,
+                  ),
+                ),
+              ),
+
+              content: formStatusAsync.when(
+                data: (isActive) {
+                  debugPrint('page is active: $isActive');
+
+                  return isActive
+                      ? SizedBox(
+                          width: 350,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Страница опубликована!',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  // color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 16,
+                              ),
+
+                              Text(
+                                'https://fform.me/${formSlug.value ?? ''}',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  fontWeight: FontWeight.w500,
+                                  // color: AppTheme.primary,
+                                ),
+                              ),
+                              const SizedBox(
+                                height: 16,
+                              ),
+                              FFButton(
+                                onPressed: () {},
+                                text: 'Открыть',
+                                secondTheme: true,
+                              ),
+                              const SizedBox(
+                                height: 8,
+                              ),
+                              TextButton.icon(
+                                onPressed: () async {
+                                  final formController = ref.read(
+                                    formControllerProvider.notifier,
+                                  );
+
+                                  await formController
+                                      .unpublishForm(formId)
+                                      .then((_) {
+                                        ref.invalidate(formStatusProvider);
+                                        ref.invalidate(formControllerProvider);
+                                        if (context.mounted) {
+                                          Navigator.pop(context);
+                                        }
+                                      });
+                                },
+                                icon: HeroIcon(HeroIcons.linkSlash),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: AppTheme.secondary,
+                                  iconColor: AppTheme.secondary.withAlpha(100),
+                                ),
+                                label: Text(
+                                  'или отключить страницу',
+                                  style: TextStyle(
+                                    color: AppTheme.secondary.withAlpha(100),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : SizedBox(
+                          width: 350,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'Страница не опубликована',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                },
+                error: (er, st) {
+                  return Center(
+                    child: Text(er.toString()),
+                  );
+                },
+                loading: () => Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Center(
+                      child: LoadingAnimationWidget.waveDots(
+                        color: AppTheme.secondary,
+                        size: 30,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   void _showUnsavedChangesDialog() {
@@ -228,9 +389,22 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: EditorAppBar(
-        formName: widget.formId,
+        formName: formState.name,
         automaticallyImplyLeading: true,
         isPublishing: formState.isPublishing,
+        onTapLink: () {
+          _showLinkDialog(widget.formId);
+        },
+        isFormNameChange: isFormNameChange,
+        onSaveFormName: (name) async {
+          await _updateFormName(name);
+        },
+        onToggleEditMode: (value) {
+          setState(() {
+            isFormNameChange = value;
+          });
+        },
+
         onBack: () {
           if (formState.hasChanges) {
             _showUnsavedChangesDialog();

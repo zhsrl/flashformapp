@@ -88,45 +88,62 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
             height: 16,
           ),
           Expanded(
-            child: SingleChildScrollView(
-              physics: AlwaysScrollableScrollPhysics(),
-              child: Form(
-                key: _formKey,
-                child: SizedBox(
-                  width: 350,
-                  child: AnimatedCrossFade(
-                    duration: const Duration(milliseconds: 300),
-                    crossFadeState: _tabIndex == 0
-                        ? CrossFadeState.showFirst
-                        : CrossFadeState.showSecond,
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(
+                context,
+              ).copyWith(scrollbars: false),
+              child: SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: Form(
+                  key: _formKey,
+                  child: SizedBox(
+                    width: 350,
+                    child: AnimatedCrossFade(
+                      duration: const Duration(milliseconds: 300),
+                      crossFadeState: _tabIndex == 0
+                          ? CrossFadeState.showFirst
+                          : CrossFadeState.showSecond,
 
-                    // Вкладка "Контент"
-                    firstChild: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        _buildThemeBlock(context, formState.theme, controller),
-                        _buildMainContentBlock(
-                          context,
-                          ref,
-                          formState.heroImageUrl,
-                        ),
-                        _buildOfferBlock(context, formState, controller),
-                        _buildDescriptionBlock(context, formState, controller),
-                        _buildActionTypeBlock(
-                          context,
-                          formState.actionType,
-                          controller,
-                        ),
-                        _buildActionTypeWidget(context, formState, controller),
-                      ],
-                    ),
+                      // Вкладка "Контент"
+                      firstChild: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _buildThemeBlock(
+                            context,
+                            formState.theme,
+                            controller,
+                          ),
+                          _buildMainContentBlock(
+                            context,
+                            ref,
+                            formState.heroImageUrl,
+                          ),
+                          _buildOfferBlock(context, formState, controller),
+                          _buildDescriptionBlock(
+                            context,
+                            formState,
+                            controller,
+                          ),
+                          _buildActionTypeBlock(
+                            context,
+                            formState.actionType,
+                            controller,
+                          ),
+                          _buildActionTypeWidget(
+                            context,
+                            formState,
+                            controller,
+                          ),
+                        ],
+                      ),
 
-                    // Вкладка "Интеграции" (пока пустая)
-                    secondChild: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Center(child: Text("Настройки интеграций тут")),
-                      ],
+                      // Вкладка "Интеграции" (пока пустая)
+                      secondChild: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Center(child: Text("Настройки интеграций тут")),
+                        ],
+                      ),
                     ),
                   ),
                 ),

@@ -49,6 +49,7 @@ class CreateFormController extends StateNotifier<CreateFormState> {
 
   void updateActionType(String value) =>
       state = state.copyWith(actionType: value);
+  void updateFormName(String name) => state = state.copyWith(name: name);
   void updateButtonColor(Color color) =>
       state = state.copyWith(buttonColor: color);
   void updateTitleFontSize(double size) =>
@@ -85,6 +86,7 @@ class CreateFormController extends StateNotifier<CreateFormState> {
         .toList();
 
     state = state.copyWith(
+      name: form.name,
       title: data['title']['text'],
       subtitle: data['subtitle']['text'],
       formTitle: data['form']['title'],
@@ -93,10 +95,11 @@ class CreateFormController extends StateNotifier<CreateFormState> {
       fields: fieldsList,
       buttonText: data['button']['text'],
       buttonUrl: data['button']['url'],
+
       formButtonText: data['form']['button']['text'],
       buttonColor: (data['button']['color'] as String).toColor(),
       formButtonColor: (data['form']['button']['color'] as String).toColor(),
-      successText: data['success_text'],
+      successText: data['form']['success_text'],
       titleFontSize: data['title']['size'],
       subtitleFontSize: data['subtitle']['size'],
       actionType: data['action_type'],
@@ -153,6 +156,7 @@ class CreateFormController extends StateNotifier<CreateFormState> {
         'form': {
           'title': state.formTitle,
           'fields': state.fields.map((e) => e.toJson()).toList(),
+          'success_text': state.successText,
           'button': {
             'text': state.formButtonText,
             'color': state.formButtonColor.toHexString(),

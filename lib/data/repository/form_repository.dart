@@ -4,6 +4,7 @@ import 'package:flashform_app/data/model/form_model.dart';
 import 'package:flashform_app/data/repository/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final formRepoProvider = Provider<FormRepository>(
@@ -20,6 +21,23 @@ final currentFormNameProvider = Provider<String>((ref) {
   throw UnimplementedError(
     'Нужно обернуть виджет на ProviderScope и передать formName',
   );
+});
+
+final currentFormSlugProvider = FutureProvider.family<String, String>(
+  (ref, id) async {
+    final repository = ref.watch(formRepoProvider);
+
+    return await repository.getFormSlug(id);
+  },
+);
+
+final formStatusProvider = FutureProvider.family<bool, String>((
+  ref,
+  id,
+) async {
+  final repository = ref.watch(formRepoProvider);
+
+  return await repository.checkFormStatus(id);
 });
 
 class FormRepository {
@@ -54,6 +72,20 @@ class FormRepository {
     return FormModel.fromJson(repsonse);
   }
 
+  Future<void> updateFormName(
+    String name,
+    String formId,
+  ) async {
+    final supabaseClient = _supabase.client;
+
+    await supabaseClient
+        .from('forms')
+        .update({'name': name})
+        .eq('id', formId)
+        .select()
+        .single();
+  }
+
   Future<void> publishForm(Map<String, dynamic> data) async {
     final supabaseClient = _supabase.client;
 
@@ -79,6 +111,37 @@ class FormRepository {
         .eq('id', formId)
         .select()
         .single();
+  }
+
+  Future<bool> checkFormStatus(String formId) async {
+    final supabaseClient = _supabase.client;
+
+    final response = await supabaseClient
+        .from('forms')
+        .select()
+        .eq('id', formId)
+        .single();
+
+    if (response.isNotEmpty) {
+      return response['is_active'] as bool? ?? false;
+    }
+
+    return false;
+  }
+
+  Future<String> getFormSlug(String formId) async {
+    final supabaseClient = _supabase.client;
+
+    final response = await supabaseClient
+        .from('forms')
+        .select()
+        .eq('id', formId)
+        .single();
+    if (response.isNotEmpty) {
+      return response['slug'];
+    }
+
+    return '';
   }
 
   Future<List<FormModel>> getAllForms() async {

@@ -15,6 +15,7 @@ class FFTextField extends StatefulWidget {
     this.isPassword = false,
     this.enabled,
     this.bottomPadding,
+    this.bottomMargin,
     this.validator,
     this.formatters,
     this.height,
@@ -31,6 +32,7 @@ class FFTextField extends StatefulWidget {
   final TextInputType? keyboardType;
   final bool? isPassword;
   final double? bottomPadding;
+  final double? bottomMargin;
   final List<TextInputFormatter>? formatters;
   final double? height;
   final bool? enabled;
@@ -71,7 +73,7 @@ class _FFTextFieldState extends State<FFTextField> {
         ],
         Container(
           padding: EdgeInsets.only(bottom: widget.bottomPadding ?? 0),
-          margin: EdgeInsets.only(bottom: 10),
+          margin: EdgeInsets.only(bottom: widget.bottomMargin ?? 10),
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(15)),
           child: TextFormField(
             obscureText: widget.isPassword == false ? false : _obscured,

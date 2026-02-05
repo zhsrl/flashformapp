@@ -52,7 +52,7 @@ class _FFButtonState extends State<FFButton> {
               : AppTheme.secondary,
           foregroundColor: Colors.white,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadiusGeometry.circular(15),
+            borderRadius: BorderRadiusGeometry.circular(300),
           ),
         ),
         child: widget.isLoading

@@ -4,8 +4,10 @@ import 'package:flutter/material.dart';
 const _undefined = Object();
 
 class CreateFormState {
+  final String? name;
   final String? title;
   final String? subtitle;
+  final String? slug;
   final String? formTitle;
   final String? buttonText;
   final String? formButtonText;
@@ -29,6 +31,8 @@ class CreateFormState {
   final String? yandexMetrikaId;
 
   const CreateFormState({
+    this.name,
+    this.slug,
     this.title,
     this.subtitle,
     this.formTitle,
@@ -56,6 +60,8 @@ class CreateFormState {
 
   CreateFormState copyWith({
     String? title,
+    String? name,
+    String? slug,
     String? subtitle,
     String? formTitle,
     String? buttonText,
@@ -79,6 +85,8 @@ class CreateFormState {
     String? yandexMetrikaId,
   }) {
     return CreateFormState(
+      name: name ?? this.name,
+      slug: slug ?? this.slug,
       title: title ?? this.title,
       subtitle: subtitle ?? this.subtitle,
       formTitle: formTitle ?? this.formTitle,

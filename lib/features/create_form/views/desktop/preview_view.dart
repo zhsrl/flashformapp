@@ -101,8 +101,13 @@ class _PreviewViewState extends ConsumerState<PreviewView>
           ),
           // 3. Основной контент превью
           Expanded(
-            child: SingleChildScrollView(
-              child: _buildDeviceFrame(formState, imageState),
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(
+                context,
+              ).copyWith(scrollbars: false),
+              child: SingleChildScrollView(
+                child: _buildDeviceFrame(formState, imageState),
+              ),
             ),
           ),
         ],
@@ -291,8 +296,8 @@ class _PreviewViewState extends ConsumerState<PreviewView>
 
   Widget _buildPlaceholder(CreateFormState formState) {
     return Container(
-      width: 350,
-      height: 350,
+      width: 320,
+      height: 320,
       decoration: BoxDecoration(
         color: formState.theme == 'light' ? AppTheme.border : AppTheme.fourty,
         borderRadius: BorderRadius.circular(15),

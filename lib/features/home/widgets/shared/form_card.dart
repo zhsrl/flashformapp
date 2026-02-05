@@ -16,7 +16,7 @@ class FormStateWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String text = state == FormPublishState.active ? 'active' : 'disabled';
+    String text = state == FormPublishState.active ? 'Активна' : 'Отключена';
     return Container(
       padding: EdgeInsets.symmetric(
         horizontal: 6,
@@ -90,7 +90,7 @@ class _FormCardState extends State<FormCard> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     SizedBox(
-                      width: 230,
+                      width: 180,
                       child: Text(
                         widget.form.name,
 

@@ -4,6 +4,7 @@ import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/image_controller.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/features/create_form/widgets/image_picker_widget.dart';
+import 'package:flashform_app/features/create_form/widgets/settings/intergration_settings_desktop_view.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_tabbar.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:heroicons/heroicons.dart';
 
 class SettingsPanelView extends ConsumerStatefulWidget {
@@ -52,7 +54,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
     _tabController.addListener(() {
       setState(() {
         _tabIndex = _tabController.index;
@@ -74,7 +76,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
           FFTabBar(
             tabs: [
               Text('Контент'),
-              Text('Footer'),
+              // Text('Footer'),
               Text('Интеграция'),
             ],
             controller: _tabController,
@@ -138,11 +140,8 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
                       ),
 
                       // Вкладка "Интеграции" (пока пустая)
-                      secondChild: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Center(child: Text("Настройки интеграций тут")),
-                        ],
+                      secondChild: SettingsIntergrationViewDesktop(
+                        formId: 'fsefsef',
                       ),
                     ),
                   ),
@@ -163,7 +162,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
   ) {
     return Container(
       width: context.screenWidth,
-      decoration: _blockDecoration(),
+      decoration: _buildBlocksDecotration(),
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -214,7 +213,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
     return DefaultTabController(
       length: 2,
       child: Container(
-        decoration: _blockDecoration(),
+        decoration: _buildBlocksDecotration(),
         margin: const EdgeInsets.only(bottom: 16),
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -251,7 +250,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
     CreateFormController controller,
   ) {
     return Container(
-      decoration: _blockDecoration(),
+      decoration: _buildBlocksDecotration(),
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -294,7 +293,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
     CreateFormController controller,
   ) {
     return Container(
-      decoration: _blockDecoration(),
+      decoration: _buildBlocksDecotration(),
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -336,7 +335,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
   ) {
     return Container(
       width: context.screenWidth,
-      decoration: _blockDecoration(),
+      decoration: _buildBlocksDecotration(),
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -404,7 +403,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
   ) {
     return Container(
       width: context.screenWidth,
-      decoration: _blockDecoration(),
+      decoration: _buildBlocksDecotration(),
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -456,7 +455,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
   ) {
     return Container(
       width: context.screenWidth,
-      decoration: _blockDecoration(),
+      decoration: _buildBlocksDecotration(),
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -558,7 +557,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
     CreateFormController controller,
   ) {
     return Container(
-      decoration: _blockDecoration(),
+      decoration: _buildBlocksDecotration(),
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -624,7 +623,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
     );
   }
 
-  BoxDecoration _blockDecoration() {
+  BoxDecoration _buildBlocksDecotration() {
     return BoxDecoration(
       borderRadius: BorderRadius.circular(30),
       color: AppTheme.background,

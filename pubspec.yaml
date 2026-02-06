@@ -81,6 +81,8 @@ flutter:
     - assets/images/logo-dark.svg
     - assets/images/logo-short.svg
     - assets/images/envelope.png
+    - assets/images/meta.svg
+    - assets/images/metrika.svg
 
   fonts:
     - family: GoogleSans

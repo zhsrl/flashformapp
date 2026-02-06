@@ -22,6 +22,7 @@ class FFTextField extends StatefulWidget {
     this.title,
     this.focusNode,
     this.maxLength,
+    this.maxLines,
   });
 
   final String? hintText;
@@ -39,6 +40,7 @@ class FFTextField extends StatefulWidget {
   final String? title;
   final String? Function(String? value)? validator;
   final int? maxLength;
+  final int? maxLines;
   final FocusNode? focusNode;
 
   @override
@@ -88,7 +90,7 @@ class _FFTextFieldState extends State<FFTextField> {
               fontSize: 16,
               height: widget.height,
             ),
-            maxLines: widget.isPassword == true ? 1 : null,
+            maxLines: widget.isPassword == true ? 1 : widget.maxLines,
             maxLength: widget.maxLength,
             inputFormatters: widget.formatters,
             cursorColor: AppTheme.secondary,

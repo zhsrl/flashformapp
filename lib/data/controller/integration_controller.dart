@@ -1,9 +1,11 @@
+import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 final metaPixelControllerProvider =
-    StateNotifierProvider.autoDispose<MetaPixelController, AsyncValue<String>>((
+    StateNotifierProvider<MetaPixelController, AsyncValue<String>>((
       ref,
     ) {
       return MetaPixelController(ref);
@@ -22,23 +24,30 @@ class MetaPixelController extends StateNotifier<AsyncValue<String>> {
 
   final Ref _ref;
 
-  Future<void> save(String formId, String pixelId) async {
-    state = AsyncLoading();
+  Future<void> save(String formId) async {
+    final formState = _ref.read(createFormProvider);
+
+    if (formState.metaPixelId == '') {
+      state = const AsyncValue.data('');
+      return;
+    }
 
     state = await AsyncValue.guard(() async {
-      await _ref.read(formRepoProvider).setMetaPixelId(formId, pixelId);
+      await _ref
+          .read(formRepoProvider)
+          .setMetaPixelId(formId, formState.metaPixelId);
 
-      return pixelId;
+      return formState.metaPixelId;
     });
   }
 
-  Future<void> get(String formId) async {
+  Future<String> get(String formId) async {
     state = AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      final response = await _ref.read(formRepoProvider).getMetaPixelId(formId);
+    final response = await _ref.read(formRepoProvider).getMetaPixelId(formId);
 
-      return response;
-    });
+    state = AsyncData(response);
+
+    return response;
   }
 }
 
@@ -47,13 +56,20 @@ class YandexMetrikaController extends StateNotifier<AsyncValue<String>> {
 
   final Ref _ref;
 
-  Future<void> save(String formId, String pixelId) async {
-    state = AsyncLoading();
+  Future<void> save(String formId) async {
+    final formState = _ref.read(createFormProvider);
+
+    if (formState.metaPixelId == '') {
+      state = const AsyncValue.data('');
+      return;
+    }
 
     state = await AsyncValue.guard(() async {
-      await _ref.read(formRepoProvider).setYandexMetrikaId(formId, pixelId);
+      await _ref
+          .read(formRepoProvider)
+          .setYandexMetrikaId(formId, formState.yandexMetrikaId);
 
-      return pixelId;
+      return formState.metaPixelId;
     });
   }
 

@@ -1,14 +1,12 @@
-// ignore: depend_on_referenced_packages
-
-import 'package:flashform_app/data/controller/image_controller.dart';
+import 'package:flashform_app/data/controller/formui_controller.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
-import 'package:flashform_app/features/create_form/views/desktop/preview_view.dart';
-import 'package:flashform_app/features/create_form/views/desktop/settings_panel_view.dart';
+import 'package:flashform_app/features/create_form/views/desktop/preview/preview_view.dart';
+import 'package:flashform_app/features/create_form/views/desktop/editor/editor_view.dart';
 import 'package:flashform_app/features/home/widgets/editor_app_bar.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
@@ -33,56 +31,52 @@ class CreateFormDesktopView extends ConsumerStatefulWidget {
 }
 
 class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
-  final _titleController = TextEditingController(text: 'Заголовок');
-  final _subtitleController = TextEditingController(text: 'Описание');
-  final _formTitleController = TextEditingController(text: 'Заголовок формы');
-  final _successTextController = TextEditingController(text: 'Успешная форма');
-  final _buttonTextController = TextEditingController(text: 'Кнопка');
-  final _formButtonTextController = TextEditingController(
-    text: 'Оставить заявку',
-  );
-
   bool _isloadingInitialData = true;
   bool isFormNameChange = false;
 
   final FocusNode _focusNode = FocusNode();
 
+  // @override
+  // void initState() {
+  //   super.initState();
+
+  // }
+
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _loadFormData();
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _subtitleController.dispose();
-    _formTitleController.dispose();
-    _buttonTextController.dispose();
-    _successTextController.dispose();
-
-    super.dispose();
   }
 
   Future<void> _loadFormData() async {
     try {
       final formController = ref.read(formControllerProvider.notifier);
       final form = await formController.fetchForm(widget.formId);
+      final uiControllers = ref.watch(formUIControllersProvider);
 
       debugPrint('Form: ${form.data}');
 
       if (mounted) {
         ref.read(createFormProvider.notifier).initializeFromModel(form);
 
-        _titleController.text = form.data?['title']['text'] ?? 'Заголовк';
-        _subtitleController.text = form.data?['subtitle']['text'] ?? 'Описание';
-        _formTitleController.text =
+        uiControllers.titleController.text =
+            form.data?['title']['text'] ?? 'Заголовок сайта';
+        uiControllers.subtitleController.text =
+            form.data?['subtitle']['text'] ?? 'Описание';
+        uiControllers.formTitleController.text =
             form.data?['form']['title'] ?? 'Заголовок формы';
-        _buttonTextController.text = form.data?['button']['text'] ?? 'Кнопка';
-        _formButtonTextController.text =
+        uiControllers.buttonTextController.text =
+            form.data?['button']['text'] ?? 'Кнопка';
+        uiControllers.formRedirectUrlController.text =
+            form.data?['form']['button']['redirect-url'];
+        uiControllers.formButtonTextController.text =
             form.data?['form']['button']['text'] ?? 'Оставить заявку';
-        _successTextController.text =
+        uiControllers.successTextController.text =
             form.data?['success_text'] ?? 'Успешная форма';
+        uiControllers.metaPixelIdController.text =
+            form.data?['settings']['meta-pixel-id'] ?? '';
+        uiControllers.yandexMetrikaIdController.text =
+            form.data?['settings']['ya-metrika-id'] ?? '';
       }
     } catch (e) {
       debugPrint('Error loading form: $e');
@@ -106,78 +100,23 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
     });
   }
 
-  Future<void> _handlePublish(String formId) async {
-    final imageNotifier = ref.read(imageControllerProvider.notifier);
-    final formNotifier = ref.read(createFormProvider.notifier);
+  Future<void> _onPublishTap() async {
+    // Просто вызываем умный метод контроллера
+    final success = await ref
+        .read(createFormProvider.notifier)
+        .publishForm(widget.formId);
 
-    final imageState = ref.read(imageControllerProvider);
+    if (!mounted) return;
 
-    try {
-      String? imageUrl = ref.read(createFormProvider).heroImageUrl;
-
-      // Invalidate form status provider
-      ref.invalidate(formStatusProvider(formId));
-
-      if (imageState.localImageBytes != null) {
-        final uploadImageUrl = await imageNotifier.uploadImage(
-          folder: formId,
-          bytes: imageState.localImageBytes,
-        );
-
-        if (uploadImageUrl != null) {
-          imageUrl = uploadImageUrl;
-          debugPrint('URL to fetch: $imageUrl');
-          formNotifier.updateHeroImage(imageUrl);
-        } else {
-          throw Exception('Не удалось загрузить изображение');
-        }
-
-        final success = await formNotifier.publishForm(formId);
-
-        if (mounted) {
-          if (success) {
-            imageNotifier.resetPickedImage();
-            _showLinkDialog(formId);
-            // showSnackbar(
-            //   context,
-            //   type: SnackbarType.success,
-            //   message: 'Опубликовано!',
-            // );
-            formNotifier.clearChanges();
-          } else {
-            showSnackbar(
-              context,
-              type: SnackbarType.error,
-              message: 'Ошибка публикации',
-            );
-          }
-        }
-      } else {
-        final success = await formNotifier.publishForm(formId);
-
-        if (mounted) {
-          if (success) {
-            imageNotifier.resetPickedImage();
-
-            _showLinkDialog(formId);
-            formNotifier.clearChanges();
-          } else {
-            showSnackbar(
-              context,
-              type: SnackbarType.error,
-              message: 'Ошибка публикации',
-            );
-          }
-        }
-      }
-    } catch (e) {
-      debugPrint('Error chain: $e');
-      if (mounted) {
-        showSnackbar(context, type: SnackbarType.error, message: 'Ошибка: $e');
-      }
-      throw Exception(e);
-    } finally {
-      formNotifier.updateIsPublishing(false);
+    if (success) {
+      // Если успех — показываем диалог (он никуда не делся!)
+      _showLinkDialog(widget.formId);
+    } else {
+      showSnackbar(
+        context,
+        type: SnackbarType.error,
+        message: 'Ошибка публикации',
+      );
     }
   }
 
@@ -192,6 +131,8 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
           builder: (context, ref, child) {
             final formStatusAsync = ref.watch(formStatusProvider(formId));
             final formSlug = ref.watch(currentFormSlugProvider(formId));
+
+            ref.invalidate(formStatusProvider);
 
             return AlertDialog(
               backgroundColor: AppTheme.background,
@@ -362,7 +303,7 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
 
   Future<void> _publishAndLeave() async {
     if (mounted) {
-      _handlePublish(widget.formId);
+      _onPublishTap();
       context.pop();
 
       showSnackbar(
@@ -418,7 +359,7 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
         },
 
         onPublish: () async {
-          await _handlePublish(widget.formId);
+          await _onPublishTap();
         },
       ),
 
@@ -436,31 +377,18 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    SettingsPanelView(
-                      titleController: _titleController,
+                    EditorView(
                       onChanged: ref
                           .read(createFormProvider.notifier)
                           .markAsChanged,
-                      formButtonTextController: _formButtonTextController,
-                      subtitleController: _subtitleController,
-                      formTitleController: _formTitleController,
 
                       focusNode: _focusNode,
-
-                      successTextController: _successTextController,
-                      buttonTextController: _buttonTextController,
                     ),
 
                     const SizedBox(
                       width: 16,
                     ),
                     PreviewView(
-                      titleController: _titleController,
-                      subtitleController: _subtitleController,
-                      formTitleController: _formTitleController,
-                      buttonTextController: _buttonTextController,
-                      formButtonTextController: _formButtonTextController,
-                      successTextController: _successTextController,
                       focusNode: _focusNode,
                     ),
                   ],

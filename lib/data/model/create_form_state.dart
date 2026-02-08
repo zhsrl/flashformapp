@@ -27,8 +27,8 @@ class CreateFormState {
   final bool isPublishing;
   final bool isSaving;
   final String? buttonUrl;
-  final String? metaPixelId;
-  final String? yandexMetrikaId;
+  final String metaPixelId;
+  final String yandexMetrikaId;
 
   const CreateFormState({
     this.name,
@@ -54,8 +54,8 @@ class CreateFormState {
     this.isPublishing = false,
     this.isSaving = false,
 
-    this.metaPixelId,
-    this.yandexMetrikaId,
+    this.metaPixelId = '',
+    this.yandexMetrikaId = '',
   });
 
   CreateFormState copyWith({

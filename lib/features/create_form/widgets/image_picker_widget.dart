@@ -1,10 +1,7 @@
-import 'dart:typed_data';
-
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/image_controller.dart';
 import 'package:flashform_app/data/model/create_form_state.dart';
-import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,13 +103,13 @@ class _ImagePickerWidgetState extends ConsumerState<ImagePickerWidget> {
 
                     padding: EdgeInsets.zero,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+                      borderRadius: BorderRadius.circular(300),
                     ),
                   ),
                   icon: HeroIcon(
                     HeroIcons.trash,
                     size: 20,
-                    color: AppTheme.primary,
+                    color: Colors.white,
                   ),
                 ),
               ),

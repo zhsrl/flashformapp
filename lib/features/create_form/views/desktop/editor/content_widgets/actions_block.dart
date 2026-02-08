@@ -1,382 +1,97 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
-import 'package:flashform_app/data/controller/image_controller.dart';
-import 'package:flashform_app/data/repository/form_repository.dart';
-import 'package:flashform_app/features/create_form/widgets/image_picker_widget.dart';
-import 'package:flashform_app/features/create_form/widgets/settings/intergration_settings_desktop_view.dart';
+import 'package:flashform_app/data/controller/formui_controller.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
-import 'package:flashform_app/features/widgets/ff_tabbar.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:heroicons/heroicons.dart';
 
-class SettingsPanelView extends ConsumerStatefulWidget {
-  const SettingsPanelView({
+class BuildActionsBlock extends ConsumerWidget {
+  const BuildActionsBlock({
     super.key,
-
-    // Контроллеры оставляем, так как они управляются родителем для синхронизации
-    required this.titleController,
-    required this.subtitleController,
-    required this.onChanged,
-    this.formTitleController,
-    this.buttonTextController,
-    this.formButtonTextController,
-    this.successTextController,
-    this.buttonUrlController,
+    required this.currentType,
+    required this.controller,
     required this.focusNode,
+    required this.formState,
+    required this.uiControllers,
   });
 
-  final TextEditingController titleController;
-  final TextEditingController subtitleController;
-  final TextEditingController? formTitleController;
-  final TextEditingController? buttonTextController;
-  final TextEditingController? formButtonTextController;
-  final TextEditingController? successTextController;
-  final TextEditingController? buttonUrlController;
+  final String currentType;
+  final CreateFormController controller;
+  final FormUIControllers uiControllers;
   final FocusNode focusNode;
-  final VoidCallback onChanged;
+  final dynamic formState;
 
   @override
-  ConsumerState<SettingsPanelView> createState() => _SettingsPanelViewState();
-}
-
-class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
-    with SingleTickerProviderStateMixin {
-  int _tabIndex = 0;
-  late TabController _tabController;
-  final _formKey = GlobalKey<FormState>();
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
-    _tabController.addListener(() {
-      setState(() {
-        _tabIndex = _tabController.index;
-      });
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    // Подписываемся на стейт
-    final formState = ref.watch(createFormProvider);
-
-    final controller = ref.read(createFormProvider.notifier);
-
-    return SizedBox(
-      width: 350,
-      child: Column(
-        children: [
-          FFTabBar(
-            tabs: [
-              Text('Контент'),
-              // Text('Footer'),
-              Text('Интеграция'),
-            ],
-            controller: _tabController,
-            onTap: (index) {
-              setState(() {
-                _tabIndex = index;
-              });
-            },
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Column(
+      children: [
+        // Action type
+        Container(
+          width: context.screenWidth,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(30),
+            color: AppTheme.background,
+            border: Border.all(width: 1.5, color: AppTheme.border),
           ),
-          const SizedBox(
-            height: 16,
-          ),
-          Expanded(
-            child: ScrollConfiguration(
-              behavior: ScrollConfiguration.of(
-                context,
-              ).copyWith(scrollbars: false),
-              child: SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                child: Form(
-                  key: _formKey,
-                  child: SizedBox(
-                    width: 350,
-                    child: AnimatedCrossFade(
-                      duration: const Duration(milliseconds: 300),
-                      crossFadeState: _tabIndex == 0
-                          ? CrossFadeState.showFirst
-                          : CrossFadeState.showSecond,
+          margin: const EdgeInsets.only(bottom: 16),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Выберите тип действия',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              DropdownMenu(
+                width: 350,
 
-                      // Вкладка "Контент"
-                      firstChild: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildThemeBlock(
-                            context,
-                            formState.theme,
-                            controller,
-                          ),
-                          _buildMainContentBlock(
-                            context,
-                            ref,
-                            formState.heroImageUrl,
-                          ),
-                          _buildOfferBlock(context, formState, controller),
-                          _buildDescriptionBlock(
-                            context,
-                            formState,
-                            controller,
-                          ),
-                          _buildActionTypeBlock(
-                            context,
-                            formState.actionType,
-                            controller,
-                          ),
-                          _buildActionTypeWidget(
-                            context,
-                            formState,
-                            controller,
-                          ),
-                        ],
-                      ),
-
-                      // Вкладка "Интеграции" (пока пустая)
-                      secondChild: SettingsIntergrationViewDesktop(
-                        formId: 'fsefsef',
-                      ),
-                    ),
+                initialSelection: currentType,
+                onSelected: (value) {
+                  if (value != null) controller.updateActionType(value);
+                  ref.read(createFormProvider.notifier).markAsChanged();
+                },
+                menuStyle: MenuStyle(
+                  backgroundColor: WidgetStatePropertyAll(AppTheme.background),
+                  maximumSize: WidgetStatePropertyAll(Size.square(300)),
+                  minimumSize: WidgetStatePropertyAll(Size.square(200)),
+                ),
+                inputDecorationTheme: InputDecorationTheme(
+                  fillColor: AppTheme.background,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppTheme.border),
+                    borderRadius: BorderRadius.circular(15),
                   ),
                 ),
+                dropdownMenuEntries: const [
+                  DropdownMenuEntry(
+                    value: 'button-url',
+                    label: 'Кнопка со ссылкой',
+                  ),
+                  DropdownMenuEntry(
+                    value: 'form',
+                    label: 'Форма',
+                  ),
+                ],
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // --- БЛОКИ ИНТЕРФЕЙСА ---
-  Widget _buildThemeBlock(
-    BuildContext context,
-    String currentTheme,
-    CreateFormController controller,
-  ) {
-    return Container(
-      width: context.screenWidth,
-      decoration: _buildBlocksDecotration(),
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Выберите тему',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          DropdownMenu(
-            width: 350,
-
-            initialSelection: currentTheme,
-            menuStyle: MenuStyle(
-              backgroundColor: WidgetStatePropertyAll(AppTheme.background),
-              maximumSize: WidgetStatePropertyAll(Size.square(300)),
-              minimumSize: WidgetStatePropertyAll(Size.square(200)),
-            ),
-            onSelected: (value) {
-              if (value != null) controller.updateTheme(value);
-              widget.onChanged();
-              ref.read(createFormProvider.notifier).markAsChanged();
-            },
-            inputDecorationTheme: InputDecorationTheme(
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: AppTheme.border),
-                borderRadius: BorderRadius.circular(15),
-              ),
-            ),
-            dropdownMenuEntries: const [
-              DropdownMenuEntry(value: 'dark', label: 'Темная тема'),
-              DropdownMenuEntry(value: 'light', label: 'Светлая тема'),
             ],
           ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMainContentBlock(
-    BuildContext context,
-    WidgetRef ref,
-    String? heroImageUrl,
-  ) {
-    final currentFormId = ref.read(currentFormIdProvider);
-    return DefaultTabController(
-      length: 2,
-      child: Container(
-        decoration: _buildBlocksDecotration(),
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Контент',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-
-            ImagePickerWidget(
-              folder: currentFormId,
-              formId: currentFormId,
-              imageUrl: heroImageUrl,
-              // onImageUpdated: (url) {
-              //   ref.read(createFormProvider.notifier).updateHeroImage(url);
-              //   ref.read(createFormProvider.notifier).markAsChanged();
-              // },
-              onImageDeleted: () async {
-                ref.read(createFormProvider.notifier).updateHeroImage(null);
-                ref.read(imageControllerProvider.notifier).reset();
-              },
-            ),
-          ],
         ),
-      ),
-    );
-  }
 
-  Widget _buildOfferBlock(
-    BuildContext context,
-    dynamic formState,
-    CreateFormController controller,
-  ) {
-    return Container(
-      decoration: _buildBlocksDecotration(),
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Заголовок',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          FFTextField(
-            hintText: 'Напишите заголовок',
-            onChanged: (value) {
-              widget.onChanged();
-              controller.updateTitle(value);
-              ref.read(createFormProvider.notifier).markAsChanged();
-            },
-            controller: widget
-                .titleController, // Используем контроллер переданный из родителя
-          ),
-          const SizedBox(width: 8),
-          _buildSizeSlider(
-            label: 'Размер текста',
-            value: formState.titleFontSize,
-            max: 42,
-            min: 24,
-            onChanged: (val) => {
-              controller.updateTitleFontSize(val),
-              ref.read(createFormProvider.notifier).markAsChanged(),
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDescriptionBlock(
-    BuildContext context,
-    dynamic formState,
-    CreateFormController controller,
-  ) {
-    return Container(
-      decoration: _buildBlocksDecotration(),
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Описание',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
-          FFTextField(
-            hintText: 'Напишите описание',
-            controller: widget.subtitleController,
-            onChanged: (value) {
-              controller.updateSubtitle(value);
-              ref.read(createFormProvider.notifier).markAsChanged();
-            },
-          ),
-          const SizedBox(width: 8),
-          _buildSizeSlider(
-            label: 'Размер текста',
-            value: formState.subtitleFontSize,
-            max: 22,
-            min: 12,
-            onChanged: (val) => {
-              controller.updateSubtitleFontSize(val),
-              ref.read(createFormProvider.notifier).markAsChanged(),
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionTypeBlock(
-    BuildContext context,
-    String currentType,
-    CreateFormController controller,
-  ) {
-    return Container(
-      width: context.screenWidth,
-      decoration: _buildBlocksDecotration(),
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Выберите тип действия',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          DropdownMenu(
-            width: 350,
-
-            initialSelection: currentType,
-            onSelected: (value) {
-              if (value != null) controller.updateActionType(value);
-              ref.read(createFormProvider.notifier).markAsChanged();
-            },
-            menuStyle: MenuStyle(
-              backgroundColor: WidgetStatePropertyAll(AppTheme.background),
-              maximumSize: WidgetStatePropertyAll(Size.square(300)),
-              minimumSize: WidgetStatePropertyAll(Size.square(200)),
-            ),
-            inputDecorationTheme: InputDecorationTheme(
-              fillColor: AppTheme.background,
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide(color: AppTheme.border),
-                borderRadius: BorderRadius.circular(15),
-              ),
-            ),
-            dropdownMenuEntries: const [
-              DropdownMenuEntry(
-                value: 'button-url',
-                label: 'Кнопка со ссылкой',
-              ),
-              DropdownMenuEntry(value: 'form', label: 'Форма'),
-            ],
-          ),
-        ],
-      ),
+        _buildActionTypeWidget(
+          context,
+          formState,
+          controller,
+          uiControllers,
+          ref,
+        ),
+      ],
     );
   }
 
@@ -384,10 +99,24 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
     BuildContext context,
     dynamic formState,
     CreateFormController controller,
+    FormUIControllers uiControllers,
+    WidgetRef ref,
   ) {
     return AnimatedCrossFade(
-      firstChild: _buildButtonUrlWidget(context, formState, controller),
-      secondChild: _buildFormWidget(context, formState, controller),
+      firstChild: _buildButtonUrlWidget(
+        context,
+        formState,
+        controller,
+        uiControllers,
+        ref,
+      ),
+      secondChild: _buildFormWidget(
+        context,
+        formState,
+        controller,
+        uiControllers,
+        ref,
+      ),
       crossFadeState: formState.actionType == 'button-url'
           ? CrossFadeState.showFirst
           : CrossFadeState.showSecond,
@@ -400,6 +129,8 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
     BuildContext context,
     dynamic formState,
     CreateFormController controller,
+    FormUIControllers uiControllers,
+    WidgetRef ref,
   ) {
     return Container(
       width: context.screenWidth,
@@ -417,7 +148,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
           const SizedBox(height: 8),
           FFTextField(
             hintText: 'Текст в кнопке',
-            controller: widget.buttonTextController,
+            controller: uiControllers.buttonTextController,
             onChanged: (value) => {
               controller.updateButtonText(value),
               ref.read(createFormProvider.notifier).markAsChanged(),
@@ -428,7 +159,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
           FFTextField(
             hintText: 'URL (ссылка)',
             prefixIcon: const HeroIcon(HeroIcons.link),
-            controller: widget.buttonUrlController,
+            controller: uiControllers.buttonUrlController,
             onChanged: (value) => {
               controller.updateButtonUrl(value),
               ref.read(createFormProvider.notifier).markAsChanged(),
@@ -452,6 +183,8 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
     BuildContext context,
     dynamic formState,
     CreateFormController controller,
+    FormUIControllers uiControllers,
+    WidgetRef ref,
   ) {
     return Container(
       width: context.screenWidth,
@@ -471,7 +204,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
             prefixIcon: const HeroIcon(HeroIcons.documentText),
             hintText: 'Заполните форму ...',
             title: 'Заголовок формы',
-            controller: widget.formTitleController,
+            controller: uiControllers.formTitleController,
             onChanged: (value) => {
               controller.updateFormTitle(value),
               ref.read(createFormProvider.notifier).markAsChanged(),
@@ -483,7 +216,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
           FFTextField(
             hintText: 'например, Регистрация',
             title: 'Текст в кнопке',
-            controller: widget.formButtonTextController,
+            controller: uiControllers.formButtonTextController,
             onChanged: (value) => {
               controller.updateFormButtonText(value),
               ref.read(createFormProvider.notifier).markAsChanged(),
@@ -494,8 +227,8 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
           FFTextField(
             hintText: '',
             title: 'Сообщение после успешной отправки',
-            focusNode: widget.focusNode,
-            controller: widget.successTextController,
+            focusNode: focusNode,
+            controller: uiControllers.successTextController,
             onChanged: (value) => {
               controller.updateSuccessText(value),
               ref.read(createFormProvider.notifier).markAsChanged(),
@@ -530,6 +263,7 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
             FFTextField(
               hintText: 'например, WhatsApp...',
               title: 'Ссылка на перенаправление',
+              controller: uiControllers.formRedirectUrlController,
               prefixIcon: const HeroIcon(HeroIcons.link),
               onChanged: (value) => {
                 controller.updateFormRedirectUrl(value),
@@ -642,48 +376,6 @@ class _SettingsPanelViewState extends ConsumerState<SettingsPanelView>
       default:
         return HeroIcons.user;
     }
-  }
-
-  Widget _buildSizeSlider({
-    required String label,
-    required double value,
-    required double min,
-    required double max,
-    required ValueChanged<double> onChanged,
-  }) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label, style: const TextStyle(fontSize: 16)),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(width: 1.5, color: AppTheme.border),
-              ),
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                '${value.toInt()} px',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-        Slider(
-          value: value,
-          min: min,
-          max: max,
-          divisions: (max - min).toInt(),
-          thumbColor: AppTheme.secondary,
-          label: value.toString(),
-          onChanged: onChanged,
-        ),
-      ],
-    );
   }
 
   Widget _buildColorPickerRow({

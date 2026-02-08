@@ -1,15 +1,22 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
+import 'package:flashform_app/data/controller/createform_controller.dart';
+
+import 'package:flashform_app/data/controller/formui_controller.dart';
 import 'package:flashform_app/data/controller/integration_controller.dart';
+import 'package:flashform_app/data/repository/form_repository.dart';
+
 import 'package:flashform_app/features/widgets/ff_button.dart';
+import 'package:flashform_app/features/widgets/ff_snackbar.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
-class SettingsIntergrationViewDesktop extends ConsumerStatefulWidget {
-  SettingsIntergrationViewDesktop({
+class EditorIntergrationView extends ConsumerStatefulWidget {
+  const EditorIntergrationView({
     super.key,
     required this.formId,
   });
@@ -17,45 +24,69 @@ class SettingsIntergrationViewDesktop extends ConsumerStatefulWidget {
   final String formId;
 
   @override
-  ConsumerState<SettingsIntergrationViewDesktop> createState() =>
+  ConsumerState<EditorIntergrationView> createState() =>
       _SettingsIntergrationViewDesktopState();
 }
 
 class _SettingsIntergrationViewDesktopState
-    extends ConsumerState<SettingsIntergrationViewDesktop> {
+    extends ConsumerState<EditorIntergrationView> {
   bool _isMetaPixelEnabled = false;
   bool _isYandexMetrikaEnabled = false;
 
-  final _metaPixelController = TextEditingController();
-  final _yandexMetrikaController = TextEditingController();
-
-  @override
-  void initState() async {
-    super.initState();
-    final metaPixel = ref.watch(metaPixelControllerProvider.notifier);
-    metaPixel.get(widget.formId);
+  Future<void> _onAddMetaPixel() async {
+    final currentFormId = ref.read(currentFormIdProvider);
+    await ref.watch(metaPixelControllerProvider.notifier).save(currentFormId);
   }
 
-  @override
-  void dispose() {
-    _metaPixelController.dispose();
-    _yandexMetrikaController.dispose();
-    super.dispose();
+  Future<void> _onAddYandexMetrikaId() async {
+    final currentFormId = ref.read(currentFormIdProvider);
+    await ref
+        .watch(yandexMetrikaControllerProvider.notifier)
+        .save(currentFormId);
   }
 
   @override
   Widget build(BuildContext context) {
+    final uiControllers = ref.watch(formUIControllersProvider);
+
     return Column(
       children: [
         _buildMetaPixelIntegration(
-          isEnabled: _isMetaPixelEnabled,
-          controller: _metaPixelController,
+          isEnabled: uiControllers.metaPixelIdController.text != ''
+              ? true
+              : _isMetaPixelEnabled,
+          controller: uiControllers.metaPixelIdController,
+          onTap: () async {
+            await _onAddMetaPixel().then((a) {
+              if (context.mounted) {
+                showSnackbar(
+                  context,
+                  type: SnackbarType.info,
+                  message: 'Meta Pixel успешно добавлен',
+                );
+              }
+            });
+          },
           onChanged: (value) => setState(() {
             _isMetaPixelEnabled = value;
           }),
         ),
         _buildYandexMetrikaIntegration(
-          isEnabled: _isYandexMetrikaEnabled,
+          isEnabled: uiControllers.yandexMetrikaIdController.text != ''
+              ? true
+              : _isYandexMetrikaEnabled,
+          controller: uiControllers.yandexMetrikaIdController,
+          onTap: () async {
+            await _onAddYandexMetrikaId().then((a) {
+              if (context.mounted) {
+                showSnackbar(
+                  context,
+                  type: SnackbarType.info,
+                  message: 'Yandex Metrika ID успешно добавлен',
+                );
+              }
+            });
+          },
           onChanged: (value) => setState(() {
             _isYandexMetrikaEnabled = value;
           }),
@@ -95,14 +126,16 @@ class _SettingsIntergrationViewDesktopState
                     width: 8,
                   ),
                   Text(
-                    'Подключить Meta Pixel',
+                    'Meta Pixel',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
-              Switch(
+              CupertinoSwitch(
                 value: isEnabled,
-                thumbColor: WidgetStatePropertyAll(AppTheme.secondary),
+                thumbColor: AppTheme.secondary,
+                inactiveThumbColor: AppTheme.border,
+                activeTrackColor: AppTheme.primary,
                 onChanged: onChanged,
               ),
             ],
@@ -117,13 +150,17 @@ class _SettingsIntergrationViewDesktopState
               prefixIcon: HeroIcon(HeroIcons.codeBracket),
               hintText: 'Введите Pixel Id',
               controller: controller,
+              onChanged: (value) {
+                ref.read(createFormProvider.notifier).updateMetaPixelId(value);
+                ref.read(createFormProvider.notifier).markAsChanged();
+              },
             ),
             SizedBox(
               width: context.screenWidth,
               child: FFButton(
                 onPressed: onTap ?? () {},
 
-                text: 'Добавить',
+                text: 'Сохранить',
               ),
             ),
           ],
@@ -135,6 +172,8 @@ class _SettingsIntergrationViewDesktopState
   Widget _buildYandexMetrikaIntegration({
     bool isEnabled = true,
     ValueChanged<bool>? onChanged,
+    VoidCallback? onTap,
+    TextEditingController? controller,
   }) {
     return Container(
       width: context.screenWidth,
@@ -161,32 +200,44 @@ class _SettingsIntergrationViewDesktopState
                     width: 8,
                   ),
                   Text(
-                    'Подключить Метрику',
+                    'Яндекс Метрика',
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
-              Switch(
+              CupertinoSwitch(
                 value: isEnabled,
-                thumbColor: WidgetStatePropertyAll(AppTheme.secondary),
+
+                thumbColor: AppTheme.secondary,
+                inactiveThumbColor: AppTheme.border,
+                activeTrackColor: AppTheme.primary,
                 onChanged: onChanged,
               ),
             ],
           ),
+
           if (isEnabled) ...[
             const SizedBox(
               height: 8,
             ),
             FFTextField(
-              prefixIcon: HeroIcon(HeroIcons.codeBracket),
               maxLines: 1,
+              prefixIcon: HeroIcon(HeroIcons.codeBracket),
               hintText: 'Введите Metrika Id',
+              onChanged: (value) {
+                ref
+                    .read(createFormProvider.notifier)
+                    .updateYandexMetrikaId(value);
+                ref.read(createFormProvider.notifier).markAsChanged();
+              },
+              controller: controller,
             ),
             SizedBox(
               width: context.screenWidth,
               child: FFButton(
-                onPressed: () {},
-                text: 'Добавить',
+                onPressed: onTap ?? () {},
+
+                text: 'Сохранить',
               ),
             ),
           ],
@@ -200,61 +251,6 @@ class _SettingsIntergrationViewDesktopState
       borderRadius: BorderRadius.circular(30),
       color: AppTheme.background,
       border: Border.all(width: 1.5, color: AppTheme.border),
-    );
-  }
-
-  HeroIcons _getIconForFieldType(String type) {
-    switch (type) {
-      case 'phone':
-        return HeroIcons.phone;
-      case 'email':
-        return HeroIcons.envelope;
-      case 'text':
-        return HeroIcons.chatBubbleOvalLeftEllipsis;
-      default:
-        return HeroIcons.user;
-    }
-  }
-
-  Widget _buildSizeSlider({
-    required String label,
-    required double value,
-    required double min,
-    required double max,
-    required ValueChanged<double> onChanged,
-  }) {
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label, style: const TextStyle(fontSize: 16)),
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(width: 1.5, color: AppTheme.border),
-              ),
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                '${value.toInt()} px',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-        ),
-        Slider(
-          value: value,
-          min: min,
-          max: max,
-          divisions: (max - min).toInt(),
-          thumbColor: AppTheme.secondary,
-          label: value.toString(),
-          onChanged: onChanged,
-        ),
-      ],
     );
   }
 }

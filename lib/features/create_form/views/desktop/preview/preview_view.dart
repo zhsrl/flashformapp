@@ -1,6 +1,7 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
+import 'package:flashform_app/data/controller/formui_controller.dart';
 import 'package:flashform_app/data/controller/image_controller.dart';
 import 'package:flashform_app/data/model/create_form_state.dart';
 import 'package:flashform_app/data/service/image_service.dart';
@@ -14,21 +15,10 @@ import 'package:heroicons/heroicons.dart';
 class PreviewView extends ConsumerStatefulWidget {
   const PreviewView({
     super.key,
-    required this.titleController,
-    required this.subtitleController,
-    required this.formTitleController,
-    required this.buttonTextController,
-    required this.formButtonTextController,
-    required this.successTextController,
+
     required this.focusNode,
   });
 
-  final TextEditingController titleController;
-  final TextEditingController subtitleController;
-  final TextEditingController formTitleController;
-  final TextEditingController buttonTextController;
-  final TextEditingController formButtonTextController;
-  final TextEditingController successTextController;
   final FocusNode focusNode;
 
   @override
@@ -62,6 +52,7 @@ class _PreviewViewState extends ConsumerState<PreviewView>
     // 1. Подписываемся на стейт формы
     final formState = ref.watch(createFormProvider);
     final imageState = ref.watch(imageControllerProvider);
+    final uiControllers = ref.watch(formUIControllersProvider);
 
     return Expanded(
       child: Column(
@@ -106,7 +97,11 @@ class _PreviewViewState extends ConsumerState<PreviewView>
                 context,
               ).copyWith(scrollbars: false),
               child: SingleChildScrollView(
-                child: _buildDeviceFrame(formState, imageState),
+                child: _buildDeviceFrame(
+                  formState,
+                  imageState,
+                  uiControllers,
+                ),
               ),
             ),
           ),
@@ -118,6 +113,7 @@ class _PreviewViewState extends ConsumerState<PreviewView>
   Widget _buildDeviceFrame(
     CreateFormState formState,
     ImageUploadState imageState,
+    FormUIControllers uiControllers,
   ) {
     final isDesktop = _tabIndex == 1;
 
@@ -151,9 +147,9 @@ class _PreviewViewState extends ConsumerState<PreviewView>
                   children: [
                     // Title
                     ListenableBuilder(
-                      listenable: widget.titleController,
+                      listenable: uiControllers.titleController,
                       builder: (_, __) => Text(
-                        widget.titleController.text,
+                        uiControllers.titleController.text,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           height: 1.2,
@@ -169,9 +165,9 @@ class _PreviewViewState extends ConsumerState<PreviewView>
 
                     // Subtitle
                     ListenableBuilder(
-                      listenable: widget.subtitleController,
+                      listenable: uiControllers.subtitleController,
                       builder: (_, __) => Text(
-                        widget.subtitleController.text,
+                        uiControllers.subtitleController.text,
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           height: 1.2,
@@ -186,7 +182,7 @@ class _PreviewViewState extends ConsumerState<PreviewView>
                     const SizedBox(height: 16),
 
                     // Action Widget (Button or Form)
-                    _buildWidgetByActionType(formState),
+                    _buildWidgetByActionType(formState, uiControllers),
 
                     // Branding
                     _buildFlashformBrandingWidget(formState),
@@ -233,9 +229,9 @@ class _PreviewViewState extends ConsumerState<PreviewView>
                             ),
                             const SizedBox(height: 16),
                             ListenableBuilder(
-                              listenable: widget.successTextController,
+                              listenable: uiControllers.successTextController,
                               builder: (_, __) => Text(
-                                widget.successTextController.text,
+                                uiControllers.successTextController.text,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
@@ -312,7 +308,11 @@ class _PreviewViewState extends ConsumerState<PreviewView>
     );
   }
 
-  Widget _buildWidgetByActionType(CreateFormState formState) {
+  Widget _buildWidgetByActionType(
+    CreateFormState formState,
+    FormUIControllers uiControllers,
+  ) {
+    final isDesktop = _tabIndex == 1;
     return AnimatedCrossFade(
       duration: const Duration(milliseconds: 300),
       crossFadeState: formState.actionType == 'button-url'
@@ -321,7 +321,7 @@ class _PreviewViewState extends ConsumerState<PreviewView>
 
       // CASE 1: Button URL
       firstChild: SizedBox(
-        width: context.screenWidth,
+        width: isDesktop ? context.screenWidth : 350, // Адаптивная ширина
         height: 60,
         child: ElevatedButton(
           onPressed: () {},
@@ -333,9 +333,9 @@ class _PreviewViewState extends ConsumerState<PreviewView>
             ),
           ),
           child: ListenableBuilder(
-            listenable: widget.buttonTextController,
+            listenable: uiControllers.buttonTextController,
             builder: (_, __) => Text(
-              widget.buttonTextController.text,
+              uiControllers.buttonTextController.text,
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 16,
@@ -364,13 +364,13 @@ class _PreviewViewState extends ConsumerState<PreviewView>
         child: Column(
           children: [
             ListenableBuilder(
-              listenable: widget.formTitleController,
+              listenable: uiControllers.formTitleController,
               builder: (_, __) => SizedBox(
                 width: 270,
                 child: Text(
-                  widget.formTitleController.text.isEmpty
+                  uiControllers.formTitleController.text.isEmpty
                       ? 'Заголовок формы'
-                      : widget.formTitleController.text,
+                      : uiControllers.formTitleController.text,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 18,
@@ -421,9 +421,9 @@ class _PreviewViewState extends ConsumerState<PreviewView>
                   ),
                 ),
                 child: ListenableBuilder(
-                  listenable: widget.formButtonTextController,
+                  listenable: uiControllers.formButtonTextController,
                   builder: (_, __) => Text(
-                    widget.formButtonTextController.text,
+                    uiControllers.formButtonTextController.text,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 16,

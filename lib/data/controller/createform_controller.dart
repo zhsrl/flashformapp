@@ -1,4 +1,5 @@
 import 'package:flashform_app/data/controller/forms_controller.dart';
+import 'package:flashform_app/data/controller/image_controller.dart';
 import 'package:flashform_app/data/model/create_form_state.dart'
     show CreateFormState;
 import 'package:flashform_app/data/model/form_model.dart';
@@ -60,6 +61,7 @@ class CreateFormController extends StateNotifier<CreateFormState> {
       state = state.copyWith(formButtonColor: color);
   void updateHasRedirectUrl(bool hasRedirectUrl) =>
       state = state.copyWith(hasRedirectUrl: hasRedirectUrl);
+
   void updateFormRedirectUrl(String url) =>
       state = state.copyWith(redirectUrl: url);
   void updateFields(List<FormFields> fields) =>
@@ -103,7 +105,7 @@ class CreateFormController extends StateNotifier<CreateFormState> {
       titleFontSize: data['title']['size'],
       subtitleFontSize: data['subtitle']['size'],
       actionType: data['action_type'],
-      hasRedirectUrl: data['form']['button']['redirect_url'] != null
+      hasRedirectUrl: data['form']['button']['redirect-url'] != null
           ? true
           : false,
       redirectUrl: data['form']['button']['redirect-url'],
@@ -123,6 +125,10 @@ class CreateFormController extends StateNotifier<CreateFormState> {
   }
 
   Future<bool> publishForm(String formId) async {
+    final imageNotifier = ref.read(imageControllerProvider.notifier);
+
+    final imageState = ref.read(imageControllerProvider);
+
     if (state.fields.isEmpty && state.actionType == 'form') {
       return false;
     }
@@ -132,7 +138,18 @@ class CreateFormController extends StateNotifier<CreateFormState> {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) throw Exception("User not authenticated");
 
-      debugPrint('TITLE for save: ${state.title}');
+      if (imageState.localImageBytes != null) {
+        final uploadedUrl = await imageNotifier.uploadImage(
+          folder: formId,
+          bytes: imageState.localImageBytes,
+        );
+
+        if (uploadedUrl != null) {
+          updateHeroImage(uploadedUrl); // Обновляем стейт формы URL-ом
+        } else {
+          throw Exception('Не удалось загрузить изображение');
+        }
+      }
 
       final data = {
         'id': formId,
@@ -174,6 +191,10 @@ class CreateFormController extends StateNotifier<CreateFormState> {
       debugPrint('Data to save: $data');
 
       await ref.read(formControllerProvider.notifier).publishForm(data);
+
+      imageNotifier.resetPickedImage();
+      clearChanges();
+
       return true;
     } catch (e) {
       debugPrint('Error publishing form: $e');

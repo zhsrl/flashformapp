@@ -2,7 +2,7 @@ import 'package:flashform_app/data/controller/forms_controller.dart';
 import 'package:flashform_app/data/controller/image_controller.dart';
 import 'package:flashform_app/data/model/create_form_state.dart'
     show CreateFormState;
-import 'package:flashform_app/data/model/form_model.dart';
+import 'package:flashform_app/data/model/form.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';

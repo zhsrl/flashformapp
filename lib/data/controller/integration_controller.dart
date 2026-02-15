@@ -41,6 +41,16 @@ class MetaPixelController extends StateNotifier<AsyncValue<String>> {
     });
   }
 
+  Future<void> delete(String formId) async {
+    final formState = _ref.read(createFormProvider);
+
+    state = await AsyncValue.guard(() async {
+      await _ref.read(formRepoProvider).deleteMetaPixelId(formId);
+
+      return formState.metaPixelId;
+    });
+  }
+
   Future<String> get(String formId) async {
     state = AsyncLoading();
     final response = await _ref.read(formRepoProvider).getMetaPixelId(formId);
@@ -68,6 +78,16 @@ class YandexMetrikaController extends StateNotifier<AsyncValue<String>> {
       await _ref
           .read(formRepoProvider)
           .setYandexMetrikaId(formId, formState.yandexMetrikaId);
+
+      return formState.metaPixelId;
+    });
+  }
+
+  Future<void> delete(String formId) async {
+    final formState = _ref.read(createFormProvider);
+
+    state = await AsyncValue.guard(() async {
+      await _ref.read(formRepoProvider).deleteYandexMetrikaId(formId);
 
       return formState.metaPixelId;
     });

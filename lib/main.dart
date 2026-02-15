@@ -1,9 +1,10 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flashform_app/core/app_theme.dart';
-import 'package:flashform_app/core/router_settings.dart';
+import 'package:flashform_app/core/router/router_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:toastification/toastification.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,18 +35,20 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final routerConfig = ref.watch(routerProvider);
-    return MaterialApp.router(
-      routerConfig: routerConfig,
-      localizationsDelegates: context.localizationDelegates,
-      supportedLocales: context.supportedLocales,
-      locale: context.locale,
-      title: 'FlashForm',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'GoogleSans',
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.green,
-          primary: AppTheme.primary,
+    return ToastificationWrapper(
+      child: MaterialApp.router(
+        routerConfig: routerConfig,
+        localizationsDelegates: context.localizationDelegates,
+        supportedLocales: context.supportedLocales,
+        locale: context.locale,
+        title: 'FlashForm',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          fontFamily: 'GoogleSans',
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.green,
+            primary: AppTheme.primary,
+          ),
         ),
       ),
     );

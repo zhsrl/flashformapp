@@ -1,4 +1,4 @@
-import 'package:flashform_app/data/model/form_model.dart';
+import 'package:flashform_app/data/model/form.dart';
 import 'package:flashform_app/data/repository/auth_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -192,6 +192,18 @@ class FormRepository {
     if (formId.isEmpty) return;
 
     await _updateSettingsField(formId, 'ya-metrika-id', pixelId);
+  }
+
+  Future<void> deleteMetaPixelId(String formId) async {
+    if (formId.isEmpty) return;
+
+    await _updateSettingsField(formId, 'meta-pixel-id', '');
+  }
+
+  Future<void> deleteYandexMetrikaId(String formId) async {
+    if (formId.isEmpty) return;
+
+    await _updateSettingsField(formId, 'ya-metrika-id', '');
   }
 
   /// Приватный метод для безопасного слияния настроек (Deep Merge)

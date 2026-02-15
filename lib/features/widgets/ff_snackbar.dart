@@ -1,8 +1,7 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
-import 'package:top_snackbar_flutter/custom_snack_bar.dart';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
+import 'package:toastification/toastification.dart';
 
 enum SnackbarType {
   error,
@@ -14,62 +13,44 @@ void showSnackbar(
   BuildContext context, {
   required SnackbarType type,
   String message = '',
-}) async {
-  CustomSnackBar snackbar = switch (type) {
-    SnackbarType.error => CustomSnackBar.error(
-      message: message,
-      backgroundColor: AppTheme.secondary,
-      textStyle: TextStyle(
-        fontWeight: FontWeight.w600,
-        fontSize: 16,
-        color: AppTheme.primary,
-      ),
-      icon: HeroIcon(
-        HeroIcons.exclamationTriangle,
-        color: AppTheme.primary.withAlpha(30),
-        size: 120,
-      ),
+}) {
+  final (toastType, iconColor, icon) = switch (type) {
+    SnackbarType.error => (
+      ToastificationType.error,
+      Colors.red,
+      HeroIcons.exclamationTriangle,
     ),
-    SnackbarType.info => CustomSnackBar.info(
-      message: message,
-      backgroundColor: AppTheme.secondary,
-      textStyle: TextStyle(
-        fontWeight: FontWeight.w600,
-        fontSize: 16,
-        color: AppTheme.primary,
-      ),
-      icon: HeroIcon(
-        HeroIcons.questionMarkCircle,
-        color: AppTheme.primary.withAlpha(30),
-        size: 120,
-      ),
+    SnackbarType.info => (
+      ToastificationType.info,
+      Colors.blueAccent,
+      HeroIcons.questionMarkCircle,
     ),
-    SnackbarType.success => CustomSnackBar.success(
-      message: message,
-      backgroundColor: AppTheme.primary,
-      textStyle: TextStyle(
-        fontWeight: FontWeight.w600,
-        fontSize: 16,
-        color: AppTheme.secondary,
-      ),
-      icon: HeroIcon(
-        HeroIcons.faceSmile,
-        color: AppTheme.secondary.withAlpha(30),
-        size: 120,
-      ),
+    SnackbarType.success => (
+      ToastificationType.success,
+      AppTheme.primary,
+      HeroIcons.faceSmile,
     ),
   };
 
-  showTopSnackBar(
-    Overlay.of(context),
-    Align(
-      alignment: Alignment.topCenter,
+  toastification.show(
+    type: toastType,
+    alignment: Alignment.bottomRight,
+    style: ToastificationStyle.flat,
+    backgroundColor: AppTheme.secondary,
+    title: Text(
+      message,
+      style: TextStyle(
+        fontWeight: FontWeight.w500,
 
-      child: SizedBox(width: 350, height: 60, child: snackbar),
+        color: Colors.white,
+      ),
     ),
-
-    animationDuration: Duration(milliseconds: 600),
-    reverseAnimationDuration: Duration(milliseconds: 600),
-    displayDuration: Duration(milliseconds: 2500),
+    icon: HeroIcon(
+      icon,
+      color: iconColor,
+      size: 24,
+    ),
+    foregroundColor: Colors.white,
+    autoCloseDuration: const Duration(milliseconds: 3000),
   );
 }

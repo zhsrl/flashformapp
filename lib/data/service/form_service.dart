@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:flashform_app/data/model/form_model.dart';
+import 'package:flashform_app/data/model/form.dart';
 import 'package:flashform_app/data/repository/auth_repository.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flutter/material.dart';

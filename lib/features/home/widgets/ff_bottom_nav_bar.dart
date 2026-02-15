@@ -17,9 +17,14 @@ class FFBottomNavBar extends StatefulWidget {
   const FFBottomNavBar({
     super.key,
     required this.onCreateForm,
+    required this.selectedIndex,
+    required this.onItemTapped,
   });
 
   final VoidCallback onCreateForm;
+
+  final int selectedIndex;
+  final Function(int index) onItemTapped;
 
   @override
   State<FFBottomNavBar> createState() => _FFBottomNavBarState();
@@ -30,7 +35,7 @@ class _FFBottomNavBarState extends State<FFBottomNavBar> {
 
   final List<FFBottomItem> _items = [
     FFBottomItem(icon: HeroIcons.inbox, title: 'Формы'),
-    FFBottomItem(icon: HeroIcons.squares2x2, title: 'Таблицы'),
+    FFBottomItem(icon: HeroIcons.squares2x2, title: 'Заявки'),
     FFBottomItem(icon: HeroIcons.cog6Tooth, title: 'Настройки'),
   ];
 
@@ -96,14 +101,8 @@ class _FFBottomNavBarState extends State<FFBottomNavBar> {
                 (index) => _buildNavigationItem(
                   _items[index],
                   index,
-                  selected: selectedIndex == index,
-                  onTap: (value) {
-                    setState(() {
-                      selectedIndex = value;
-                    });
-
-                    // debugPrint('Selected: $selectedIndex');
-                  },
+                  selected: widget.selectedIndex == index,
+                  onTap: widget.onItemTapped,
                 ),
               ),
             ),

@@ -394,6 +394,7 @@ class _PreviewViewState extends ConsumerState<PreviewView>
                   final field = formState.fields[index];
                   return FFTextField(
                     height: 2.0,
+                    fillColor: AppTheme.fourty,
                     prefixIcon: HeroIcon(
                       field.type == 'phone'
                           ? HeroIcons.phone

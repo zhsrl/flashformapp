@@ -5,7 +5,7 @@ import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
 import 'package:flashform_app/features/home/widgets/ff_bottom_nav_bar.dart';
 import 'package:flashform_app/features/home/widgets/home_appbar.dart';
-import 'package:flashform_app/features/home/widgets/shared/form_card.dart';
+import 'package:flashform_app/features/forms/widgets/shared/form_card.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/material.dart';
@@ -14,15 +14,14 @@ import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-class HomePageDesktopView extends ConsumerStatefulWidget {
-  const HomePageDesktopView({super.key});
+class FormsViewDesktop extends ConsumerStatefulWidget {
+  const FormsViewDesktop({super.key});
 
   @override
-  ConsumerState<HomePageDesktopView> createState() =>
-      _HomePageDesktopViewState();
+  ConsumerState<FormsViewDesktop> createState() => _HomePageDesktopViewState();
 }
 
-class _HomePageDesktopViewState extends ConsumerState<HomePageDesktopView> {
+class _HomePageDesktopViewState extends ConsumerState<FormsViewDesktop> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _formTitleController;
 
@@ -129,17 +128,6 @@ class _HomePageDesktopViewState extends ConsumerState<HomePageDesktopView> {
       backgroundColor: AppTheme.background,
       appBar: HomeAppBar(),
 
-      // floatingActionButton: FloatingActionButton.large(
-      //   onPressed: () {
-      //     showCreateFormDialog();
-      //   },
-      //   elevation: 0,
-      //   backgroundColor: AppTheme.secondary,
-      //   child: HeroIcon(
-      //     HeroIcons.plus,
-      //     color: AppTheme.primary,
-      //   ),
-      // ),
       body: Stack(
         children: [
           SingleChildScrollView(
@@ -186,15 +174,16 @@ class _HomePageDesktopViewState extends ConsumerState<HomePageDesktopView> {
                   );
                 }
                 return GridView.builder(
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    mainAxisExtent: 150,
+                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    mainAxisExtent: 180,
                     mainAxisSpacing: 16,
                     crossAxisSpacing: 16,
-                    crossAxisCount: context.isDesktop
-                        ? 4
-                        : context.isTablet
-                        ? 2
-                        : 1,
+                    maxCrossAxisExtent: 200,
+                    // crossAxisCount: context.isDesktop
+                    //     ? 4
+                    //     : context.isTablet
+                    //     ? 2
+                    //     : 1,
                   ),
                   itemCount: forms.length,
                   shrinkWrap: true,
@@ -215,11 +204,11 @@ class _HomePageDesktopViewState extends ConsumerState<HomePageDesktopView> {
             ),
           ),
 
-          FFBottomNavBar(
-            onCreateForm: () {
-              showCreateFormDialog();
-            },
-          ),
+          // FFBottomNavBar(
+          //   onCreateForm: () {
+          //     showCreateFormDialog();
+          //   },
+          // ),
         ],
       ),
     );

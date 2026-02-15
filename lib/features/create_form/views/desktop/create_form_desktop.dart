@@ -1,3 +1,4 @@
+import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/formui_controller.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flutter_svg/svg.dart';
@@ -12,10 +13,12 @@ import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CreateFormDesktopView extends ConsumerStatefulWidget {
   const CreateFormDesktopView({
@@ -33,6 +36,7 @@ class CreateFormDesktopView extends ConsumerStatefulWidget {
 class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
   bool _isloadingInitialData = true;
   bool isFormNameChange = false;
+  bool isCopy = false;
 
   final FocusNode _focusNode = FocusNode();
 
@@ -98,6 +102,12 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
     setState(() {
       isFormNameChange = false;
     });
+  }
+
+  Future<void> _openURL(String url) async {
+    Uri uri = Uri.parse(url);
+
+    await launchUrl(uri);
   }
 
   Future<void> _onPublishTap() async {
@@ -178,19 +188,88 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
                                 height: 16,
                               ),
 
-                              Text(
-                                'https://fform.me/${formSlug.value ?? ''}',
-                                style: TextStyle(
-                                  fontSize: 22,
-                                  fontWeight: FontWeight.w500,
-                                  // color: AppTheme.primary,
-                                ),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceAround,
+                                children: [
+                                  Text(
+                                    'https://fform.me/${formSlug.value ?? ''}',
+                                    style: TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.w500,
+                                      // color: AppTheme.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 8,
+                                  ),
+                                  GestureDetector(
+                                    onTap: () {
+                                      final url =
+                                          'https://fform.me/${formSlug.value ?? ''}';
+                                      Clipboard.setData(
+                                        ClipboardData(text: url),
+                                      ).then((_) {
+                                        if (!context.mounted) return;
+                                        showSnackbar(
+                                          context,
+                                          type: SnackbarType.info,
+                                          message: 'Ссылка скопирована',
+                                        );
+                                      });
+                                    },
+                                    child: HeroIcon(
+                                      HeroIcons.documentDuplicate,
+                                    ),
+                                  ),
+                                ],
                               ),
+
+                              // MouseRegion(
+                              //   onEnter: (event) => setState(() {
+                              //     isCopy = true;
+                              //   }),
+                              //   onExit: (event) => setState(() {
+                              //     isCopy = false;
+                              //   }),
+                              //   child: AnimatedCrossFade(
+                              //     firstChild: Text(
+                              //       'https://fform.me/${formSlug.value ?? ''}',
+                              //       style: TextStyle(
+                              //         fontSize: 22,
+                              //         fontWeight: FontWeight.w500,
+                              //         // color: AppTheme.primary,
+                              //       ),
+                              //     ),
+                              //     secondChild: SizedBox(
+                              //       width: context.screenWidth,
+                              //       child: TextButton.icon(
+                              //         onPressed: () {},
+                              //         icon: HeroIcon(
+                              //           HeroIcons.documentDuplicate,
+                              //         ),
+                              //         style: TextButton.styleFrom(
+                              //           backgroundColor: Colors.black,
+                              //         ),
+                              //         label: Text('Скопировать ссылку'),
+                              //       ),
+                              //     ),
+                              //     crossFadeState: isCopy
+                              //         ? CrossFadeState.showSecond
+                              //         : CrossFadeState.showFirst,
+                              //     duration: Duration(milliseconds: 100),
+                              //   ),
+                              // ),
                               const SizedBox(
                                 height: 16,
                               ),
                               FFButton(
-                                onPressed: () {},
+                                onPressed: () async {
+                                  await _openURL(
+                                    'https://fform.me/${formSlug.value ?? ''}',
+                                  );
+                                },
                                 text: 'Открыть',
                                 secondTheme: true,
                               ),
@@ -319,7 +398,7 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
     if (context.canPop()) {
       context.pop();
     } else {
-      context.go('/');
+      context.go('/forms');
     }
   }
 
@@ -353,7 +432,7 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
             if (context.canPop()) {
               context.pop();
             } else {
-              context.go('/');
+              context.go('/forms');
             }
           }
         },

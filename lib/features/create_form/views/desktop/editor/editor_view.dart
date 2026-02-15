@@ -30,7 +30,7 @@ class _SettingsPanelViewState extends ConsumerState<EditorView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
+    _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
     _tabController.addListener(() {
       setState(() {
         _tabIndex = _tabController.index;
@@ -53,6 +53,7 @@ class _SettingsPanelViewState extends ConsumerState<EditorView>
           FFTabBar(
             tabs: [
               Text('Контент'),
+              Text('Блоки'),
               // Text('Footer'),
               Text('Интеграция'),
             ],
@@ -77,25 +78,27 @@ class _SettingsPanelViewState extends ConsumerState<EditorView>
                   key: _formKey,
                   child: SizedBox(
                     width: 350,
-                    child: AnimatedCrossFade(
-                      duration: const Duration(milliseconds: 300),
-                      crossFadeState: _tabIndex == 0
-                          ? CrossFadeState.showFirst
-                          : CrossFadeState.showSecond,
-
-                      // Вкладка "Контент"
-                      firstChild: EditorContentView(
-                        controller: controller,
-                        focusNode: widget.focusNode,
-                        formState: formState,
-                        onChanged: widget.onChanged,
-                        ref: ref,
-                        uiControllers: uiControllers,
-                      ),
-
-                      secondChild: EditorIntergrationView(
-                        formId: currentFormId,
-                      ),
+                    child: AnimatedSwitcher(
+                      duration: Duration(milliseconds: 100),
+                      transitionBuilder: (child, animation) {
+                        return FadeTransition(opacity: animation, child: child);
+                      },
+                      child: _tabIndex == 0
+                          ? EditorContentView(
+                              controller: controller,
+                              focusNode: widget.focusNode,
+                              formState: formState,
+                              onChanged: widget.onChanged,
+                              ref: ref,
+                              uiControllers: uiControllers,
+                            )
+                          : _tabIndex == 1
+                          ? Center(
+                              child: Text('Footer'),
+                            )
+                          : EditorIntergrationView(
+                              formId: currentFormId,
+                            ),
                     ),
                   ),
                 ),

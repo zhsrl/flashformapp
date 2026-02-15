@@ -1,4 +1,4 @@
-import 'package:flashform_app/data/model/form_model.dart';
+import 'package:flashform_app/data/model/form.dart';
 import 'package:flutter/material.dart';
 
 const _undefined = Object();

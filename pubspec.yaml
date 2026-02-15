@@ -52,6 +52,7 @@ dependencies:
   dashed_border: ^1.0.2
   flutter_colorpicker: ^1.1.0
   adaptive_will_pop_scope: ^1.0.4
+  toastification: ^3.0.3
 
 dev_dependencies:
   flutter_test:

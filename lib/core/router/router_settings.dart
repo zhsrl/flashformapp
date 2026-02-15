@@ -1,10 +1,15 @@
 import 'dart:async';
 
+import 'package:flashform_app/core/router/adaptive_page.dart';
 import 'package:flashform_app/features/auth/confirm_email.dart';
 import 'package:flashform_app/features/auth/signup_page.dart';
 import 'package:flashform_app/features/create_form/screens/create_form_page.dart';
+import 'package:flashform_app/features/forms/views/forms_screen.dart';
 import 'package:flashform_app/features/home/screens/home_page.dart';
 import 'package:flashform_app/features/auth/signin_page.dart';
+import 'package:flashform_app/features/settings/settings_screen.dart';
+import 'package:flashform_app/features/tables/leads_detail_screen.dart';
+import 'package:flashform_app/features/tables/leads_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,7 +19,7 @@ final routerProvider = Provider<GoRouter>(
   (ref) {
     final supabase = Supabase.instance.client;
     return GoRouter(
-      initialLocation: '/',
+      initialLocation: '/forms',
       refreshListenable: GoRouterRefreshStream(supabase.auth.onAuthStateChange),
       redirect: (context, state) {
         final session = supabase.auth.currentSession;
@@ -33,12 +38,6 @@ final routerProvider = Provider<GoRouter>(
         return null;
       },
       routes: [
-        GoRoute(
-          path: '/',
-          pageBuilder: (context, state) => NoTransitionPage(
-            child: HomePage(),
-          ),
-        ),
         GoRoute(
           path: '/signin',
           pageBuilder: (context, state) => NoTransitionPage(
@@ -68,6 +67,49 @@ final routerProvider = Provider<GoRouter>(
               ),
             );
           },
+        ),
+        GoRoute(
+          path: '/detail/:id',
+
+          pageBuilder: (context, state) {
+            final id = state.pathParameters['id'];
+            return NoTransitionPage(
+              child: LeadsDetailScreen(
+                formId: id!,
+              ),
+            );
+          },
+        ),
+        ShellRoute(
+          pageBuilder: (context, state, child) {
+            return adaptivePage(
+              context: context,
+              child: HomePage(child: child),
+            );
+          },
+          routes: [
+            GoRoute(
+              path: '/forms',
+              pageBuilder: (context, state) => adaptivePage(
+                context: context,
+                child: FormsScreen(),
+              ),
+            ),
+            GoRoute(
+              path: '/tables',
+              pageBuilder: (context, state) => adaptivePage(
+                context: context,
+                child: LeadsScreen(),
+              ),
+            ),
+            GoRoute(
+              path: '/settings',
+              pageBuilder: (context, state) => adaptivePage(
+                context: context,
+                child: SettingsScreen(),
+              ),
+            ),
+          ],
         ),
       ],
     );

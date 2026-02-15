@@ -23,6 +23,7 @@ class FFTextField extends StatefulWidget {
     this.focusNode,
     this.maxLength,
     this.maxLines,
+    this.fillColor,
   });
 
   final String? hintText;
@@ -38,6 +39,7 @@ class FFTextField extends StatefulWidget {
   final double? height;
   final bool? enabled;
   final String? title;
+  final Color? fillColor;
   final String? Function(String? value)? validator;
   final int? maxLength;
   final int? maxLines;
@@ -114,7 +116,7 @@ class _FFTextFieldState extends State<FFTextField> {
               prefixIconColor: AppTheme.tertiary,
               filled: true,
 
-              fillColor: AppTheme.fourty,
+              fillColor: widget.fillColor ?? Colors.white,
               hintStyle: TextStyle(
                 color: AppTheme.tertiary,
                 fontWeight: FontWeight.w500,

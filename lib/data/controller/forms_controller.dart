@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flashform_app/data/model/form_model.dart';
+import 'package:flashform_app/data/model/form.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/data/service/form_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

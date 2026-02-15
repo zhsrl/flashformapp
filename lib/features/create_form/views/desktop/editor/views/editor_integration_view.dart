@@ -1,6 +1,7 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
+import 'package:flashform_app/data/controller/forms_controller.dart';
 
 import 'package:flashform_app/data/controller/formui_controller.dart';
 import 'package:flashform_app/data/controller/integration_controller.dart';
@@ -10,10 +11,10 @@ import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:heroicons/heroicons.dart';
-import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class EditorIntergrationView extends ConsumerStatefulWidget {
   const EditorIntergrationView({
@@ -33,16 +34,82 @@ class _SettingsIntergrationViewDesktopState
   bool _isMetaPixelEnabled = false;
   bool _isYandexMetrikaEnabled = false;
 
-  Future<void> _onAddMetaPixel() async {
-    final currentFormId = ref.read(currentFormIdProvider);
-    await ref.watch(metaPixelControllerProvider.notifier).save(currentFormId);
+  Future<void> _deleteMetaPixelId() async {
+    final formState = ref.read(createFormProvider);
+
+    final uiControllers = ref.read(formUIControllersProvider);
+
+    final form = await ref
+        .watch(formControllerProvider.notifier)
+        .fetchForm(widget.formId);
+    if (formState.metaPixelId.isNotEmpty) {
+      _showDeleteDialog(
+        'Meta Pixel',
+        onCancel: () => setState(() {
+          setState(() {
+            _isMetaPixelEnabled = true;
+          });
+          Navigator.pop(context);
+        }),
+
+        onConfirm: () async {
+          if ((form.data?['settings']['meta-pixel-id'] as String).isNotEmpty) {
+            debugPrint('confirmed');
+            await ref
+                .watch(metaPixelControllerProvider.notifier)
+                .delete(widget.formId);
+            setState(() {
+              uiControllers.metaPixelIdController.text = '';
+            });
+          }
+          if (mounted) {
+            Navigator.pop(context);
+          }
+        },
+      );
+    }
   }
 
-  Future<void> _onAddYandexMetrikaId() async {
-    final currentFormId = ref.read(currentFormIdProvider);
-    await ref
-        .watch(yandexMetrikaControllerProvider.notifier)
-        .save(currentFormId);
+  Future<void> _deleteYandexMetrikaId() async {
+    final formState = ref.read(createFormProvider);
+
+    final uiControllers = ref.read(formUIControllersProvider);
+
+    if (formState.yandexMetrikaId.isNotEmpty) {
+      _showDeleteDialog(
+        'Яндекс Метрика',
+        onCancel: () => setState(() {
+          setState(() {
+            _isYandexMetrikaEnabled = true;
+          });
+          Navigator.pop(context);
+        }),
+
+        onConfirm: () async {
+          await ref
+              .watch(yandexMetrikaControllerProvider.notifier)
+              .delete(widget.formId);
+          setState(() {
+            uiControllers.yandexMetrikaIdController.text = '';
+          });
+          if (mounted) {
+            Navigator.pop(context);
+          }
+        },
+      );
+    } else {
+      return;
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    final form = ref.read(createFormProvider);
+
+    _isMetaPixelEnabled = form.metaPixelId.isNotEmpty ? true : false;
+    _isYandexMetrikaEnabled = form.yandexMetrikaId.isNotEmpty ? true : false;
   }
 
   @override
@@ -52,44 +119,40 @@ class _SettingsIntergrationViewDesktopState
     return Column(
       children: [
         _buildMetaPixelIntegration(
-          isEnabled: uiControllers.metaPixelIdController.text != ''
-              ? true
-              : _isMetaPixelEnabled,
+          isEnabled: _isMetaPixelEnabled,
+
           controller: uiControllers.metaPixelIdController,
-          onTap: () async {
-            await _onAddMetaPixel().then((a) {
-              if (context.mounted) {
-                showSnackbar(
-                  context,
-                  type: SnackbarType.info,
-                  message: 'Meta Pixel успешно добавлен',
-                );
-              }
+
+          onChanged: (value) async {
+            if (value == false) {
+              await _deleteMetaPixelId();
+            }
+
+            setState(() {
+              _isMetaPixelEnabled = value;
             });
           },
-          onChanged: (value) => setState(() {
-            _isMetaPixelEnabled = value;
-          }),
         ),
+
         _buildYandexMetrikaIntegration(
-          isEnabled: uiControllers.yandexMetrikaIdController.text != ''
-              ? true
-              : _isYandexMetrikaEnabled,
+          isEnabled: _isYandexMetrikaEnabled,
           controller: uiControllers.yandexMetrikaIdController,
-          onTap: () async {
-            await _onAddYandexMetrikaId().then((a) {
-              if (context.mounted) {
-                showSnackbar(
-                  context,
-                  type: SnackbarType.info,
-                  message: 'Yandex Metrika ID успешно добавлен',
-                );
-              }
+
+          onChanged: (value) async {
+            final form = await ref
+                .watch(formControllerProvider.notifier)
+                .fetchForm(widget.formId);
+
+            if (value == false &&
+                (form.data?['settings']['ya-metrika-id'] as String)
+                    .isNotEmpty) {
+              await _deleteYandexMetrikaId();
+            }
+
+            setState(() {
+              _isYandexMetrikaEnabled = value;
             });
           },
-          onChanged: (value) => setState(() {
-            _isYandexMetrikaEnabled = value;
-          }),
         ),
       ],
     );
@@ -97,8 +160,9 @@ class _SettingsIntergrationViewDesktopState
 
   Widget _buildMetaPixelIntegration({
     bool isEnabled = true,
+
     ValueChanged<bool>? onChanged,
-    VoidCallback? onTap,
+
     TextEditingController? controller,
   }) {
     return Container(
@@ -155,14 +219,6 @@ class _SettingsIntergrationViewDesktopState
                 ref.read(createFormProvider.notifier).markAsChanged();
               },
             ),
-            SizedBox(
-              width: context.screenWidth,
-              child: FFButton(
-                onPressed: onTap ?? () {},
-
-                text: 'Сохранить',
-              ),
-            ),
           ],
         ],
       ),
@@ -172,7 +228,7 @@ class _SettingsIntergrationViewDesktopState
   Widget _buildYandexMetrikaIntegration({
     bool isEnabled = true,
     ValueChanged<bool>? onChanged,
-    VoidCallback? onTap,
+
     TextEditingController? controller,
   }) {
     return Container(
@@ -232,14 +288,6 @@ class _SettingsIntergrationViewDesktopState
               },
               controller: controller,
             ),
-            SizedBox(
-              width: context.screenWidth,
-              child: FFButton(
-                onPressed: onTap ?? () {},
-
-                text: 'Сохранить',
-              ),
-            ),
           ],
         ],
       ),
@@ -251,6 +299,73 @@ class _SettingsIntergrationViewDesktopState
       borderRadius: BorderRadius.circular(30),
       color: AppTheme.background,
       border: Border.all(width: 1.5, color: AppTheme.border),
+    );
+  }
+
+  Widget _buildAlertAtDelete(String name) {
+    return Container(
+      width: 350,
+      padding: EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: Colors.red.withAlpha(50),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          HeroIcon(
+            HeroIcons.exclamationCircle,
+            style: HeroIconStyle.solid,
+            color: Colors.red,
+          ),
+          const SizedBox(
+            width: 8,
+          ),
+
+          SizedBox(
+            width: 300,
+            child: Text(
+              'После подтвержение $name удаляется автоматически без публикации страницы',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showDeleteDialog(
+    String name, {
+    VoidCallback? onConfirm,
+    VoidCallback? onCancel,
+  }) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.background,
+        title: SizedBox(
+          width: 350,
+          child: Text(
+            'Вы хотите отключить интеграцию\n$name?',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+        ),
+        content: _buildAlertAtDelete('Meta Pixel'),
+        actions: [
+          FFButton(
+            onPressed: onConfirm ?? () {},
+            text: 'Да, удалить',
+            secondTheme: true,
+          ),
+          FFButton(
+            onPressed: onCancel ?? () {},
+            text: 'Отмена',
+          ),
+        ],
+      ),
     );
   }
 }

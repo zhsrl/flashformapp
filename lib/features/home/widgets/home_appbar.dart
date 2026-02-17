@@ -2,6 +2,7 @@ import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/features/home/widgets/subscription_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
 class HomeAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -9,10 +10,12 @@ class HomeAppBar extends StatefulWidget implements PreferredSizeWidget {
     super.key,
     this.formId = '',
     this.automaticallyImplyLeading,
+    this.isBack = false,
   });
 
   final String? formId;
   final bool? automaticallyImplyLeading;
+  final bool? isBack;
 
   @override
   State<HomeAppBar> createState() => _HomeAppBarState();
@@ -25,12 +28,29 @@ class _HomeAppBarState extends State<HomeAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppTheme.background,
+
       elevation: 0,
-      automaticallyImplyLeading: widget.automaticallyImplyLeading ?? false,
+
       centerTitle: false,
       title: Row(
         children: [
+          if (widget.isBack!)
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () {
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.go('/tables');
+                    }
+                  },
+                  icon: HeroIcon(HeroIcons.arrowLeft),
+                ),
+              ],
+            ),
+
           SvgPicture.asset(
             'assets/images/logo-light.svg',
             width: 130,

@@ -53,6 +53,9 @@ dependencies:
   flutter_colorpicker: ^1.1.0
   adaptive_will_pop_scope: ^1.0.4
   toastification: ^3.0.3
+  data_table_2: ^2.7.2
+  file_saver: ^0.3.1
+  csv: ^6.0.0
 
 dev_dependencies:
   flutter_test:

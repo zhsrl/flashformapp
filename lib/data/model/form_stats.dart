@@ -1,20 +1,20 @@
 class FormStats {
   const FormStats({
     required this.id,
-    required this.title,
+    required this.name,
     required this.totalLeads,
     required this.todayLeads,
   });
 
   final String id;
-  final String title;
+  final String name;
   final int totalLeads;
   final int todayLeads;
 
   factory FormStats.fromJson(Map<String, dynamic> json) {
     return FormStats(
       id: json['id'] as String,
-      title: json['title'] as String,
+      name: json['name'] as String,
       totalLeads: (json['total_leads'] as num).toInt(),
       todayLeads: (json['today_leads'] as num).toInt(),
     );
@@ -22,19 +22,19 @@ class FormStats {
 
   Map<String, dynamic> toJson() => {
     'id': id,
-    'title': title,
+    'name': name,
     'total_leads': totalLeads,
     'today_leads': todayLeads,
   };
 
   FormStats copyWith({
     String? id,
-    String? title,
+    String? name,
     int? totalLeads,
     int? todayLeads,
   }) => FormStats(
     id: id ?? this.id,
-    title: title ?? this.title,
+    name: name ?? this.name,
     totalLeads: totalLeads ?? this.totalLeads,
     todayLeads: todayLeads ?? this.todayLeads,
   );
@@ -45,14 +45,14 @@ class FormStats {
           other is FormStats &&
               runtimeType == other.runtimeType &&
               id == other.id &&
-              title == other.title &&
+              name == other.name &&
               totalLeads == other.totalLeads &&
               todayLeads == other.todayLeads;
 
   @override
   int get hashCode =>
       id.hashCode ^
-      title.hashCode ^
+      name.hashCode ^
       totalLeads.hashCode ^
       todayLeads.hashCode;
 }

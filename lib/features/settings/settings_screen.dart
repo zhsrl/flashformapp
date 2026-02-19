@@ -1,3 +1,4 @@
+import 'package:flashform_app/features/settings/views/desktop/settings_view_desktop.dart';
 import 'package:flashform_app/features/widgets/responsive_layout.dart';
 import 'package:flutter/material.dart';
 
@@ -10,12 +11,8 @@ class SettingsScreen extends StatelessWidget {
       mobile: Center(
         child: Text('Mobile Settings view'),
       ),
-      desktop: Center(
-        child: Text('Desktop Settings view'),
-      ),
-      tablet: Center(
-        child: Text('Tablet Settings view'),
-      ),
+      desktop: SettingsViewDesktop(),
+      tablet: SettingsViewDesktop(),
     );
   }
 }

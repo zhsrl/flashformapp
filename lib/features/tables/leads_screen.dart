@@ -8,13 +8,9 @@ class LeadsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveLayout(
-      mobile: Center(
-        child: Text('Mobile tables view'),
-      ),
+      mobile: LeadsViewDesktop(),
       desktop: LeadsViewDesktop(),
-      tablet: Center(
-        child: Text('Tablet tables view'),
-      ),
+      tablet: LeadsViewDesktop(),
     );
   }
 }

@@ -14,10 +14,12 @@
     This is a placeholder for base href that will be replaced by the value of
     the `--base-href` argument provided to `flutter build`.
   -->
+  <!-- <base href="/"> -->
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="description" content="A new Flutter project.">
 
   <!-- iOS meta tags & icons -->
@@ -33,6 +35,21 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <script>
+    window.addEventListener('error', function(event) {
+      console.error('🔴 GLOBAL ERROR:', event.error);
+    });
+    window.addEventListener('unhandledrejection', function(event) {
+      const reason = event.reason;
+      // Ignore DevTools connection errors
+      if (reason && reason.message && reason.message.includes('Could not establish connection')) {
+        console.log('ℹ️ Ignoring DevTools connection error - this is normal for non-localhost access');
+        event.preventDefault();
+        return;
+      }
+      console.error('🔴 UNHANDLED PROMISE REJECTION:', reason);
+    });
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

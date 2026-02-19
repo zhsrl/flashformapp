@@ -73,13 +73,15 @@ class _LeadsDetailViewDesktopState
                       ),
                       FFButton(
                         onPressed: () async {
-                          // await ref
-                          //     .read(exportProvider.notifier)
-                          //     .exportDataToCSV(widget.formId);
-
                           await ref
                               .read(leadsRepoProvider)
-                              .exportDataCSV(widget.formId);
+                              .exportDataCSV(
+                                widget.formId,
+                                dateFrom: leadsState.dateFrom,
+                                dateTo: leadsState.dateTo,
+                                city: leadsState.selectedCity,
+                                country: leadsState.selectedCountry,
+                              );
                         },
                         isLoading: ref.read(exportProvider).isLoading,
                         text: 'Экспорт',
@@ -463,6 +465,8 @@ class _LeadsDetailViewDesktopState
         ),
       ],
     ).then((value) {
+      if (!mounted) return;
+
       if (value != null) {
         if (value == DateFilterType.custom) {
           _selectCustomDate(context);
@@ -519,6 +523,8 @@ class _LeadsDetailViewDesktopState
         }),
       ],
     ).then((value) {
+      if (!mounted) return;
+
       if (value == null) {
         ref
             .read(leadsControllerProvider(widget.formId).notifier)
@@ -541,6 +547,8 @@ class _LeadsDetailViewDesktopState
       firstDate: DateTime(2020),
       lastDate: DateTime.now().add(const Duration(days: 365)),
     );
+
+    if (!mounted) return;
 
     if (picked != null) {
       setState(() {
@@ -575,14 +583,17 @@ class LeadDetailsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      child: SizedBox(
+    return AlertDialog(
+      backgroundColor: AppTheme.background,
+      content: SizedBox(
         width: 600,
         height: 600,
         child: Scaffold(
+          backgroundColor: Colors.transparent,
           appBar: AppBar(
             title: Text('Заявка #${lead.id?.substring(0, 8)}'),
-            automaticallyImplyLeading: true,
+            backgroundColor: Colors.transparent,
+            automaticallyImplyLeading: false,
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
@@ -595,17 +606,17 @@ class LeadDetailsDialog extends StatelessWidget {
                   [
                     _buildInfoRow(
                       context,
-                      'ID заявки:',
+                      'ID заявки',
                       lead.id ?? 'N/A',
                     ),
                     _buildInfoRow(
                       context,
-                      'ID формы:',
+                      'ID формы',
                       lead.formId ?? 'N/A',
                     ),
                     _buildInfoRow(
                       context,
-                      'Дата создания:',
+                      'Дата создания',
                       lead.createdAt != null
                           ? '${lead.createdAt?.toLocal()}'.split('.')[0]
                           : 'N/A',

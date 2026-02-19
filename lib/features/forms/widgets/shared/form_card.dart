@@ -113,8 +113,8 @@ class _FormCardState extends State<FormCard> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        SizedBox(
-                          width: 150,
+                        Expanded(
+                          // width: 150,
                           child: Text(
                             widget.form.name,
 

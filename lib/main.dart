@@ -20,7 +20,7 @@ Future<void> main() async {
   runApp(
     EasyLocalization(
       supportedLocales: const [Locale('ru'), Locale('kk')],
-      path: '/translations',
+      path: 'assets/translations',
       saveLocale: true,
       fallbackLocale: const Locale('ru'),
       startLocale: const Locale('ru'),
@@ -35,6 +35,7 @@ class MyApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final routerConfig = ref.watch(routerProvider);
+
     return ToastificationWrapper(
       child: MaterialApp.router(
         routerConfig: routerConfig,

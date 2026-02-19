@@ -116,7 +116,7 @@ class _FFTextFieldState extends State<FFTextField> {
               prefixIconColor: AppTheme.tertiary,
               filled: true,
 
-              fillColor: widget.fillColor ?? Colors.white,
+              fillColor: widget.fillColor ?? AppTheme.fourty,
               hintStyle: TextStyle(
                 color: AppTheme.tertiary,
                 fontWeight: FontWeight.w500,

@@ -78,7 +78,7 @@ class _LeadCardState extends State<LeadCard> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      widget.stats.title,
+                      widget.stats.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(

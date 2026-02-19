@@ -146,14 +146,39 @@ class LeadsRepository {
   }
 
   Future<void> exportDataCSV(
-    String formId,
-  ) async {
+    String formId, {
+    DateTime? dateFrom,
+    DateTime? dateTo,
+    String? city,
+    String? country,
+  }) async {
     debugPrint('Exporting data to CSV...');
-    final data = await _client
+    var query = _client
         .from('leads')
         .select('created_at, answers, utm_data, geo')
-        .eq('form_id', formId)
-        .order('created_at', ascending: false);
+        .eq('form_id', formId);
+
+    // Apply date filters
+    if (dateFrom != null) {
+      final dateStr =
+          '${dateFrom.year}-${dateFrom.month.toString().padLeft(2, '0')}-${dateFrom.day.toString().padLeft(2, '0')}';
+      query = query.gte('created_at', dateStr);
+    }
+    if (dateTo != null) {
+      final dateStr =
+          '${dateTo.year}-${dateTo.month.toString().padLeft(2, '0')}-${dateTo.day.toString().padLeft(2, '0')}';
+      query = query.lt('created_at', dateStr);
+    }
+
+    // Apply location filters
+    if (city != null) {
+      query = query.filter('geo->>city', 'eq', city);
+    }
+    if (country != null) {
+      query = query.filter('geo->>country', 'eq', country);
+    }
+
+    final data = await query.order('created_at', ascending: false);
 
     if (data.isEmpty) {
       debugPrint('No data to export');

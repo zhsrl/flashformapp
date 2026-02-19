@@ -18,6 +18,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 final routerProvider = Provider<GoRouter>(
   (ref) {
     final supabase = Supabase.instance.client;
+
     return GoRouter(
       initialLocation: '/forms',
       refreshListenable: GoRouterRefreshStream(supabase.auth.onAuthStateChange),

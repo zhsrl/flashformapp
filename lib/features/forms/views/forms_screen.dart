@@ -8,13 +8,9 @@ class FormsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveLayout(
-      mobile: Center(
-        child: Text('Mobile forms view'),
-      ),
+      mobile: FormsViewDesktop(),
       desktop: FormsViewDesktop(),
-      tablet: Center(
-        child: Text('Tablet forms view'),
-      ),
+      tablet: FormsViewDesktop(),
     );
   }
 }

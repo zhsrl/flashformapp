@@ -79,4 +79,40 @@ class AuthRepository {
       throw Exception(e);
     }
   }
+
+  Future<void> changePassword({
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    try {
+      // Verify old password by trying to sign in
+      final currentUser = _supabase.client.auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('User not logged in');
+      }
+
+      // Get email from current user
+      final email = currentUser.email;
+      if (email == null) {
+        throw Exception('User email not found');
+      }
+
+      // Verify old password
+      try {
+        await _supabase.client.auth.signInWithPassword(
+          email: email,
+          password: oldPassword,
+        );
+      } on AuthException catch (e) {
+        throw Exception('Неверный текущий пароль');
+      }
+
+      // Update password
+      await _supabase.client.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+    } on AuthException catch (e) {
+      throw Exception('Ошибка смены пароля: ${e.message}');
+    }
+  }
 }

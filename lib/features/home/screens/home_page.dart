@@ -1,5 +1,6 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/app_validator.dart';
+import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
 import 'package:flashform_app/features/home/widgets/ff_bottom_nav_bar.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
@@ -147,18 +148,58 @@ class _HomePageState extends State<HomePage> {
     final String location = GoRouterState.of(context).uri.path;
 
     return Scaffold(
+      bottomNavigationBar: context.isMobile
+          ? BottomNavigationBar(
+              onTap: (index) {
+                _onItemTapped(index, context);
+              },
+              backgroundColor: AppTheme.background,
+              selectedItemColor: AppTheme.secondary,
+              unselectedItemColor: AppTheme.secondary.withAlpha(50),
+
+              currentIndex: _getSelectedindex(location),
+              items: [
+                BottomNavigationBarItem(
+                  icon: HeroIcon(HeroIcons.inbox),
+                  label: 'Формы',
+                  activeIcon: HeroIcon(
+                    HeroIcons.inbox,
+                    style: HeroIconStyle.solid,
+                  ),
+                ),
+                BottomNavigationBarItem(
+                  icon: HeroIcon(HeroIcons.squares2x2),
+                  label: 'Заявки',
+                  activeIcon: HeroIcon(
+                    HeroIcons.squares2x2,
+                    style: HeroIconStyle.solid,
+                  ),
+                ),
+                BottomNavigationBarItem(
+                  icon: HeroIcon(HeroIcons.cog6Tooth),
+                  label: 'Настройки',
+                  activeIcon: HeroIcon(
+                    HeroIcons.cog6Tooth,
+                    style: HeroIconStyle.solid,
+                  ),
+                ),
+              ],
+            )
+          : SizedBox(),
       body: Stack(
         children: [
           widget.child,
-          FFBottomNavBar(
-            selectedIndex: _getSelectedindex(location),
-            onItemTapped: (index) {
-              _onItemTapped(index, context);
-            },
-            onCreateForm: () {
-              showCreateFormDialog();
-            },
-          ),
+
+          if (context.isDesktop || context.isTablet)
+            FFBottomNavBar(
+              selectedIndex: _getSelectedindex(location),
+              onItemTapped: (index) {
+                _onItemTapped(index, context);
+              },
+              onCreateForm: () {
+                showCreateFormDialog();
+              },
+            ),
         ],
       ),
     );

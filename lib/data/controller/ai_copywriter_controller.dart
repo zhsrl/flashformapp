@@ -7,7 +7,7 @@ final aiCopywriterControllerProvider = FutureProvider<AiCopywriterController>((
   ref,
 ) async {
   // TODO: Позже перенести в Supabase Secrets
-  const apiKey = 'AIzaSyCQQaNKM41cX8OC3kZpLyzXNDlTCfh72Cg';
+  const apiKey = '';
 
   if (apiKey.isEmpty) {
     throw Exception('Gemini API key not configured');

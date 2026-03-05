@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class FFButton extends StatefulWidget {
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final String text;
   final bool isLoading;
   final bool secondTheme;
@@ -34,6 +34,7 @@ class _FFButtonState extends State<FFButton> {
   Widget build(BuildContext context) {
     return Container(
       height: 45,
+
       // width: context.screenWidth,
       margin: EdgeInsets.only(
         bottom: widget.marginBottom,
@@ -44,7 +45,9 @@ class _FFButtonState extends State<FFButton> {
       child: ElevatedButton(
         onPressed: widget.isLoading ? null : widget.onPressed,
         style: ElevatedButton.styleFrom(
-          disabledBackgroundColor: AppTheme.secondary.withAlpha(200),
+          disabledBackgroundColor: widget.secondTheme
+              ? AppTheme.primary.withAlpha(100)
+              : AppTheme.secondary.withAlpha(100),
 
           elevation: 0,
           backgroundColor: widget.secondTheme
@@ -55,6 +58,7 @@ class _FFButtonState extends State<FFButton> {
             borderRadius: BorderRadiusGeometry.circular(300),
           ),
         ),
+
         child: widget.isLoading
             ? LoadingAnimationWidget.waveDots(
                 color: AppTheme.primary,

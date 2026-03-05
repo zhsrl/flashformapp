@@ -21,7 +21,7 @@ class FFBottomNavBar extends StatefulWidget {
     required this.onItemTapped,
   });
 
-  final VoidCallback onCreateForm;
+  final VoidCallback? onCreateForm;
 
   final int selectedIndex;
   final Function(int index) onItemTapped;

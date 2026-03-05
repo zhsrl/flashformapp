@@ -1,24 +1,22 @@
 import 'package:flashform_app/core/app_theme.dart';
+import 'package:flashform_app/data/model/subscription_plan.dart';
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
-
-enum SubscriptionType {
-  free,
-  personal,
-}
 
 class SubscriptionWidget extends StatelessWidget {
   const SubscriptionWidget({
     super.key,
-    required this.subscriptionType,
+    required this.plan,
   });
 
-  final SubscriptionType subscriptionType;
+  final SubscriptionPlan plan;
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor = subscriptionType == SubscriptionType.free
-        ? AppTheme.fourty
+    Color backgroundColor = plan == SubscriptionPlan.spark
+        ? Colors.deepOrange
+        : plan == SubscriptionPlan.pro
+        ? AppTheme.secondary
         : AppTheme.primary;
 
     return Container(
@@ -30,19 +28,40 @@ class SubscriptionWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          if (subscriptionType == SubscriptionType.personal)
+          if (plan == SubscriptionPlan.spark)
+            HeroIcon(
+              HeroIcons.star,
+              color: Colors.white,
+              style: HeroIconStyle.solid,
+            ),
+          if (plan == SubscriptionPlan.go)
             HeroIcon(
               HeroIcons.fire,
               color: AppTheme.secondary,
               style: HeroIconStyle.solid,
             ),
-          if (subscriptionType == SubscriptionType.personal)
-            const SizedBox(
-              width: 6,
+          if (plan == SubscriptionPlan.pro)
+            HeroIcon(
+              HeroIcons.bolt,
+              color: AppTheme.primary,
+              style: HeroIconStyle.solid,
             ),
+
+          const SizedBox(
+            width: 6,
+          ),
           Text(
-            subscriptionType == SubscriptionType.free ? 'Free' : 'Personal',
+            plan == SubscriptionPlan.spark
+                ? 'Spark'
+                : plan == SubscriptionPlan.go
+                ? 'Go'
+                : 'Pro',
             style: TextStyle(
+              color: plan == SubscriptionPlan.spark
+                  ? Colors.white
+                  : plan == SubscriptionPlan.pro
+                  ? AppTheme.primary
+                  : AppTheme.secondary,
               fontWeight: FontWeight.bold,
             ),
           ),

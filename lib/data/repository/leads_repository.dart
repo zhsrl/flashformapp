@@ -104,6 +104,25 @@ class LeadsRepository {
     return response.count;
   }
 
+  // Считает все лиды пользователя за текущий месяц (для проверки лимита)
+  Future<int> getMonthlyLeadsCount() async {
+    if (_currentUser == null) {
+      throw const AuthException('User not logged in');
+    }
+
+    final now = DateTime.now();
+    final monthStart = DateTime(now.year, now.month, 1);
+
+    final response = await _client
+        .from('leads')
+        .select('id, forms!inner(user_id)')
+        .eq('forms.user_id', _currentUser!.id)
+        .gte('created_at', monthStart.toIso8601String())
+        .count(CountOption.exact);
+
+    return response.count;
+  }
+
   // Get unique locations for filter dropdown
   Future<List<Map<String, String>>> getUniqueLocations(String formId) async {
     if (_currentUser == null) {

@@ -1,4 +1,5 @@
 import 'package:flashform_app/core/app_theme.dart';
+import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/features/home/widgets/home_appbar.dart';
 import 'package:flashform_app/features/settings/widgets/profile_widget_desktop.dart';
 import 'package:flashform_app/features/widgets/ff_tabbar.dart';
@@ -34,35 +35,43 @@ class _SettingsViewDesktopState extends State<SettingsViewDesktop>
       appBar: HomeAppBar(),
       endDrawer: ChangePasswordDialog(),
       backgroundColor: AppTheme.background,
-      body: SingleChildScrollView(
-        child: Center(
-          child: SizedBox(
-            width: 500,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FFTabBar(
-                  controller: _tabController,
-                  onTap: (index) {
-                    setState(() {
-                      _selectedIndex = index;
-                    });
-                  },
-                  tabs: [
-                    Text('Профиль'),
-                    Text('Подписка'),
-                  ],
-                ),
-                const SizedBox(
-                  height: 16,
-                ),
+      body: Padding(
+        padding: context.isMobile
+            ? EdgeInsets.symmetric(horizontal: 16)
+            : EdgeInsets.zero,
+        child: SingleChildScrollView(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: 500,
+                minWidth: 300,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  FFTabBar(
+                    controller: _tabController,
+                    onTap: (index) {
+                      setState(() {
+                        _selectedIndex = index;
+                      });
+                    },
+                    tabs: [
+                      Text('Профиль'),
+                      Text('Подписка'),
+                    ],
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
 
-                [
-                  SettingsProfileView(),
-                  Text('Subscription'),
-                ].elementAt(_selectedIndex),
-              ],
+                  [
+                    SettingsProfileView(),
+                    Text('Subscription'),
+                  ].elementAt(_selectedIndex),
+                ],
+              ),
             ),
           ),
         ),

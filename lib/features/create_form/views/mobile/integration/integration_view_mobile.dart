@@ -2,13 +2,10 @@ import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
-
 import 'package:flashform_app/data/controller/formui_controller.dart';
 import 'package:flashform_app/data/controller/integration_controller.dart';
-import 'package:flashform_app/data/repository/form_repository.dart';
-
+import 'package:flashform_app/features/create_form/views/desktop/editor/views/telegram_integration_settings_view.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
-import 'package:flashform_app/features/widgets/ff_snackbar.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -16,8 +13,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:heroicons/heroicons.dart';
 
-class EditorIntergrationView extends ConsumerStatefulWidget {
-  const EditorIntergrationView({
+class IntegrationViewMobile extends ConsumerStatefulWidget {
+  const IntegrationViewMobile({
     super.key,
     required this.formId,
   });
@@ -25,12 +22,12 @@ class EditorIntergrationView extends ConsumerStatefulWidget {
   final String formId;
 
   @override
-  ConsumerState<EditorIntergrationView> createState() =>
+  ConsumerState<IntegrationViewMobile> createState() =>
       _SettingsIntergrationViewDesktopState();
 }
 
 class _SettingsIntergrationViewDesktopState
-    extends ConsumerState<EditorIntergrationView> {
+    extends ConsumerState<IntegrationViewMobile> {
   bool _isMetaPixelEnabled = false;
   bool _isYandexMetrikaEnabled = false;
 

@@ -30,7 +30,7 @@ class _SettingsPanelViewState extends ConsumerState<EditorView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this, initialIndex: 0);
+    _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
     _tabController.addListener(() {
       setState(() {
         _tabIndex = _tabController.index;
@@ -52,10 +52,21 @@ class _SettingsPanelViewState extends ConsumerState<EditorView>
         children: [
           FFTabBar(
             tabs: [
-              Text('Контент'),
-              Text('Блоки'),
-              // Text('Footer'),
-              Text('Интеграция'),
+              Text(
+                'Контент',
+                style: TextStyle(
+                  // fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              Text(
+                'Интеграции',
+                style: TextStyle(
+                  // fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ],
             controller: _tabController,
             onTap: (index) {
@@ -76,30 +87,23 @@ class _SettingsPanelViewState extends ConsumerState<EditorView>
                 physics: AlwaysScrollableScrollPhysics(),
                 child: Form(
                   key: _formKey,
-                  child: SizedBox(
-                    width: 350,
-                    child: AnimatedSwitcher(
-                      duration: Duration(milliseconds: 100),
-                      transitionBuilder: (child, animation) {
-                        return FadeTransition(opacity: animation, child: child);
-                      },
-                      child: _tabIndex == 0
-                          ? EditorContentView(
-                              controller: controller,
-                              focusNode: widget.focusNode,
-                              formState: formState,
-                              onChanged: widget.onChanged,
-                              ref: ref,
-                              uiControllers: uiControllers,
-                            )
-                          : _tabIndex == 1
-                          ? Center(
-                              child: Text('Footer'),
-                            )
-                          : EditorIntergrationView(
-                              formId: currentFormId,
-                            ),
-                    ),
+                  child: AnimatedSwitcher(
+                    duration: Duration(milliseconds: 100),
+                    transitionBuilder: (child, animation) {
+                      return FadeTransition(opacity: animation, child: child);
+                    },
+
+                    child: [
+                      EditorContentView(
+                        controller: controller,
+                        focusNode: widget.focusNode,
+                        formState: formState,
+                        onChanged: widget.onChanged,
+                        ref: ref,
+                        uiControllers: uiControllers,
+                      ),
+                      EditorIntergrationView(formId: currentFormId),
+                    ].elementAt(_tabIndex),
                   ),
                 ),
               ),

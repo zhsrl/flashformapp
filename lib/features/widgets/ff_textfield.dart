@@ -78,7 +78,9 @@ class _FFTextFieldState extends State<FFTextField> {
         Container(
           padding: EdgeInsets.only(bottom: widget.bottomPadding ?? 0),
           margin: EdgeInsets.only(bottom: widget.bottomMargin ?? 10),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(15)),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(15),
+          ),
           child: TextFormField(
             obscureText: widget.isPassword == false ? false : _obscured,
             controller: widget.controller,

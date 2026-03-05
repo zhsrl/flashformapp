@@ -2,24 +2,27 @@ import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/app_validator.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
+import 'package:flashform_app/data/controller/plan_usage_controller.dart';
+import 'package:flashform_app/data/controller/user_controller.dart';
 import 'package:flashform_app/features/home/widgets/ff_bottom_nav_bar.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
+import 'package:flashform_app/features/widgets/ff_snackbar.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key, required this.child});
 
   final Widget child;
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _formTitleController;
 
@@ -29,6 +32,9 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _formTitleController = TextEditingController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(userControllerProvider.notifier).loadProfile();
+    });
   }
 
   int _getSelectedindex(String location) {
@@ -49,6 +55,52 @@ class _HomePageState extends State<HomePage> {
       case 2:
         context.go('/settings');
     }
+  }
+
+  showFormLimitDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: AppTheme.secondary,
+          content: SizedBox(
+            width: 400,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Вы достигли максимума',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w500,
+                    fontSize: 28,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(
+                  height: 8,
+                ),
+                Text(
+                  'Вы создали все доступные формы на текущем тарифе. Чтобы продолжить сбор лидов без ограничений, перейдите на расширенный план.',
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                FFButton(
+                  onPressed: () {},
+                  text: 'Перейти на расширенный план',
+                  secondTheme: true,
+                  marginBottom: 0,
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   showCreateFormDialog() {
@@ -123,7 +175,7 @@ class _HomePageState extends State<HomePage> {
                                 }
                               }
                             },
-                            text: 'Create',
+                            text: 'Создать',
                           ),
                         ),
                       ],
@@ -140,14 +192,49 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // return ResponsiveLayout(
-    //   mobile: SizedBox(),
-    //   desktop: HomePageDesktopView(),
-    // );
-
     final String location = GoRouterState.of(context).uri.path;
 
+    final usageAsync = ref.read(planUsageProvider);
     return Scaffold(
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: context.isMobile
+          ? FloatingActionButton(
+              onPressed: () async {
+                final usageAsync = ref.read(planUsageProvider);
+
+                await usageAsync.when(
+                  data: (usage) {
+                    if (usage.isFormsLimitReached) {
+                      showFormLimitDialog();
+                    } else {
+                      showCreateFormDialog();
+                    }
+                  },
+                  loading: () {},
+
+                  error: (er, st) {
+                    showSnackbar(
+                      context,
+                      type: SnackbarType.error,
+                      message: 'Ошибка: $er',
+                    );
+                  },
+                );
+              },
+              backgroundColor: AppTheme.secondary,
+              foregroundColor: AppTheme.primary,
+              child: HeroIcon(HeroIcons.plus),
+              // child: Row(
+              //   children: [
+              //     HeroIcon(HeroIcons.plus),
+              //     const SizedBox(
+              //       width: 8,
+              //     ),
+              //     Text('Создать'),
+              //   ],
+              // ),
+            )
+          : null,
       bottomNavigationBar: context.isMobile
           ? BottomNavigationBar(
               onTap: (index) {
@@ -156,6 +243,8 @@ class _HomePageState extends State<HomePage> {
               backgroundColor: AppTheme.background,
               selectedItemColor: AppTheme.secondary,
               unselectedItemColor: AppTheme.secondary.withAlpha(50),
+              iconSize: 20,
+              showUnselectedLabels: false,
 
               currentIndex: _getSelectedindex(location),
               items: [
@@ -196,8 +285,28 @@ class _HomePageState extends State<HomePage> {
               onItemTapped: (index) {
                 _onItemTapped(index, context);
               },
-              onCreateForm: () {
-                showCreateFormDialog();
+
+              onCreateForm: () async {
+                final usageAsync = ref.read(planUsageProvider);
+
+                await usageAsync.when(
+                  data: (usage) {
+                    if (usage.isFormsLimitReached) {
+                      showFormLimitDialog();
+                    } else {
+                      showCreateFormDialog();
+                    }
+                  },
+                  loading: () {},
+
+                  error: (er, st) {
+                    showSnackbar(
+                      context,
+                      type: SnackbarType.error,
+                      message: 'Ошибка: $er',
+                    );
+                  },
+                );
               },
             ),
         ],

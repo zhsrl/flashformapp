@@ -68,7 +68,7 @@ class BuildDescriptionBlock extends ConsumerWidget {
       width: context.screenWidth,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
-        color: AppTheme.background,
+        color: Colors.white,
         border: Border.all(width: 1.5, color: AppTheme.border),
       ),
       margin: const EdgeInsets.only(bottom: 16),

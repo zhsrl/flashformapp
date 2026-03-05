@@ -1,11 +1,18 @@
 import 'package:flashform_app/core/app_theme.dart';
+import 'package:flashform_app/core/utils/responsive_helper.dart';
+import 'package:flashform_app/data/controller/forms_controller.dart';
+import 'package:flashform_app/data/controller/plan_usage_controller.dart';
+import 'package:flashform_app/data/controller/user_controller.dart';
+import 'package:flashform_app/data/model/subscription_plan.dart';
 import 'package:flashform_app/features/home/widgets/subscription_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-class HomeAppBar extends StatefulWidget implements PreferredSizeWidget {
+class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
   const HomeAppBar({
     super.key,
     this.formId = '',
@@ -17,14 +24,126 @@ class HomeAppBar extends StatefulWidget implements PreferredSizeWidget {
   final bool? automaticallyImplyLeading;
   final bool? isBack;
 
-  @override
-  State<HomeAppBar> createState() => _HomeAppBarState();
+  void showUsageDialog(
+    BuildContext context,
+  ) {
+    showDialog(
+      context: context,
 
-  @override
-  Size get preferredSize => Size(double.infinity, 60);
-}
+      builder: (context) {
+        return Consumer(
+          builder: (context, ref, child) {
+            final usageAsync = ref.watch(planUsageProvider);
 
-class _HomeAppBarState extends State<HomeAppBar> {
+            return AlertDialog(
+              backgroundColor: AppTheme.secondary,
+              title: Text(
+                'Использование и лимиты',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16,
+                ),
+              ),
+              content: usageAsync.when(
+                data: (usage) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Формы',
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            '${usage.formsUsed}/${usage.formsLimit}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      LinearProgressIndicator(
+                        value: usage.formsProgress,
+                        minHeight: 8,
+                        borderRadius: BorderRadius.circular(400),
+                        backgroundColor: AppTheme.tertiary,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          usage.isFormsLimitReached
+                              ? Colors.red
+                              : AppTheme.primary,
+                        ),
+                      ),
+
+                      const SizedBox(
+                        height: 16,
+                      ),
+
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Лиды',
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+
+                          Text(
+                            '${usage.leadsUsed}/${usage.leadsLimit} в месяц',
+                            style: TextStyle(
+                              color: Colors.white.withAlpha(100),
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(
+                        height: 8,
+                      ),
+
+                      LinearProgressIndicator(
+                        value: usage.leadsProgress,
+                        backgroundColor: AppTheme.tertiary,
+                        minHeight: 8,
+                        borderRadius: BorderRadius.circular(400),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          usage.isLeadsLimitReached
+                              ? Colors.red
+                              : AppTheme.primary,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+                error: (er, st) =>
+                    SizedBox(height: 100, child: Text('Ошибка: $er')),
+                loading: () => SizedBox(
+                  height: 100,
+                  child: Center(
+                    child: LoadingAnimationWidget.waveDots(
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return AppBar(
@@ -35,7 +154,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
       centerTitle: false,
       title: Row(
         children: [
-          if (widget.isBack!)
+          if (isBack!)
             Row(
               children: [
                 IconButton(
@@ -50,20 +169,25 @@ class _HomeAppBarState extends State<HomeAppBar> {
                 ),
               ],
             ),
-
-          SvgPicture.asset(
-            'assets/images/logo-light.svg',
-            width: 130,
-          ),
+          if (context.isDesktop || context.isTablet)
+            SvgPicture.asset(
+              'assets/images/logo-light.svg',
+              width: 130,
+            ),
+          if (context.isMobile)
+            SvgPicture.asset(
+              'assets/images/logo-short.svg',
+              width: 40,
+            ),
           const SizedBox(
             width: 10,
           ),
-          if (widget.formId == '')
-            Container(
+          if (formId == '')
+            SizedBox(
               height: 40,
               child: Center(
                 child: Text(
-                  widget.formId!,
+                  formId!,
                   style: TextStyle(color: Colors.black),
                 ),
               ),
@@ -74,8 +198,20 @@ class _HomeAppBarState extends State<HomeAppBar> {
       actionsPadding: EdgeInsets.only(right: 10),
 
       actions: [
-        SubscriptionWidget(
-          subscriptionType: SubscriptionType.personal,
+        Consumer(
+          builder: (context, ref, _) {
+            final userState = ref.watch(userControllerProvider);
+            final user = userState.user;
+
+            if (user == null) {
+              return SizedBox();
+            }
+
+            return GestureDetector(
+              onTap: () => showUsageDialog(context),
+              child: SubscriptionWidget(plan: user.plan),
+            );
+          },
         ),
         const SizedBox(
           width: 10,
@@ -100,4 +236,7 @@ class _HomeAppBarState extends State<HomeAppBar> {
       ],
     );
   }
+
+  @override
+  Size get preferredSize => Size(double.infinity, 60);
 }

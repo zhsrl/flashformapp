@@ -130,75 +130,82 @@ class _HomePageDesktopViewState extends ConsumerState<FormsViewDesktop> {
 
       body: Stack(
         children: [
-          SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: formsAsync.when(
-              data: (forms) {
-                if (forms.isEmpty) {
-                  return Center(
-                    child: InkWell(
-                      onTap: () {},
-                      borderRadius: BorderRadius.circular(20),
-                      child: Container(
-                        width: 200,
-                        height: 200,
-                        padding: EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          border: DashedBorder(
-                            color: AppTheme.secondary.withAlpha(100),
+          SizedBox.expand(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: formsAsync.when(
+                data: (forms) {
+                  if (forms.isEmpty) {
+                    return Center(
+                      child: InkWell(
+                        onTap: () {},
+                        borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          width: 200,
+                          height: 200,
+                          padding: EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            border: DashedBorder(
+                              color: AppTheme.secondary.withAlpha(100),
+                            ),
+                            borderRadius: BorderRadius.circular(20),
                           ),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Center(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              HeroIcon(
-                                HeroIcons.plusCircle,
-                                color: AppTheme.secondary.withAlpha(100),
-                                size: 50,
-                              ),
-                              Text(
-                                'Создать вашу первую форму!',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
+                          child: Center(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                HeroIcon(
+                                  HeroIcons.plusCircle,
                                   color: AppTheme.secondary.withAlpha(100),
+                                  size: 50,
                                 ),
-                              ),
-                            ],
+                                Text(
+                                  'Создать вашу первую форму!',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    color: AppTheme.secondary.withAlpha(100),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
+                    );
+                  }
+                  return Column(
+                    children: [
+                      GridView.builder(
+                        physics: NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                          mainAxisExtent: 180,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          maxCrossAxisExtent: 200,
+                          // crossAxisCount: context.isDesktop
+                          //     ? 4
+                          //     : context.isTablet
+                          //     ? 2
+                          //     : 1,
+                        ),
+                        itemCount: forms.length,
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) {
+                          return FormCard(form: forms[index]);
+                        },
+                      ),
+                    ],
                   );
-                }
-                return GridView.builder(
-                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                    mainAxisExtent: 180,
-                    mainAxisSpacing: 16,
-                    crossAxisSpacing: 16,
-                    maxCrossAxisExtent: 200,
-                    // crossAxisCount: context.isDesktop
-                    //     ? 4
-                    //     : context.isTablet
-                    //     ? 2
-                    //     : 1,
+                },
+                error: (er, st) {
+                  throw Exception(er.toString());
+                },
+                loading: () => Center(
+                  child: LoadingAnimationWidget.waveDots(
+                    color: AppTheme.primary,
+                    size: 40,
                   ),
-                  itemCount: forms.length,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    return FormCard(form: forms[index]);
-                  },
-                );
-              },
-              error: (er, st) {
-                throw Exception(er.toString());
-              },
-              loading: () => Center(
-                child: LoadingAnimationWidget.waveDots(
-                  color: AppTheme.primary,
-                  size: 40,
                 ),
               ),
             ),

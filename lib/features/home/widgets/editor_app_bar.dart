@@ -1,10 +1,10 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/app_validator.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
+import 'package:flashform_app/features/widgets/responsive_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:heroicons/heroicons.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class EditorAppBar extends StatefulWidget implements PreferredSizeWidget {
   const EditorAppBar({
@@ -14,6 +14,7 @@ class EditorAppBar extends StatefulWidget implements PreferredSizeWidget {
     required this.onPublish,
     required this.onToggleEditMode,
     required this.onSaveFormName,
+    this.onTapMore,
     this.isPublishing,
     this.onTapLink,
 
@@ -27,6 +28,7 @@ class EditorAppBar extends StatefulWidget implements PreferredSizeWidget {
   final ValueChanged<bool> onToggleEditMode;
   final ValueChanged<String> onSaveFormName;
   final VoidCallback? onTapLink;
+  final VoidCallback? onTapMore;
   final VoidCallback onBack;
   final bool? isPublishing;
   final bool? isFormNameChange;
@@ -169,6 +171,41 @@ class _EditorAppBarState extends State<EditorAppBar> {
       actionsPadding: EdgeInsets.only(right: 10),
 
       actions: [
+        PopupMenuButton<String>(
+          icon: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: AppTheme.border),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.all(6),
+            child: HeroIcon(HeroIcons.ellipsisHorizontal),
+          ),
+          onSelected: (value) {
+            if (value == 'delete') widget.onTapMore?.call();
+          },
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              value: 'delete',
+              child: Row(
+                children: [
+                  HeroIcon(
+                    HeroIcons.trash,
+                    color: Colors.red,
+                    size: 18,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Удалить форму',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(
+          width: 8,
+        ),
         IconButton.outlined(
           onPressed: widget.onTapLink,
           icon: HeroIcon(HeroIcons.link),

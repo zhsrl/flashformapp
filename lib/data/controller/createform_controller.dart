@@ -81,11 +81,55 @@ class CreateFormController extends StateNotifier<CreateFormState> {
   void updateFormButtonText(String text) =>
       state = state.copyWith(formButtonText: text);
 
+  void updateSuccessAction(String action) =>
+      state = state.copyWith(successAction: action);
+  void updateWhatsappNumber(String number) =>
+      state = state.copyWith(whatsappNumber: number);
+  void updateWhatsappMessage(String message) =>
+      state = state.copyWith(whatsappMessage: message);
+  void updateThxTitle(String title) => state = state.copyWith(thxTitle: title);
+  void updateThxDescription(String description) =>
+      state = state.copyWith(thxDescription: description);
+
+  // Telegram methods
+  void updateTelegramEnabled(bool enabled) {
+    state = state.copyWith(telegramEnabled: enabled);
+    markAsChanged();
+  }
+
+  void updateTelegramChatId(String chatId) {
+    state = state.copyWith(telegramChatId: chatId);
+    markAsChanged();
+  }
+
+  void clearTelegramSettings() {
+    state = state.copyWith(
+      telegramEnabled: false,
+      telegramChatId: null,
+    );
+    markAsChanged();
+  }
+
   void initializeFromModel(FormModel form) {
     final data = form.data ?? {};
     final fieldsList = (data['form']['fields'] as List? ?? [])
         .map((e) => FormFields.fromJson(e))
         .toList();
+
+    // Загружаем success_action из новой структуры
+    final successAction = data['form']['success_action'] as Map?;
+    final successActionType = successAction?['type'] as String? ?? 'thx';
+    final whatsappNumber = successAction?['whatsapp_number'] as String?;
+    final whatsappMessage = successAction?['whatsapp_message'] as String?;
+    final thxTitle = successAction?['thx_title'] as String?;
+    final thxDescription = successAction?['thx_description'] as String?;
+    final redirectUrl = successAction?['redirect_url'] as String?;
+
+    // Загружаем Telegram настройки
+    final notificationSettings = data['notification_settings'] as Map?;
+    final telegramSettings = notificationSettings?['telegram'] as Map?;
+    final telegramEnabled = telegramSettings?['enabled'] as bool? ?? false;
+    final telegramChatId = telegramSettings?['chat_id'] as String?;
 
     state = state.copyWith(
       name: form.name,
@@ -105,12 +149,17 @@ class CreateFormController extends StateNotifier<CreateFormState> {
       titleFontSize: data['title']['size'],
       subtitleFontSize: data['subtitle']['size'],
       actionType: data['action_type'],
-      hasRedirectUrl: data['form']['button']['redirect-url'] != null
-          ? true
-          : false,
-      redirectUrl: data['form']['button']['redirect-url'],
+      successAction: successActionType,
+      whatsappNumber: whatsappNumber,
+      whatsappMessage: whatsappMessage,
+      thxTitle: thxTitle,
+      thxDescription: thxDescription,
+      redirectUrl: redirectUrl,
+      hasRedirectUrl: redirectUrl != null ? true : false,
       yandexMetrikaId: data['settings']['ya-metrika-id'],
       metaPixelId: data['settings']['meta-pixel-id'],
+      telegramEnabled: telegramEnabled,
+      telegramChatId: telegramChatId,
     );
   }
 
@@ -177,14 +226,26 @@ class CreateFormController extends StateNotifier<CreateFormState> {
           'button': {
             'text': state.formButtonText,
             'color': state.formButtonColor.toHexString(),
-
-            'redirect-url': state.redirectUrl,
+          },
+          'success_action': {
+            'type': state.successAction,
+            'whatsapp_number': state.whatsappNumber,
+            'whatsapp_message': state.whatsappMessage,
+            'thx_title': state.thxTitle,
+            'thx_description': state.thxDescription,
+            'redirect_url': state.redirectUrl,
           },
         },
         'theme': state.theme,
         'settings': {
           'meta-pixel-id': state.metaPixelId,
           'ya-metrika-id': state.yandexMetrikaId,
+        },
+        'notification_settings': {
+          'telegram': {
+            'enabled': state.telegramEnabled,
+            'chat_id': state.telegramChatId,
+          },
         },
       };
 

@@ -24,7 +24,7 @@ class _ConfirmEmailPageState extends State<ConfirmEmailPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Image.asset(
-                'images/envelope.png',
+                'assets/images/envelope.png',
                 width: 80,
               ),
               const SizedBox(

@@ -30,6 +30,12 @@ class FormUIControllers {
   late final TextEditingController metaPixelIdController;
   late final TextEditingController yandexMetrikaIdController;
 
+  late final TextEditingController whatsappNumberController;
+  late final TextEditingController whatsappMessageController;
+
+  late final TextEditingController thxTitleController;
+  late final TextEditingController thxDescriptionController;
+
   FormUIControllers(this._logicNotifier) {
     titleController = TextEditingController();
     subtitleController = TextEditingController();
@@ -38,12 +44,16 @@ class FormUIControllers {
     formButtonTextController = TextEditingController();
     successTextController = TextEditingController();
     buttonUrlController = TextEditingController();
+
     formRedirectUrlController = TextEditingController();
+    whatsappNumberController = TextEditingController();
+    whatsappMessageController = TextEditingController();
+    thxTitleController = TextEditingController();
+    thxDescriptionController = TextEditingController();
 
     metaPixelIdController = TextEditingController();
     yandexMetrikaIdController = TextEditingController();
 
-    // МАГИЯ СИНХРОНИЗАЦИИ:
     // Как только юзер печатает, мы обновляем главный стейт
     titleController.addListener(() {
       _logicNotifier.updateTitle(titleController.text);
@@ -52,12 +62,44 @@ class FormUIControllers {
 
     subtitleController.addListener(() {
       _logicNotifier.updateSubtitle(subtitleController.text);
-      // _logicNotifier.markAsChanged();
     });
 
-    // Добавь остальные слушатели...
     formTitleController.addListener(
       () => _logicNotifier.updateFormTitle(formTitleController.text),
+    );
+
+    buttonTextController.addListener(
+      () => _logicNotifier.updateButtonText(buttonTextController.text),
+    );
+    formButtonTextController.addListener(
+      () => _logicNotifier.updateButtonText(formButtonTextController.text),
+    );
+    successTextController.addListener(
+      () => _logicNotifier.updateButtonText(successTextController.text),
+    );
+    buttonUrlController.addListener(
+      () => _logicNotifier.updateButtonText(buttonUrlController.text),
+    );
+    formRedirectUrlController.addListener(
+      () => _logicNotifier.updateButtonText(formRedirectUrlController.text),
+    );
+    whatsappNumberController.addListener(
+      () => _logicNotifier.updateWhatsappNumber(whatsappNumberController.text),
+    );
+    whatsappMessageController.addListener(
+      () => _logicNotifier.updateWhatsappMessage(whatsappMessageController.text),
+    );
+    thxTitleController.addListener(
+      () => _logicNotifier.updateThxTitle(thxTitleController.text),
+    );
+    thxDescriptionController.addListener(
+      () => _logicNotifier.updateThxDescription(thxDescriptionController.text),
+    );
+    metaPixelIdController.addListener(
+      () => _logicNotifier.updateButtonText(metaPixelIdController.text),
+    );
+    yandexMetrikaIdController.addListener(
+      () => _logicNotifier.updateButtonText(yandexMetrikaIdController.text),
     );
   }
 
@@ -71,6 +113,10 @@ class FormUIControllers {
     String? successText,
     String? buttonUrl,
     String? formRedirectUrl,
+    String? whatsappNumber,
+    String? whatsappMessage,
+    String? thxTitle,
+    String? thxDescription,
     String? metaPixelId,
     String? yandexMetrikaId,
   }) {
@@ -85,8 +131,20 @@ class FormUIControllers {
       formRedirectUrlController.text = formRedirectUrl;
 
       if (metaPixelId != null) metaPixelIdController.text = metaPixelId;
-      if (yandexMetrikaId != null)
+      if (yandexMetrikaId != null) {
         yandexMetrikaIdController.text = yandexMetrikaId;
+      }
+
+      if (whatsappNumber != null) {
+        whatsappNumberController.text = whatsappNumber;
+      }
+      if (whatsappMessage != null) {
+        whatsappMessageController.text = whatsappMessage;
+      }
+
+      if (thxTitle != null) thxTitleController.text = thxTitle;
+      if (thxDescription != null)
+        thxDescriptionController.text = thxDescription;
     }
   }
 
@@ -101,5 +159,9 @@ class FormUIControllers {
     formRedirectUrlController.dispose();
     metaPixelIdController.dispose();
     yandexMetrikaIdController.dispose();
+    whatsappNumberController.dispose();
+    whatsappMessageController.dispose();
+    thxTitleController.dispose();
+    thxDescriptionController.dispose();
   }
 }

@@ -29,7 +29,8 @@ class _FFTabBarState extends State<FFTabBar> {
       width: widget.width,
 
       decoration: BoxDecoration(
-        color: AppTheme.fourty,
+        // color: AppTheme.fourty,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(15),
       ),
       child: TabBar(

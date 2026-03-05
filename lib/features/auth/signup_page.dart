@@ -144,7 +144,7 @@ class _SigninPageState extends ConsumerState<SignupPage> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   SvgPicture.asset(
-                    'images/logo-short.svg',
+                    'assets/images/logo-short.svg',
                     width: 50,
                   ),
                   const SizedBox(

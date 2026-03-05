@@ -10,6 +10,7 @@ import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class SettingsProfileView extends ConsumerStatefulWidget {
   const SettingsProfileView({super.key});
@@ -28,11 +29,6 @@ class _SettingsProfileViewState extends ConsumerState<SettingsProfileView> {
     super.initState();
     _nameController = TextEditingController();
     _emailController = TextEditingController();
-
-    // Загружаем профиль при открытии
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(userControllerProvider.notifier).loadProfile();
-    });
   }
 
   @override
@@ -48,7 +44,7 @@ class _SettingsProfileViewState extends ConsumerState<SettingsProfileView> {
     final authNotifier = ref.watch(authControllerProvider.notifier);
 
     // Обработка состояния загрузки
-    if (userState.isLoading && userState.user == null) {
+    if (userState.isLoading) {
       return Center(child: CircularProgressIndicator());
     }
 
@@ -59,7 +55,12 @@ class _SettingsProfileViewState extends ConsumerState<SettingsProfileView> {
 
     final user = userState.user;
     if (user == null) {
-      return Center(child: Text('Нет данных'));
+      return Center(
+        child: LoadingAnimationWidget.waveDots(
+          color: AppTheme.secondary,
+          size: 30,
+        ),
+      );
     }
 
     // Устанавливаем значения в TextFields при первой загрузке
@@ -101,7 +102,6 @@ class _SettingsProfileViewState extends ConsumerState<SettingsProfileView> {
           SizedBox(
             width: context.screenWidth,
             child: FFButton(
-              isLoading: userState.isLoading,
               onPressed: () {
                 String name = _nameController.text;
                 debugPrint('Entered name: $name');
@@ -291,12 +291,24 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                'Изменить пароль',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w500,
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Изменить пароль',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Scaffold.of(context).closeEndDrawer();
+                    },
+                    child: HeroIcon(HeroIcons.xMark),
+                  ),
+                ],
               ),
               const SizedBox(
                 height: 16,

@@ -8,9 +8,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ResponsiveLayout(
-      mobile: Center(
-        child: Text('Mobile Settings view'),
-      ),
+      mobile: SettingsViewDesktop(),
       desktop: SettingsViewDesktop(),
       tablet: SettingsViewDesktop(),
     );

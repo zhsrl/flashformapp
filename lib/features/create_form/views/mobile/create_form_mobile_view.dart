@@ -1,27 +1,30 @@
-import 'package:flashform_app/data/controller/formui_controller.dart';
-import 'package:flashform_app/data/repository/form_repository.dart';
-import 'package:flashform_app/features/create_form/views/desktop/editor/views/telegram_integration_settings_view.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:heroicons/heroicons.dart';
 import 'package:flashform_app/core/app_theme.dart';
+import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
-import 'package:flashform_app/features/create_form/views/desktop/preview/preview_view.dart';
-import 'package:flashform_app/features/create_form/views/desktop/editor/editor_view_desktop.dart';
+import 'package:flashform_app/data/controller/formui_controller.dart';
+import 'package:flashform_app/data/repository/form_repository.dart';
+import 'package:flashform_app/features/create_form/views/desktop/editor/views/editor_integration_view.dart';
+import 'package:flashform_app/features/create_form/views/desktop/editor/views/telegram_integration_settings_view.dart';
+import 'package:flashform_app/features/create_form/views/mobile/editor/editor_view_mobile.dart';
+import 'package:flashform_app/features/create_form/views/mobile/integration/integration_view_mobile.dart';
+import 'package:flashform_app/features/create_form/views/mobile/preview/preview_view_mobile.dart';
 import 'package:flashform_app/features/home/widgets/editor_app_bar.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
-
+import 'package:flashform_app/features/widgets/ff_tabbar.dart';
+import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:heroicons/heroicons.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class CreateFormDesktopView extends ConsumerStatefulWidget {
-  const CreateFormDesktopView({
+class CreateFormMobileView extends ConsumerStatefulWidget {
+  const CreateFormMobileView({
     super.key,
     required this.formId,
   });
@@ -29,17 +32,20 @@ class CreateFormDesktopView extends ConsumerStatefulWidget {
   final String formId;
 
   @override
-  ConsumerState<CreateFormDesktopView> createState() =>
-      _CreateFormDesktopViewState();
+  ConsumerState<CreateFormMobileView> createState() =>
+      _CreateFormMobileViewState();
 }
 
-class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
+class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
+    with SingleTickerProviderStateMixin {
   bool _isloadingInitialData = true;
   bool isFormNameChange = false;
   bool isCopy = false;
 
   final FocusNode _focusNode = FocusNode();
+  int _tabIndex = 0;
 
+  final TextEditingController _formNameController = TextEditingController();
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -193,44 +199,98 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
                               const SizedBox(
                                 height: 16,
                               ),
+                              if (context.isDesktop || context.isTablet)
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceAround,
+                                  children: [
+                                    Text(
+                                      'https://fform.me/${formSlug.value ?? ''}',
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w500,
+                                        // color: AppTheme.primary,
+                                      ),
+                                    ),
 
-                              Row(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                children: [
-                                  Text(
-                                    'https://fform.me/${formSlug.value ?? ''}',
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w500,
-                                      // color: AppTheme.primary,
+                                    const SizedBox(
+                                      width: 8,
                                     ),
-                                  ),
-                                  const SizedBox(
-                                    width: 8,
-                                  ),
-                                  GestureDetector(
-                                    onTap: () {
-                                      final url =
-                                          'https://fform.me/${formSlug.value ?? ''}';
-                                      Clipboard.setData(
-                                        ClipboardData(text: url),
-                                      ).then((_) {
-                                        if (!context.mounted) return;
-                                        showSnackbar(
-                                          context,
-                                          type: SnackbarType.info,
-                                          message: 'Ссылка скопирована',
-                                        );
-                                      });
-                                    },
-                                    child: HeroIcon(
-                                      HeroIcons.documentDuplicate,
+                                    GestureDetector(
+                                      onTap: () {
+                                        final url =
+                                            'https://fform.me/${formSlug.value ?? ''}';
+                                        Clipboard.setData(
+                                          ClipboardData(text: url),
+                                        ).then((_) {
+                                          if (!context.mounted) return;
+                                          showSnackbar(
+                                            context,
+                                            type: SnackbarType.info,
+                                            message: 'Ссылка скопирована',
+                                          );
+                                        });
+                                      },
+                                      child: HeroIcon(
+                                        HeroIcons.documentDuplicate,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                  ],
+                                ),
+                              if (context.isMobile)
+                                Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'https://fform.me',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        color: AppTheme.tertiary,
+                                      ),
+                                    ),
+
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          '/${formSlug.value ?? ''}',
+                                          style: TextStyle(
+                                            fontSize: 22,
+                                            fontWeight: FontWeight.w500,
+                                            // color: AppTheme.primary,
+                                          ),
+                                        ),
+
+                                        const SizedBox(
+                                          width: 8,
+                                        ),
+                                        GestureDetector(
+                                          onTap: () {
+                                            final url =
+                                                'https://fform.me/${formSlug.value ?? ''}';
+                                            Clipboard.setData(
+                                              ClipboardData(text: url),
+                                            ).then((_) {
+                                              if (!context.mounted) return;
+                                              showSnackbar(
+                                                context,
+                                                type: SnackbarType.info,
+                                                message: 'Ссылка скопирована',
+                                              );
+                                            });
+                                          },
+                                          child: HeroIcon(
+                                            HeroIcons.documentDuplicate,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
                               const SizedBox(
                                 height: 16,
                               ),
@@ -350,6 +410,41 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
     );
   }
 
+  void _showUpdateFormNameDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppTheme.background,
+        title: const Text('Изменить название формы'),
+        content: FFTextField(
+          controller: _formNameController,
+          hintText: 'Новая название формы',
+        ),
+        actions: [
+          FFButton(
+            onPressed: () => Navigator.pop(context),
+            text: 'Отмена',
+          ),
+
+          FFButton(
+            secondTheme: true,
+            onPressed: () async {
+              String name = _formNameController.text;
+
+              if (name.isEmpty || name == '') return;
+
+              await _updateFormName(name);
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
+            },
+            text: 'Сохранить',
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _publishAndLeave() async {
     if (mounted) {
       _onPublishTap();
@@ -372,127 +467,74 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
     }
   }
 
-  void _showDeleteFormDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        title: const Text(
-          'Удалить форму?',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-        ),
-        content: SizedBox(
-          width: 350,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.withAlpha(20),
-                  borderRadius: BorderRadius.circular(10),
-                  border: Border.all(color: Colors.red.withAlpha(60)),
-                ),
-                child: Row(
-                  children: [
-                    HeroIcon(
-                      HeroIcons.exclamationTriangle,
-                      color: Colors.red,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 10),
-                    const Expanded(
-                      child: Text(
-                        'Форма и все связанные данные будут удалены безвозвратно.',
-                        style: TextStyle(color: Colors.red, fontSize: 13),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          FFButton(
-            onPressed: () => Navigator.pop(context),
-            text: 'Отмена',
-          ),
-          FFButton(
-            secondTheme: true,
-            onPressed: () async {
-              Navigator.pop(context);
-              await _deleteForm();
-            },
-            text: 'Удалить',
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _deleteForm() async {
-    final formState = ref.read(createFormProvider);
-    final imageUrl = formState.heroImageUrl;
-
-    try {
-      await ref
-          .read(formControllerProvider.notifier)
-          .deleteForm(widget.formId, imageUrl: imageUrl);
-
-      if (!mounted) return;
-      context.go('/forms');
-    } catch (e) {
-      if (!mounted) return;
-      showSnackbar(
-        context,
-        type: SnackbarType.error,
-        message: 'Ошибка при удалении формы',
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(createFormProvider);
-
     return Scaffold(
-      backgroundColor: AppTheme.background,
-      appBar: EditorAppBar(
-        formName: formState.name,
-        automaticallyImplyLeading: true,
-        isPublishing: formState.isPublishing,
-        onTapMore: _showDeleteFormDialog,
-        onTapLink: () {
-          _showLinkDialog(widget.formId);
-        },
-        isFormNameChange: isFormNameChange,
-        onSaveFormName: (name) async {
-          await _updateFormName(name);
-        },
-        onToggleEditMode: (value) {
-          setState(() {
-            isFormNameChange = value;
-          });
-        },
-
-        onBack: () {
-          if (formState.hasChanges) {
-            _showUnsavedChangesDialog();
-          } else {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/forms');
-            }
-          }
-        },
-
-        onPublish: () async {
-          await _onPublishTap();
-        },
-      ),
       endDrawer: TelegramBotIntegrationSettingsView(),
+      backgroundColor: AppTheme.background,
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            if (formState.hasChanges) {
+              _showUnsavedChangesDialog();
+            } else {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/forms');
+              }
+            }
+          },
+          icon: Icon(Icons.arrow_back_rounded),
+        ),
+        title: Row(
+          children: [
+            Text(formState.name ?? ''),
+            const SizedBox(
+              width: 8,
+            ),
+
+            // Change Form name
+            GestureDetector(
+              onTap: () {
+                _showUpdateFormNameDialog();
+              },
+              child: HeroIcon(
+                HeroIcons.pencil,
+                color: AppTheme.secondary.withAlpha(100),
+                style: HeroIconStyle.solid,
+                size: 15,
+              ),
+            ),
+          ],
+        ),
+        titleTextStyle: TextStyle(
+          fontSize: 16,
+        ),
+        titleSpacing: 0,
+        centerTitle: false,
+        backgroundColor: AppTheme.background,
+        actionsPadding: EdgeInsets.only(right: 16),
+        actions: [
+          IconButton.outlined(
+            onPressed: () {
+              _showLinkDialog(widget.formId);
+            },
+            icon: HeroIcon(HeroIcons.link),
+          ),
+          const SizedBox(
+            width: 8,
+          ),
+          IconButton.filled(
+            onPressed: () async {
+              await _onPublishTap();
+            },
+            icon: HeroIcon(HeroIcons.arrowUpOnSquare),
+          ),
+        ],
+      ),
+
       body: _isloadingInitialData
           ? Center(
               child: LoadingAnimationWidget.waveDots(
@@ -501,30 +543,61 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
               ),
             )
           : Padding(
-              padding: EdgeInsetsGeometry.all(16),
-              child: Center(
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    EditorView(
-                      onChanged: ref
-                          .read(createFormProvider.notifier)
-                          .markAsChanged,
+              padding: EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  DefaultTabController(
+                    length: 3,
+                    child: FFTabBar(
+                      onTap: (index) {
+                        setState(() {
+                          _tabIndex = index;
+                        });
+                      },
+                      tabs: [
+                        Text('Редактор'),
+                        Text('Превью'),
+                        Text('Интеграции'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ),
 
-                      focusNode: _focusNode,
+                  Expanded(
+                    child: AnimatedCrossFade(
+                      firstChild: EditorViewMobile(
+                        onChanged: ref
+                            .read(createFormProvider.notifier)
+                            .markAsChanged,
+                        focusNode: _focusNode,
+                      ),
+                      secondChild: AnimatedCrossFade(
+                        firstChild: PreviewViewMobile(focusNode: _focusNode),
+                        secondChild: EditorIntergrationView(
+                          formId: widget.formId,
+                        ),
+                        crossFadeState: _tabIndex == 1
+                            ? CrossFadeState.showFirst
+                            : CrossFadeState.showSecond,
+                        duration: Duration(milliseconds: 100),
+                      ),
+                      crossFadeState: _tabIndex == 0
+                          ? CrossFadeState.showFirst
+                          : CrossFadeState.showSecond,
+                      duration: Duration(milliseconds: 100),
                     ),
-
-                    const SizedBox(
-                      width: 16,
-                    ),
-                    PreviewView(
-                      focusNode: _focusNode,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
     );
+  }
+
+  @override
+  void dispose() {
+    _formNameController.dispose();
+    super.dispose();
   }
 }

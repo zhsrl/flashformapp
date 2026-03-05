@@ -30,24 +30,29 @@ class LeadsViewDesktop extends ConsumerWidget {
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: SingleChildScrollView(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  mainAxisExtent: 180,
-                  mainAxisSpacing: 16,
-                  maxCrossAxisExtent: 200,
-                  crossAxisSpacing: 16,
+            child: SizedBox.expand(
+              child: SingleChildScrollView(
+                child: GridView.builder(
+                  physics: NeverScrollableScrollPhysics(),
+                  shrinkWrap: true,
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    mainAxisExtent: 180,
+                    mainAxisSpacing: 16,
+
+                    maxCrossAxisExtent: 200,
+                    crossAxisSpacing: 16,
+                  ),
+                  itemCount: stats.length,
+
+                  itemBuilder: (context, index) {
+                    return LeadCard(
+                      stats: stats[index],
+                      onTap: () {
+                        context.go('/detail/${stats[index].id}');
+                      },
+                    );
+                  },
                 ),
-                itemCount: stats.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  return LeadCard(
-                    stats: stats[index],
-                    onTap: () {
-                      context.go('/detail/${stats[index].id}');
-                    },
-                  );
-                },
               ),
             ),
           );

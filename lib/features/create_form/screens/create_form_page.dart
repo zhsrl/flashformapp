@@ -1,5 +1,6 @@
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/features/create_form/views/desktop/create_form_desktop.dart';
+import 'package:flashform_app/features/create_form/views/mobile/create_form_mobile_view.dart';
 import 'package:flashform_app/features/widgets/responsive_layout.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,7 +26,8 @@ class _CreateFormPageState extends State<CreateFormPage> {
       ],
 
       child: ResponsiveLayout(
-        mobile: SizedBox(),
+        mobile: CreateFormMobileView(formId: widget.formId),
+        tablet: CreateFormDesktopView(formId: widget.formId),
         desktop: CreateFormDesktopView(
           formId: widget.formId,
         ),

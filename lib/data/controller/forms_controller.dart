@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flashform_app/data/model/form.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
+import 'package:flashform_app/data/repository/storage_repository.dart';
 import 'package:flashform_app/data/service/form_service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -77,6 +78,24 @@ class FormController extends AsyncNotifier<List<FormModel>> {
         final repository = ref.read(formRepoProvider);
 
         await repository.updateFormName(name, id);
+
+        return repository.getAllForms();
+      },
+    );
+  }
+
+  Future<void> deleteForm(String formId, {String? imageUrl}) async {
+    state = AsyncLoading();
+    state = await AsyncValue.guard(
+      () async {
+        // Если есть фото — удаляем из Storage
+        if (imageUrl != null && imageUrl.isNotEmpty) {
+          final storageRepo = ref.read(storageRepoProvider);
+          await storageRepo.deleteImage(imageUrl);
+        }
+
+        final repository = ref.read(formRepoProvider);
+        await repository.deleteForm(formId);
 
         return repository.getAllForms();
       },

@@ -1,5 +1,7 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flashform_app/core/app_theme.dart';
+import 'package:flashform_app/core/utils/responsive_helper.dart';
+import 'package:flashform_app/core/utils/utils.dart';
 import 'package:flashform_app/data/controller/export_controller.dart';
 import 'package:flashform_app/data/controller/leads_controller.dart';
 import 'package:flashform_app/data/model/lead.dart';
@@ -586,7 +588,7 @@ class LeadDetailsDialog extends StatelessWidget {
     return AlertDialog(
       backgroundColor: AppTheme.background,
       content: SizedBox(
-        width: 600,
+        width: context.isMobile ? context.screenWidth : 600,
         height: 600,
         child: Scaffold(
           backgroundColor: Colors.transparent,
@@ -700,25 +702,60 @@ class LeadDetailsDialog extends StatelessWidget {
   Widget _buildInfoRow(BuildContext context, String label, String value) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          SizedBox(
-            width: 120,
-            child: Text(
-              '$label:',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.bold,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: 120,
+                      child: Text(
+                        '$label:',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Text(
+                        value,
+                        style: Theme.of(context).textTheme.bodySmall,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
-          Expanded(
-            child: Text(
-              value,
-              style: Theme.of(context).textTheme.bodySmall,
-              maxLines: 3,
-              overflow: TextOverflow.ellipsis,
-            ),
+              if (!context.isMobile)
+                if (label == 'Телефон')
+                  ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      elevation: 0,
+                      backgroundColor: Colors.green,
+                    ),
+                    onPressed: () async {
+                      await openMessenger('https://wa.me/$value');
+                    },
+                    label: Text(
+                      'Написать на WhatsApp',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                      ),
+                    ),
+                    icon: Icon(
+                      Icons.phone,
+                      color: Colors.white,
+                      size: 12,
+                    ),
+                  ),
+            ],
           ),
         ],
       ),

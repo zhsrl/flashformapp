@@ -25,7 +25,7 @@ class BuildThemeBlock extends ConsumerWidget {
       width: context.screenWidth,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
-        color: AppTheme.background,
+        color: Colors.white,
         border: Border.all(width: 1.5, color: AppTheme.border),
       ),
       margin: const EdgeInsets.only(bottom: 16),
@@ -41,7 +41,7 @@ class BuildThemeBlock extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           DropdownMenu(
-            width: 350,
+            width: 500,
 
             initialSelection: currentTheme,
             menuStyle: MenuStyle(

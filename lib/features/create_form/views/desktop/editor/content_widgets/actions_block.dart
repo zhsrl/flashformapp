@@ -1,16 +1,17 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/formui_controller.dart';
+import 'package:flashform_app/features/create_form/views/desktop/editor/widgets/ai_text_field.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
 
-class BuildActionsBlock extends ConsumerWidget {
+class BuildActionsBlock extends ConsumerStatefulWidget {
   const BuildActionsBlock({
     super.key,
     required this.currentType,
@@ -27,7 +28,22 @@ class BuildActionsBlock extends ConsumerWidget {
   final dynamic formState;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BuildActionsBlock> createState() => _BuildActionsBlockState();
+}
+
+class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
+  late Set<String> _successFormActionSelect;
+
+  @override
+  void initState() {
+    super.initState();
+    // Восстановляем выбор из контроллера
+    final savedAction = widget.formState.successAction ?? 'thx';
+    _successFormActionSelect = {savedAction};
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
         // Action type
@@ -35,7 +51,7 @@ class BuildActionsBlock extends ConsumerWidget {
           width: context.screenWidth,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(30),
-            color: AppTheme.background,
+            color: Colors.white,
             border: Border.all(width: 1.5, color: AppTheme.border),
           ),
           margin: const EdgeInsets.only(bottom: 16),
@@ -52,9 +68,9 @@ class BuildActionsBlock extends ConsumerWidget {
               DropdownMenu(
                 width: 350,
 
-                initialSelection: currentType,
+                initialSelection: widget.currentType,
                 onSelected: (value) {
-                  if (value != null) controller.updateActionType(value);
+                  if (value != null) widget.controller.updateActionType(value);
                   ref.read(createFormProvider.notifier).markAsChanged();
                 },
                 menuStyle: MenuStyle(
@@ -86,9 +102,16 @@ class BuildActionsBlock extends ConsumerWidget {
 
         _buildActionTypeWidget(
           context,
-          formState,
-          controller,
-          uiControllers,
+          widget.formState,
+          widget.controller,
+          widget.uiControllers,
+          ref,
+        ),
+        _buildActionAfterSuccessForm(
+          context,
+          widget.formState,
+          widget.controller,
+          widget.uiControllers,
           ref,
         ),
       ],
@@ -146,15 +169,16 @@ class BuildActionsBlock extends ConsumerWidget {
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          FFTextField(
-            hintText: 'Текст в кнопке',
+          AiTextField(
             controller: uiControllers.buttonTextController,
+            label: 'Текст кнопки',
+            hint: 'Текст в кнопке',
+            aiType: 'button',
+            language: context.locale.languageCode,
             onChanged: (value) => {
               controller.updateButtonText(value),
               ref.read(createFormProvider.notifier).markAsChanged(),
             },
-            maxLength: 30,
-            prefixIcon: const HeroIcon(HeroIcons.listBullet),
           ),
           FFTextField(
             hintText: 'URL (ссылка)',
@@ -224,10 +248,11 @@ class BuildActionsBlock extends ConsumerWidget {
             maxLength: 30,
             prefixIcon: const HeroIcon(HeroIcons.bold),
           ),
+
           FFTextField(
             hintText: '',
             title: 'Сообщение после успешной отправки',
-            focusNode: focusNode,
+            focusNode: widget.focusNode,
             controller: uiControllers.successTextController,
             onChanged: (value) => {
               controller.updateSuccessText(value),
@@ -235,43 +260,6 @@ class BuildActionsBlock extends ConsumerWidget {
             },
             prefixIcon: const HeroIcon(HeroIcons.bold),
           ),
-
-          // Redirect Switch
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Redirect URL', style: TextStyle(fontSize: 16)),
-                  // Tooltip можно сократить для чистоты
-                ],
-              ),
-              CupertinoSwitch(
-                value: formState.hasRedirectUrl,
-                activeTrackColor: AppTheme.primary,
-                onChanged: (val) => {
-                  controller.updateHasRedirectUrl(val),
-                  ref.read(createFormProvider.notifier).markAsChanged(),
-                },
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-
-          if (formState.hasRedirectUrl)
-            FFTextField(
-              hintText: 'например, WhatsApp...',
-              title: 'Ссылка на перенаправление',
-              controller: uiControllers.formRedirectUrlController,
-              prefixIcon: const HeroIcon(HeroIcons.link),
-              onChanged: (value) => {
-                controller.updateFormRedirectUrl(value),
-                ref.read(createFormProvider.notifier).markAsChanged(),
-              },
-              // onChanged: (val) => controller.updateRedirectUrl(val),
-            ),
-
           _buildColorPickerRow(
             context: context,
             currentColor: formState.formButtonColor,
@@ -280,6 +268,143 @@ class BuildActionsBlock extends ConsumerWidget {
               ref.read(createFormProvider.notifier).markAsChanged(),
             },
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionAfterSuccessForm(
+    BuildContext context,
+    dynamic formState,
+    CreateFormController controller,
+    FormUIControllers uiControllers,
+    WidgetRef ref,
+  ) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        children: [
+          Text(
+            'Выберите тип действии после успешной формы',
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 16,
+            ),
+          ),
+          const SizedBox(
+            height: 16,
+          ),
+          SegmentedButton(
+            style: SegmentedButton.styleFrom(
+              selectedBackgroundColor: AppTheme.primary,
+              selectedForegroundColor: AppTheme.secondary,
+            ),
+            showSelectedIcon: false,
+            expandedInsets: EdgeInsets.all(0),
+            onSelectionChanged: (value) {
+              setState(() {
+                _successFormActionSelect = value;
+              });
+              // Сохраняем в контроллер
+              final selectedAction = value.isNotEmpty ? value.first : 'thx';
+              widget.controller.updateSuccessAction(selectedAction);
+              ref.read(createFormProvider.notifier).markAsChanged();
+            },
+            segments: <ButtonSegment<String>>[
+              ButtonSegment<String>(
+                value: 'whatsapp',
+                label: Text('WhatsApp'),
+                enabled: true,
+              ),
+              ButtonSegment<String>(
+                value: 'redirect',
+                label: Text('Перенаправление'),
+                enabled: true,
+              ),
+              ButtonSegment<String>(
+                value: 'thx',
+                label: Text('Thank you страница'),
+                enabled: true,
+              ),
+            ],
+            selected: _successFormActionSelect,
+          ),
+
+          const SizedBox(
+            height: 16,
+          ),
+
+          // WHATSAPP
+          if (_successFormActionSelect.contains('whatsapp'))
+            Column(
+              children: [
+                FFTextField(
+                  hintText: '7771234567',
+                  controller: uiControllers.whatsappNumberController,
+                  title: 'Номер телефона (без +7 или 8)',
+                  prefixIcon: HeroIcon(HeroIcons.phone),
+                  onChanged: (value) => {
+                    widget.controller.updateWhatsappNumber(value),
+                    ref.read(createFormProvider.notifier).markAsChanged(),
+                  },
+                ),
+                FFTextField(
+                  title: 'Текст сообщения',
+                  hintText: 'Сообщения',
+                  prefixIcon: HeroIcon(HeroIcons.chatBubbleOvalLeft),
+                  controller: uiControllers.whatsappMessageController,
+                  onChanged: (value) => {
+                    widget.controller.updateWhatsappMessage(value),
+                    ref.read(createFormProvider.notifier).markAsChanged(),
+                  },
+                ),
+              ],
+            ),
+
+          // REDIRECT
+          if (_successFormActionSelect.contains('redirect'))
+            Column(
+              children: [
+                FFTextField(
+                  hintText: 'например, WhatsApp...',
+                  title: 'Ссылка на перенаправление',
+                  controller: uiControllers.formRedirectUrlController,
+                  prefixIcon: const HeroIcon(HeroIcons.link),
+                  onChanged: (value) => {
+                    controller.updateFormRedirectUrl(value),
+                    ref.read(createFormProvider.notifier).markAsChanged(),
+                  },
+                ),
+              ],
+            ),
+
+          if (_successFormActionSelect.contains('thx'))
+            Column(
+              children: [
+                FFTextField(
+                  hintText: 'Заголовок',
+                  title: 'Напишите заголовок',
+                  controller: uiControllers.thxTitleController,
+                  onChanged: (value) => {
+                    widget.controller.updateThxTitle(value),
+                    ref.read(createFormProvider.notifier).markAsChanged(),
+                  },
+                ),
+                FFTextField(
+                  hintText: 'Описание',
+                  title: 'Напишите описание',
+                  controller: uiControllers.thxDescriptionController,
+                  onChanged: (value) => {
+                    widget.controller.updateThxDescription(value),
+                    ref.read(createFormProvider.notifier).markAsChanged(),
+                  },
+                ),
+              ],
+            ),
         ],
       ),
     );
@@ -360,7 +485,7 @@ class BuildActionsBlock extends ConsumerWidget {
   BoxDecoration _buildBlocksDecotration() {
     return BoxDecoration(
       borderRadius: BorderRadius.circular(30),
-      color: AppTheme.background,
+      color: Colors.white,
       border: Border.all(width: 1.5, color: AppTheme.border),
     );
   }

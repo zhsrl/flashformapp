@@ -36,7 +36,7 @@ void showSnackbar(
     type: toastType,
     alignment: Alignment.bottomRight,
     style: ToastificationStyle.flat,
-    backgroundColor: AppTheme.secondary,
+    backgroundColor: Colors.black,
     title: Text(
       message,
       style: TextStyle(

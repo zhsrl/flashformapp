@@ -206,6 +206,10 @@ class FormRepository {
     await _updateSettingsField(formId, 'ya-metrika-id', '');
   }
 
+  Future<void> deleteForm(String formId) async {
+    await _client.from('forms').delete().eq('id', formId);
+  }
+
   /// Приватный метод для безопасного слияния настроек (Deep Merge)
   Future<void> _updateSettingsField(
     String formId,

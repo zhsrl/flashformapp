@@ -23,12 +23,19 @@ class CreateFormState {
   final double subtitleFontSize;
   final bool hasRedirectUrl;
   final String? redirectUrl;
+  final String? whatsappNumber;
+  final String? whatsappMessage;
+  final String? thxTitle;
+  final String? thxDescription;
+  final String? successAction;
   final List<FormFields> fields;
   final bool isPublishing;
   final bool isSaving;
   final String? buttonUrl;
   final String metaPixelId;
   final String yandexMetrikaId;
+  final bool telegramEnabled;
+  final String? telegramChatId;
 
   const CreateFormState({
     this.name,
@@ -49,13 +56,20 @@ class CreateFormState {
     this.titleFontSize = 42,
     this.subtitleFontSize = 22,
     this.hasRedirectUrl = false,
+    this.successAction,
     this.redirectUrl,
+    this.whatsappMessage,
+    this.whatsappNumber,
+    this.thxDescription,
+    this.thxTitle,
     this.fields = const [],
     this.isPublishing = false,
     this.isSaving = false,
 
     this.metaPixelId = '',
     this.yandexMetrikaId = '',
+    this.telegramEnabled = false,
+    this.telegramChatId,
   });
 
   CreateFormState copyWith({
@@ -78,11 +92,18 @@ class CreateFormState {
     double? subtitleFontSize,
     bool? hasRedirectUrl,
     String? redirectUrl,
+    String? successAction,
+    String? whatsappMessage,
+    String? whatsappNumber,
+    String? thxTitle,
+    String? thxDescription,
     List<FormFields>? fields,
     bool? isPublishing,
     bool? isSaving,
     String? metaPixelId,
     String? yandexMetrikaId,
+    bool? telegramEnabled,
+    String? telegramChatId,
   }) {
     return CreateFormState(
       name: name ?? this.name,
@@ -106,10 +127,17 @@ class CreateFormState {
       subtitleFontSize: subtitleFontSize ?? this.subtitleFontSize,
       hasRedirectUrl: hasRedirectUrl ?? this.hasRedirectUrl,
       redirectUrl: redirectUrl ?? this.redirectUrl,
+      whatsappMessage: whatsappMessage ?? this.whatsappMessage,
+      whatsappNumber: whatsappNumber ?? this.whatsappNumber,
+      thxTitle: thxTitle ?? this.thxTitle,
+      thxDescription: thxDescription ?? this.thxDescription,
+      successAction: successAction ?? this.successAction,
       fields: fields ?? this.fields,
 
       metaPixelId: metaPixelId ?? this.metaPixelId,
       yandexMetrikaId: yandexMetrikaId ?? this.yandexMetrikaId,
+      telegramEnabled: telegramEnabled ?? this.telegramEnabled,
+      telegramChatId: telegramChatId ?? this.telegramChatId,
     );
   }
 }

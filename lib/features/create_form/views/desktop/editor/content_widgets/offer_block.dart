@@ -2,6 +2,8 @@ import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/formui_controller.dart';
+import 'package:flashform_app/features/create_form/views/desktop/editor/widgets/ai_text_field.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -68,7 +70,7 @@ class BuildOfferBlock extends ConsumerWidget {
       width: context.screenWidth,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(30),
-        color: AppTheme.background,
+        color: Colors.white,
         border: Border.all(width: 1.5, color: AppTheme.border),
       ),
       margin: const EdgeInsets.only(bottom: 16),
@@ -90,6 +92,20 @@ class BuildOfferBlock extends ConsumerWidget {
             },
             controller: uiControllers.titleController,
           ),
+          // AiTextField(
+          //   controller: uiControllers.titleController,
+          //   label: 'Заголовок',
+          //   hint: 'Напишите заголовок',
+          //   aiType: 'title',
+          //   language: EasyLocalization.of(context)!.currentLocale!.languageCode,
+          //   minLines: 1,
+          //   maxLines: 3,
+          //   onChanged: (value) {
+          //     onChanged();
+          //     controller.updateTitle(value);
+          //     ref.read(createFormProvider.notifier).markAsChanged();
+          //   },
+          // ),
           const SizedBox(width: 8),
           _buildSizeSlider(
             label: 'Размер текста',

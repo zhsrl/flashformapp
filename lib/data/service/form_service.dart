@@ -49,6 +49,9 @@ class FormService {
           'text': 'Кнопка',
           'url': '',
         },
+        'settings': {
+          'has-label': true,
+        },
         'success-text': '',
       },
       'is_active': false,

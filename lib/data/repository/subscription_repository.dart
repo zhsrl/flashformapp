@@ -83,17 +83,20 @@ class SubscriptionRepository {
           'plan': plan.name,
           'status': 'active',
           'auto_renew': autoRenew,
-          'started_at': DateTime.now().toIso8601String(),
-          'expires_at': expiresAt.toIso8601String(),
+          'started_at': DateTime.now().toUtc().toIso8601String(),
+          'expires_at': expiresAt.toUtc().toIso8601String(),
         })
         .select()
         .single();
 
     // Обновляем план в таблице users
-    await _client.from('users').update({
-      'plan': plan.name,
-      'plan_expires_at': expiresAt.toIso8601String(),
-    }).eq('id', userId);
+    await _client
+        .from('users')
+        .update({
+          'plan': plan.name,
+          'plan_expires_at': expiresAt.toUtc().toIso8601String(),
+        })
+        .eq('id', userId);
 
     return Subscription.fromJson(response);
   }
@@ -109,7 +112,7 @@ class SubscriptionRepository {
 
   // Создать запись об оплате (pending) - до перехода на платёжный шлюз
   Future<Payment> createPendingPayment({
-    required String subscriptionId,
+    String? subscriptionId,
     required double amount,
     required PaymentProvider provider,
   }) async {
@@ -127,5 +130,34 @@ class SubscriptionRepository {
         .single();
 
     return Payment.fromJson(response);
+  }
+
+  Future<void> markPaymentCompleted({
+    required String paymentId,
+    String? providerTxId,
+  }) async {
+    await _client
+        .from('payments')
+        .update({
+          'status': PaymentStatus.completed.name,
+          'provider_tx_id': providerTxId,
+          'paid_at': DateTime.now().toIso8601String(),
+        })
+        .eq('id', paymentId)
+        .eq('user_id', _currentUserId);
+  }
+
+  Future<void> markPaymentFailed({
+    required String paymentId,
+    String? providerTxId,
+  }) async {
+    await _client
+        .from('payments')
+        .update({
+          'status': PaymentStatus.failed.name,
+          'provider_tx_id': providerTxId,
+        })
+        .eq('id', paymentId)
+        .eq('user_id', _currentUserId);
   }
 }

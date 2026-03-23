@@ -47,6 +47,8 @@ class _SigninPageState extends ConsumerState<SigninPage> {
       }
     } catch (e) {
       String message = e.toString().replaceAll('Exception: ', '');
+      debugPrint('Signin error: $message');
+
       if (mounted) {
         showSnackbar(context, type: SnackbarType.error, message: message);
       }
@@ -62,10 +64,18 @@ class _SigninPageState extends ConsumerState<SigninPage> {
         children: [
           Center(
             child: Container(
-              width: 350,
-              padding: EdgeInsets.symmetric(
+              width: 400,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(
+                  30,
+                ),
+              ),
+              margin: EdgeInsets.symmetric(
                 horizontal: context.isMobile ? 12 : 0,
               ),
+
+              padding: EdgeInsets.all(16),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -230,73 +240,74 @@ class _SigninPageState extends ConsumerState<SigninPage> {
               ),
             ),
           ),
-          Positioned(
-            bottom: 32,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  'global.language'.tr(),
-                  style: TextStyle(
-                    color: AppTheme.tertiary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                GestureDetector(
-                  onTapDown: (TapDownDetails details) {
-                    showMenu(
-                      color: AppTheme.background,
-                      elevation: 0,
-
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(
-                          width: 1,
-                          color: AppTheme.border,
-                        ),
-                        borderRadius: BorderRadiusGeometry.circular(16),
-                      ),
-                      position: RelativeRect.fromLTRB(
-                        details.globalPosition.dx,
-                        details.globalPosition.dy,
-                        details.globalPosition.dx,
-                        details.globalPosition.dy,
-                      ),
-                      context: context,
-                      items: [
-                        PopupMenuItem(
-                          onTap: () {
-                            context.setLocale(Locale('kk'));
-                          },
-                          child: Text(
-                            '${countryCodeToEmoji('KZ')} ${'global.lang-kz'.tr()}',
-                          ),
-                        ),
-
-                        PopupMenuItem(
-                          onTap: () {
-                            context.setLocale(Locale('ru'));
-                          },
-                          child: Text(
-                            '${countryCodeToEmoji('RU')} ${'global.lang-ru'.tr()}',
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                  child: Text(
-                    context.locale == Locale('ru')
-                        ? 'global.lang-ru'.tr()
-                        : 'global.lang-kz'.tr(),
+          if (MediaQuery.of(context).viewInsets.bottom == 0)
+            Positioned(
+              bottom: 32,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    'global.language'.tr(),
                     style: TextStyle(
-                      color: AppTheme.secondary,
+                      color: AppTheme.tertiary,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                ),
-              ],
+                  GestureDetector(
+                    onTapDown: (TapDownDetails details) {
+                      showMenu(
+                        color: AppTheme.background,
+                        elevation: 0,
+
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            width: 1,
+                            color: AppTheme.border,
+                          ),
+                          borderRadius: BorderRadiusGeometry.circular(16),
+                        ),
+                        position: RelativeRect.fromLTRB(
+                          details.globalPosition.dx,
+                          details.globalPosition.dy,
+                          details.globalPosition.dx,
+                          details.globalPosition.dy,
+                        ),
+                        context: context,
+                        items: [
+                          PopupMenuItem(
+                            onTap: () {
+                              context.setLocale(Locale('kk'));
+                            },
+                            child: Text(
+                              '${countryCodeToEmoji('KZ')} ${'global.lang-kz'.tr()}',
+                            ),
+                          ),
+
+                          PopupMenuItem(
+                            onTap: () {
+                              context.setLocale(Locale('ru'));
+                            },
+                            child: Text(
+                              '${countryCodeToEmoji('RU')} ${'global.lang-ru'.tr()}',
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                    child: Text(
+                      context.locale == Locale('ru')
+                          ? 'global.lang-ru'.tr()
+                          : 'global.lang-kz'.tr(),
+                      style: TextStyle(
+                        color: AppTheme.secondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

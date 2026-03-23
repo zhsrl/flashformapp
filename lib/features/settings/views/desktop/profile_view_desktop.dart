@@ -3,17 +3,28 @@ import 'package:flashform_app/core/utils/app_validator.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/auth_controller.dart';
 import 'package:flashform_app/data/controller/user_controller.dart';
+import 'package:flashform_app/data/model/subscription_plan.dart';
 import 'package:flashform_app/data/model/user.dart';
+import 'package:flashform_app/features/home/widgets/subscription_widget.dart';
+import 'package:flashform_app/features/settings/widgets/subscription_widget.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class SettingsProfileView extends ConsumerStatefulWidget {
-  const SettingsProfileView({super.key});
+  const SettingsProfileView({
+    super.key,
+    this.onOpenChangePassword,
+    this.onOpenSubscriptionPlans,
+  });
+
+  final VoidCallback? onOpenChangePassword;
+  final VoidCallback? onOpenSubscriptionPlans;
 
   @override
   ConsumerState<SettingsProfileView> createState() =>
@@ -23,18 +34,21 @@ class SettingsProfileView extends ConsumerStatefulWidget {
 class _SettingsProfileViewState extends ConsumerState<SettingsProfileView> {
   late TextEditingController _nameController;
   late TextEditingController _emailController;
+  late TextEditingController _idController;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController();
     _emailController = TextEditingController();
+    _idController = TextEditingController();
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _idController.dispose();
     super.dispose();
   }
 
@@ -67,6 +81,7 @@ class _SettingsProfileViewState extends ConsumerState<SettingsProfileView> {
     if (_nameController.text.isEmpty) {
       _nameController.text = user.name;
       _emailController.text = user.email;
+      _idController.text = user.id;
     }
 
     return Container(
@@ -74,16 +89,25 @@ class _SettingsProfileViewState extends ConsumerState<SettingsProfileView> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
       ),
+      margin: EdgeInsets.only(bottom: 150),
       padding: EdgeInsets.all(16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ProfileWidgetInfoView(
+          ProfileInfoWidget(
             user: user,
           ),
           Divider(
             thickness: 0.5,
             height: 32,
+          ),
+
+          ProfileSubscriptionWidget(
+            user: userState.user!,
+            onOpenSubscriptionPlans: widget.onOpenSubscriptionPlans!,
+          ),
+          const SizedBox(
+            height: 16,
           ),
           FFTextField(
             title: 'Ваше имя',
@@ -97,6 +121,49 @@ class _SettingsProfileViewState extends ConsumerState<SettingsProfileView> {
             suffixIcon: HeroIcon(HeroIcons.lockClosed),
             enabled: false,
             bottomMargin: 16,
+          ),
+          Row(
+            children: [
+              Expanded(
+                flex: 8,
+                child: FFTextField(
+                  title: 'Код пользователя',
+                  hintText: 'id',
+                  controller: _idController,
+
+                  enabled: false,
+                  bottomMargin: 16,
+                ),
+              ),
+              const SizedBox(
+                width: 8,
+              ),
+              Expanded(
+                flex: 1,
+                child: Tooltip(
+                  message: 'Скопировать ID',
+                  child: IconButton(
+                    onPressed: () {
+                      String id = _idController.text;
+
+                      Clipboard.setData(
+                        ClipboardData(text: id),
+                      ).then((_) {
+                        if (!context.mounted) return;
+                        showSnackbar(
+                          context,
+                          type: SnackbarType.info,
+                          message: 'ID скопирован',
+                        );
+                      });
+                    },
+                    icon: HeroIcon(
+                      HeroIcons.clipboardDocument,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
 
           SizedBox(
@@ -121,9 +188,7 @@ class _SettingsProfileViewState extends ConsumerState<SettingsProfileView> {
             mainAxisSize: MainAxisSize.min,
             children: [
               TextButton.icon(
-                onPressed: () {
-                  Scaffold.of(context).openEndDrawer();
-                },
+                onPressed: widget.onOpenChangePassword,
                 style: TextButton.styleFrom(
                   foregroundColor: AppTheme.secondary,
                 ),
@@ -144,22 +209,14 @@ class _SettingsProfileViewState extends ConsumerState<SettingsProfileView> {
               ),
             ],
           ),
-          const SizedBox(
-            height: 32,
-          ),
-          Text(
-            'user id:\n${user.id}',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: Colors.grey),
-          ),
         ],
       ),
     );
   }
 }
 
-class ProfileWidgetInfoView extends StatelessWidget {
-  const ProfileWidgetInfoView({
+class ProfileInfoWidget extends StatelessWidget {
+  const ProfileInfoWidget({
     super.key,
     required this.user,
   });
@@ -171,16 +228,26 @@ class ProfileWidgetInfoView extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 80,
-          height: 80,
+          width: 70,
+          height: 70,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: AppTheme.fourty,
+            // borderRadius: BorderRadius.circular(20),
+            color: AppTheme.primary,
+            border: Border.all(
+              width: 1,
+              color: AppTheme.secondary,
+            ),
           ),
+
           child: Center(
-            child: HeroIcon(
-              HeroIcons.user,
-              size: 30,
+            child: Text(
+              '${user.name[0]}${user.name[1]}'.toUpperCase(),
+
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ),
@@ -304,7 +371,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                   ),
                   GestureDetector(
                     onTap: () {
-                      Scaffold.of(context).closeEndDrawer();
+                      Navigator.pop(context);
                     },
                     child: HeroIcon(HeroIcons.xMark),
                   ),

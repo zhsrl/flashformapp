@@ -1,15 +1,14 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flashform_app/core/app_theme.dart';
+import 'package:flashform_app/core/mixins/form_loader_mixin.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
-import 'package:flashform_app/data/controller/formui_controller.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/features/create_form/views/desktop/editor/views/editor_integration_view.dart';
 import 'package:flashform_app/features/create_form/views/desktop/editor/views/telegram_integration_settings_view.dart';
 import 'package:flashform_app/features/create_form/views/mobile/editor/editor_view_mobile.dart';
-import 'package:flashform_app/features/create_form/views/mobile/integration/integration_view_mobile.dart';
 import 'package:flashform_app/features/create_form/views/mobile/preview/preview_view_mobile.dart';
-import 'package:flashform_app/features/home/widgets/editor_app_bar.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
 import 'package:flashform_app/features/widgets/ff_tabbar.dart';
@@ -37,7 +36,7 @@ class CreateFormMobileView extends ConsumerStatefulWidget {
 }
 
 class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, FormLoaderMixin {
   bool _isloadingInitialData = true;
   bool isFormNameChange = false;
   bool isCopy = false;
@@ -46,63 +45,23 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
   int _tabIndex = 0;
 
   final TextEditingController _formNameController = TextEditingController();
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loadFormData();
-  }
+    loadFormData(
+      widget.formId,
+      ref,
 
-  Future<void> _loadFormData() async {
-    try {
-      final formController = ref.read(formControllerProvider.notifier);
-      final form = await formController.fetchForm(widget.formId);
-      final uiControllers = ref.watch(formUIControllersProvider);
+      () => mounted,
+      () {
+        if (!mounted) return;
 
-      debugPrint('Form: ${form.data}');
-
-      if (mounted) {
-        ref.read(createFormProvider.notifier).initializeFromModel(form);
-
-        // Загружаем success_action из новой структуры
-        final successAction = form.data?['form']['success_action'] as Map?;
-
-        uiControllers.titleController.text =
-            form.data?['title']['text'] ?? 'Заголовок сайта';
-        uiControllers.subtitleController.text =
-            form.data?['subtitle']['text'] ?? 'Описание';
-        uiControllers.formTitleController.text =
-            form.data?['form']['title'] ?? 'Заголовок формы';
-        uiControllers.buttonTextController.text =
-            form.data?['button']['text'] ?? 'Кнопка';
-        uiControllers.formButtonTextController.text =
-            form.data?['form']['button']['text'] ?? 'Оставить заявку';
-        uiControllers.successTextController.text =
-            form.data?['success_text'] ?? 'Успешная форма';
-
-        // Инициализируем success_action поля
-        uiControllers.formRedirectUrlController.text =
-            successAction?['redirect_url'] ?? '';
-        uiControllers.whatsappNumberController.text =
-            successAction?['whatsapp_number'] ?? '';
-        uiControllers.whatsappMessageController.text =
-            successAction?['whatsapp_message'] ?? '';
-        uiControllers.thxTitleController.text =
-            successAction?['thx_title'] ?? '';
-        uiControllers.thxDescriptionController.text =
-            successAction?['thx_description'] ?? '';
-
-        uiControllers.metaPixelIdController.text =
-            form.data?['settings']['meta-pixel-id'] ?? '';
-        uiControllers.yandexMetrikaIdController.text =
-            form.data?['settings']['ya-metrika-id'] ?? '';
-      }
-    } catch (e) {
-      debugPrint('Error loading form: $e');
-    } finally {
-      setState(() {
-        _isloadingInitialData = false;
-      });
-    }
+        setState(() {
+          _isloadingInitialData = false;
+        });
+      },
+    );
   }
 
   Future<void> _updateFormName(String name) async {
@@ -112,7 +71,7 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
 
     ref.invalidate(formControllerProvider);
     createFormControllerNotifier.updateFormName(name);
-
+    if (!mounted) return;
     setState(() {
       isFormNameChange = false;
     });
@@ -139,7 +98,7 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
       showSnackbar(
         context,
         type: SnackbarType.error,
-        message: 'Ошибка публикации',
+        message: 'mobile.publish_error'.tr(),
       );
     }
   }
@@ -190,7 +149,7 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Страница опубликована!',
+                                'mobile.page_published'.tr(),
                                 style: TextStyle(
                                   fontSize: 18,
                                   // color: Colors.white,
@@ -228,7 +187,7 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
                                           showSnackbar(
                                             context,
                                             type: SnackbarType.info,
-                                            message: 'Ссылка скопирована',
+                                            message: 'mobile.link_copied'.tr(),
                                           );
                                         });
                                       },
@@ -279,7 +238,8 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
                                               showSnackbar(
                                                 context,
                                                 type: SnackbarType.info,
-                                                message: 'Ссылка скопирована',
+                                                message: 'mobile.link_copied'
+                                                    .tr(),
                                               );
                                             });
                                           },
@@ -300,7 +260,7 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
                                     'https://fform.me/${formSlug.value ?? ''}',
                                   );
                                 },
-                                text: 'Открыть',
+                                text: 'common.open'.tr(),
                                 secondTheme: true,
                               ),
                               const SizedBox(
@@ -328,7 +288,7 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
                                   iconColor: AppTheme.secondary.withAlpha(100),
                                 ),
                                 label: Text(
-                                  'или отключить страницу',
+                                  'mobile.or_disable_page'.tr(),
                                   style: TextStyle(
                                     color: AppTheme.secondary.withAlpha(100),
                                   ),
@@ -343,7 +303,7 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Text(
-                                'Страница не опубликована',
+                                'mobile.page_not_published'.tr(),
                                 style: TextStyle(
                                   fontSize: 18,
                                 ),
@@ -381,21 +341,21 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppTheme.background,
-        title: const Text('Unsaved Changes'),
-        content: const Text(
-          'You have unsaved changes. Do you want to save them?',
+        title: Text('mobile.unsaved_changes_title'.tr()),
+        content: Text(
+          'mobile.unsaved_changes_content'.tr(),
         ),
         actions: [
           FFButton(
             onPressed: () => Navigator.pop(context),
-            text: 'Отмена',
+            text: 'common.cancel'.tr(),
           ),
           FFButton(
             onPressed: () {
               Navigator.pop(context);
               _discardChanges();
             },
-            text: 'Выход без изменении',
+            text: 'mobile.exit_without_saving'.tr(),
           ),
           FFButton(
             secondTheme: true,
@@ -403,7 +363,7 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
               Navigator.pop(context);
               await _publishAndLeave();
             },
-            text: 'Опубликовать',
+            text: 'common.publish'.tr(),
           ),
         ],
       ),
@@ -415,15 +375,15 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: AppTheme.background,
-        title: const Text('Изменить название формы'),
+        title: Text('mobile.edit_form_name'.tr()),
         content: FFTextField(
           controller: _formNameController,
-          hintText: 'Новая название формы',
+          hintText: 'mobile.new_form_name'.tr(),
         ),
         actions: [
           FFButton(
             onPressed: () => Navigator.pop(context),
-            text: 'Отмена',
+            text: 'common.cancel'.tr(),
           ),
 
           FFButton(
@@ -438,7 +398,7 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
                 Navigator.pop(context);
               }
             },
-            text: 'Сохранить',
+            text: 'common.save'.tr(),
           ),
         ],
       ),
@@ -446,16 +406,16 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
   }
 
   Future<void> _publishAndLeave() async {
-    if (mounted) {
-      _onPublishTap();
-      context.pop();
+    _onPublishTap();
 
-      showSnackbar(
-        context,
-        type: SnackbarType.error,
-        message: 'Error saving form',
-      );
-    }
+    if (!mounted) return;
+    context.pop();
+
+    showSnackbar(
+      context,
+      type: SnackbarType.error,
+      message: 'mobile.error_saving_form'.tr(),
+    );
   }
 
   void _discardChanges() {
@@ -555,40 +515,34 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
                         });
                       },
                       tabs: [
-                        Text('Редактор'),
-                        Text('Превью'),
-                        Text('Интеграции'),
+                        Text('mobile.tab_editor'.tr()),
+                        Text('mobile.tab_preview'.tr()),
+                        Text('mobile.tab_integrations'.tr()),
                       ],
                     ),
                   ),
                   const SizedBox(
                     height: 16,
                   ),
-
                   Expanded(
-                    child: AnimatedCrossFade(
-                      firstChild: EditorViewMobile(
-                        onChanged: ref
-                            .read(createFormProvider.notifier)
-                            .markAsChanged,
-                        focusNode: _focusNode,
-                      ),
-                      secondChild: AnimatedCrossFade(
-                        firstChild: PreviewViewMobile(focusNode: _focusNode),
-                        secondChild: EditorIntergrationView(
+                    child: IndexedStack(
+                      index: _tabIndex,
+                      children: [
+                        EditorViewMobile(
+                          onChanged: ref
+                              .read(createFormProvider.notifier)
+                              .markAsChanged,
+                          focusNode: _focusNode,
+                        ),
+                        PreviewViewMobile(focusNode: _focusNode),
+                        EditorIntergrationView(
                           formId: widget.formId,
                         ),
-                        crossFadeState: _tabIndex == 1
-                            ? CrossFadeState.showFirst
-                            : CrossFadeState.showSecond,
-                        duration: Duration(milliseconds: 100),
-                      ),
-                      crossFadeState: _tabIndex == 0
-                          ? CrossFadeState.showFirst
-                          : CrossFadeState.showSecond,
-                      duration: Duration(milliseconds: 100),
+                      ],
                     ),
                   ),
+
+                  // Expanded(
                 ],
               ),
             ),

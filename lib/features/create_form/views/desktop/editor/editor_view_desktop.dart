@@ -25,17 +25,28 @@ class _SettingsPanelViewState extends ConsumerState<EditorView>
     with SingleTickerProviderStateMixin {
   int _tabIndex = 0;
   late TabController _tabController;
-  final _formKey = GlobalKey<FormState>();
+  late final ScrollController _contentScrollController;
+  late final ScrollController _integrationScrollController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
+    _contentScrollController = ScrollController();
+    _integrationScrollController = ScrollController();
     _tabController.addListener(() {
       setState(() {
         _tabIndex = _tabController.index;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    _contentScrollController.dispose();
+    _integrationScrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -83,29 +94,30 @@ class _SettingsPanelViewState extends ConsumerState<EditorView>
               behavior: ScrollConfiguration.of(
                 context,
               ).copyWith(scrollbars: false),
-              child: SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                child: Form(
-                  key: _formKey,
-                  child: AnimatedSwitcher(
-                    duration: Duration(milliseconds: 100),
-                    transitionBuilder: (child, animation) {
-                      return FadeTransition(opacity: animation, child: child);
-                    },
-
-                    child: [
-                      EditorContentView(
-                        controller: controller,
-                        focusNode: widget.focusNode,
-                        formState: formState,
-                        onChanged: widget.onChanged,
-                        ref: ref,
-                        uiControllers: uiControllers,
-                      ),
-                      EditorIntergrationView(formId: currentFormId),
-                    ].elementAt(_tabIndex),
+              child: IndexedStack(
+                index: _tabIndex,
+                children: [
+                  SingleChildScrollView(
+                    key: const PageStorageKey('editor-content-scroll'),
+                    controller: _contentScrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: EditorContentView(
+                      controller: controller,
+                      focusNode: widget.focusNode,
+                      formState: formState,
+                      onChanged: widget.onChanged,
+                      labelOnChanged: (value) {},
+                      ref: ref,
+                      uiControllers: uiControllers,
+                    ),
                   ),
-                ),
+                  SingleChildScrollView(
+                    key: const PageStorageKey('editor-integration-scroll'),
+                    controller: _integrationScrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: EditorIntergrationView(formId: currentFormId),
+                  ),
+                ],
               ),
             ),
           ),

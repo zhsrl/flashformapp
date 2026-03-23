@@ -2,6 +2,7 @@ import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/utils.dart';
 import 'package:flashform_app/data/controller/export_controller.dart';
 import 'package:flashform_app/data/controller/leads_controller.dart';
+import 'package:flashform_app/data/controller/plan_usage_controller.dart';
 import 'package:flashform_app/data/model/lead.dart';
 import 'package:flashform_app/data/repository/leads_repository.dart';
 import 'package:flashform_app/features/tables/views/desktop/leads_detail_view_desktop.dart';
@@ -51,18 +52,35 @@ class _LeadsDetailViewMobileState extends ConsumerState<LeadsDetailViewMobile> {
         centerTitle: false,
         actions: [
           if (leadsState.leads.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.download),
-              onPressed: () async {
-                await ref
-                    .read(leadsRepoProvider)
-                    .exportDataCSV(
-                      widget.formId,
-                      dateFrom: leadsState.dateFrom,
-                      dateTo: leadsState.dateTo,
-                      city: leadsState.selectedCity,
-                      country: leadsState.selectedCountry,
-                    );
+            Consumer(
+              builder: (context, value, child) {
+                final usageAsync = ref.watch(planUsageProvider);
+                return usageAsync.when(
+                  data: (usage) {
+                    if (usage.canExport) {
+                      return IconButton(
+                        icon: const Icon(Icons.download),
+                        onPressed: () async {
+                          await ref
+                              .read(leadsRepoProvider)
+                              .exportDataCSV(
+                                widget.formId,
+                                dateFrom: leadsState.dateFrom,
+                                dateTo: leadsState.dateTo,
+                                city: leadsState.selectedCity,
+                                country: leadsState.selectedCountry,
+                              );
+                        },
+                      );
+                    } else {
+                      return SizedBox();
+                    }
+                  },
+                  error: (er, st) {
+                    return SizedBox();
+                  },
+                  loading: () => SizedBox(),
+                );
               },
             ),
         ],
@@ -547,7 +565,8 @@ class LeadCard extends StatelessWidget {
         ),
         const SizedBox(height: 6),
         ...data.entries.take(3).map((entry) {
-          final isPhoneField = entry.key.toLowerCase().contains('телефон') ||
+          final isPhoneField =
+              entry.key.toLowerCase().contains('телефон') ||
               entry.key.toLowerCase().contains('phone');
           final phoneValue = entry.value?.toString() ?? '';
 
@@ -566,12 +585,10 @@ class LeadCard extends StatelessWidget {
                             width: 80,
                             child: Text(
                               '${entry.key}:',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodySmall
+                              style: Theme.of(context).textTheme.bodySmall
                                   ?.copyWith(
-                                fontWeight: FontWeight.w500,
-                              ),
+                                    fontWeight: FontWeight.w500,
+                                  ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),

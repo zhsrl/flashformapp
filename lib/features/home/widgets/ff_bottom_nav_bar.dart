@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flutter/material.dart';
@@ -32,11 +33,12 @@ class FFBottomNavBar extends StatefulWidget {
 
 class _FFBottomNavBarState extends State<FFBottomNavBar> {
   int selectedIndex = 0;
+  int? _hoveredIndex;
 
   final List<FFBottomItem> _items = [
-    FFBottomItem(icon: HeroIcons.inbox, title: 'Формы'),
-    FFBottomItem(icon: HeroIcons.squares2x2, title: 'Заявки'),
-    FFBottomItem(icon: HeroIcons.cog6Tooth, title: 'Настройки'),
+    FFBottomItem(icon: HeroIcons.inbox, title: 'nav-bar.forms'.tr()),
+    FFBottomItem(icon: HeroIcons.squares2x2, title: 'nav-bar.leads'.tr()),
+    FFBottomItem(icon: HeroIcons.cog6Tooth, title: 'nav-bar.settings'.tr()),
   ];
 
   Widget _buildNavigationItem(
@@ -78,36 +80,58 @@ class _FFBottomNavBarState extends State<FFBottomNavBar> {
   Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.bottomCenter,
-      child: Container(
-        margin: EdgeInsets.only(bottom: 16),
-        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        decoration: BoxDecoration(
-          color: AppTheme.secondary,
-          borderRadius: BorderRadius.circular(500),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FFButton(
-              onPressed: widget.onCreateForm,
-              text: 'Создать',
-              secondTheme: true,
-              marginBottom: 0,
+      child: Column(
+        mainAxisSize: .min,
+        children: [
+          Container(
+            margin: EdgeInsets.only(bottom: 16),
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: AppTheme.secondary,
+              borderRadius: BorderRadius.circular(500),
             ),
-            Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
-              children: List.generate(
-                _items.length,
-                (index) => _buildNavigationItem(
-                  _items[index],
-                  index,
-                  selected: widget.selectedIndex == index,
-                  onTap: widget.onItemTapped,
+              children: [
+                FFButton(
+                  onPressed: widget.onCreateForm,
+
+                  text: 'button.new-form-create'.tr(),
+                  secondTheme: true,
+                  marginBottom: 0,
                 ),
-              ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: List.generate(
+                    _items.length,
+                    (index) => MouseRegion(
+                      onEnter: (event) {
+                        setState(() {
+                          _hoveredIndex = index;
+                        });
+                      },
+                      onExit: (event) {
+                        setState(() {
+                          _hoveredIndex = null;
+                        });
+                      },
+                      child: AnimatedScale(
+                        scale: _hoveredIndex == index ? 1.1 : 1,
+                        duration: Duration(milliseconds: 100),
+                        child: _buildNavigationItem(
+                          _items[index],
+                          index,
+                          selected: widget.selectedIndex == index,
+                          onTap: widget.onItemTapped,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

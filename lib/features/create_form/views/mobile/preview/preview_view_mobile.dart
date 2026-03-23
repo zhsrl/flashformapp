@@ -4,8 +4,6 @@ import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/formui_controller.dart';
 import 'package:flashform_app/data/controller/image_controller.dart';
 import 'package:flashform_app/data/model/create_form_state.dart';
-import 'package:flashform_app/data/service/image_service.dart';
-import 'package:flashform_app/features/widgets/ff_tabbar.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -119,6 +117,7 @@ class _PreviewViewState extends ConsumerState<PreviewViewMobile>
 
                     // Action Widget (Button or Form)
                     _buildWidgetByActionType(formState, uiControllers),
+                    if (formState.hasFooter) _buildFooter(formState),
 
                     // Branding
                     _buildFlashformBrandingWidget(formState),
@@ -376,30 +375,132 @@ class _PreviewViewState extends ConsumerState<PreviewViewMobile>
     );
   }
 
-  Widget _buildFlashformBrandingWidget(CreateFormState formState) {
+  Widget _buildFooter(
+    CreateFormState formState,
+  ) {
+    String companyName = formState.footerCompanyName ?? '';
+    String idNumber = formState.footerIdNumber ?? '';
+    String address = formState.footerAddress ?? '';
+    final formStateWatch = ref.watch(createFormProvider);
+
     return Container(
-      padding: const EdgeInsets.all(10),
-      margin: const EdgeInsets.only(top: 16),
-      child: Center(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Made on',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: formState.theme == 'light' ? Colors.black : Colors.white,
+      width: 350,
+      margin: EdgeInsets.only(top: 16),
+      // decoration: BoxDecoration(
+      //   color: formState.theme == 'light'
+      //       ? Colors.white
+      //       : const Color.fromARGB(255, 32, 30, 36),
+      //   borderRadius: BorderRadius.circular(20),
+      // ),
+      child: Column(
+        children: [
+          Divider(
+            color: Color(0xFF6B7280),
+            thickness: 0.2,
+          ),
+          if (formStateWatch.footerLinks.isNotEmpty)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const SizedBox(height: 12),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 16,
+                  runSpacing: 8,
+                  children: formStateWatch.footerLinks
+                      .map(
+                        (link) => InkWell(
+                          onTap: () {
+                            // Открыть ссылку
+                          },
+                          child: Text(
+                            link.label,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Color(0xFF4B5563),
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
+            ),
+          const SizedBox(
+            height: 8,
+          ),
+          ListenableBuilder(
+            listenable: ref
+                .watch(formUIControllersProvider)
+                .footerCompanyNameController,
+            builder: (context, child) {
+              return ListenableBuilder(
+                listenable: ref
+                    .watch(formUIControllersProvider)
+                    .footerIdNumberController,
+                builder: (context, child) {
+                  return ListenableBuilder(
+                    listenable: ref
+                        .watch(formUIControllersProvider)
+                        .footerAddressController,
+                    builder: (context, child) {
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '$companyName\n ЖСН/ИИН $idNumber\n$address',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: formState.theme == 'light'
+                                  ? Colors.black
+                                  : Color(0xFF6B7280),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFlashformBrandingWidget(CreateFormState formState) {
+    return Visibility(
+      visible: formState.hasLabel,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.only(top: 16),
+        child: Center(
+          child: Row(
+            mainAxisSize: .min,
+            children: [
+              Text(
+                'Made on',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: formState.theme == 'light'
+                      ? Colors.black
+                      : Colors.white,
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            SvgPicture.asset(
-              formState.theme == 'light'
-                  ? 'assets/images/logo-light.svg'
-                  : 'assets/images/logo-dark.svg',
-              width: 100,
-            ),
-          ],
+              const SizedBox(width: 8),
+              SvgPicture.asset(
+                formState.theme == 'light'
+                    ? 'assets/images/logo-light.svg'
+                    : 'assets/images/logo-dark.svg',
+                width: 100,
+              ),
+            ],
+          ),
         ),
       ),
     );

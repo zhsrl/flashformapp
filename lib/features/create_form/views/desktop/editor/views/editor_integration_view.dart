@@ -2,19 +2,17 @@ import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
-
 import 'package:flashform_app/data/controller/formui_controller.dart';
 import 'package:flashform_app/data/controller/integration_controller.dart';
-import 'package:flashform_app/data/repository/form_repository.dart';
-
+import 'package:flashform_app/data/controller/plan_usage_controller.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
-import 'package:flashform_app/features/widgets/ff_snackbar.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class EditorIntergrationView extends ConsumerStatefulWidget {
   const EditorIntergrationView({
@@ -116,62 +114,83 @@ class _SettingsIntergrationViewDesktopState
   Widget build(BuildContext context) {
     final uiControllers = ref.watch(formUIControllersProvider);
 
-    return Column(
-      children: [
-        _buildMetaPixelIntegration(
-          isEnabled: _isMetaPixelEnabled,
+    final usageAsync = ref.watch(planUsageProvider);
 
-          controller: uiControllers.metaPixelIdController,
+    return usageAsync.when(
+      data: (usage) {
+        return Column(
+          mainAxisSize: .min,
+          children: [
+            _buildMetaPixelIntegration(
+              isEnabled: _isMetaPixelEnabled,
 
-          onChanged: (value) async {
-            if (value == false) {
-              await _deleteMetaPixelId();
-            }
+              controller: uiControllers.metaPixelIdController,
 
-            setState(() {
-              _isMetaPixelEnabled = value;
-            });
-          },
-        ),
+              onChanged: (value) async {
+                if (value == false) {
+                  await _deleteMetaPixelId();
+                }
 
-        _buildYandexMetrikaIntegration(
-          isEnabled: _isYandexMetrikaEnabled,
-          controller: uiControllers.yandexMetrikaIdController,
+                setState(() {
+                  _isMetaPixelEnabled = value;
+                });
+              },
+            ),
 
-          onChanged: (value) async {
-            final form = await ref
-                .watch(formControllerProvider.notifier)
-                .fetchForm(widget.formId);
+            _buildYandexMetrikaIntegration(
+              isEnabled: _isYandexMetrikaEnabled,
+              isAvailable: usage.hasYaMetrikaIntegration,
+              controller: uiControllers.yandexMetrikaIdController,
 
-            if (value == false &&
-                (form.data?['settings']['ya-metrika-id'] as String)
-                    .isNotEmpty) {
-              await _deleteYandexMetrikaId();
-            }
+              onChanged: (value) async {
+                final form = await ref
+                    .watch(formControllerProvider.notifier)
+                    .fetchForm(widget.formId);
 
-            setState(() {
-              _isYandexMetrikaEnabled = value;
-            });
-          },
-        ),
+                if (value == false &&
+                    (form.data?['settings']['ya-metrika-id'] as String)
+                        .isNotEmpty) {
+                  await _deleteYandexMetrikaId();
+                }
 
-        _buildTelegramIntegration(),
-      ],
+                setState(() {
+                  _isYandexMetrikaEnabled = value;
+                });
+              },
+            ),
+
+            _buildTelegramIntegration(
+              isAvailable: usage.hasTelegramBotIntegration,
+            ),
+          ],
+        );
+      },
+      error: (er, st) {
+        return Text('Ошибка при загрузке интеграции: $er');
+      },
+      loading: () {
+        return LoadingAnimationWidget.waveDots(
+          color: AppTheme.secondary,
+          size: 30,
+        );
+      },
     );
   }
 
-  Widget _buildTelegramIntegration() {
+  Widget _buildTelegramIntegration({bool isAvailable = false}) {
     final formState = ref.watch(createFormProvider);
     final isConnected =
         formState.telegramEnabled && formState.telegramChatId != null;
 
     return Container(
       width: context.screenWidth,
+
       decoration: _buildBlocksDecotration(),
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -184,7 +203,7 @@ class _SettingsIntergrationViewDesktopState
                     height: 30,
                     width: 30,
                     child: Center(
-                      child: SvgPicture.asset('images/telegram.svg'),
+                      child: SvgPicture.asset('assets/images/telegram.svg'),
                     ),
                   ),
                   const SizedBox(
@@ -200,7 +219,27 @@ class _SettingsIntergrationViewDesktopState
                           fontSize: 14,
                         ),
                       ),
-                      if (isConnected)
+                      if (!isAvailable)
+                        Row(
+                          children: [
+                            HeroIcon(
+                              HeroIcons.informationCircle,
+                              size: 15,
+                              color: Colors.deepOrangeAccent,
+                            ),
+                            const SizedBox(
+                              width: 4,
+                            ),
+                            Text(
+                              'Доступно в Pro',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.deepOrangeAccent,
+                              ),
+                            ),
+                          ],
+                        )
+                      else if (isConnected)
                         Text(
                           '✓ Подключено',
                           style: TextStyle(
@@ -224,24 +263,27 @@ class _SettingsIntergrationViewDesktopState
                   ),
                 ],
               ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor: isConnected
-                      ? Colors.green
-                      : Colors.blueAccent,
-                ),
-                onPressed: () {
-                  Scaffold.of(context).openEndDrawer();
-                },
-                child: Text(
-                  isConnected ? 'Настроить' : 'Подключить',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
+              if (!isAvailable)
+                SizedBox()
+              else
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    elevation: 0,
+                    backgroundColor: isConnected
+                        ? Colors.green
+                        : Colors.blueAccent,
+                  ),
+                  onPressed: () {
+                    Scaffold.of(context).openEndDrawer();
+                  },
+                  child: Text(
+                    isConnected ? 'Настроить' : 'Подключить',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
-              ),
             ],
           ),
         ],
@@ -319,67 +361,103 @@ class _SettingsIntergrationViewDesktopState
   Widget _buildYandexMetrikaIntegration({
     bool isEnabled = true,
     ValueChanged<bool>? onChanged,
-
+    bool isAvailable = false,
     TextEditingController? controller,
   }) {
     return Container(
       width: context.screenWidth,
+
       decoration: _buildBlocksDecotration(),
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
-      child: Column(
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          Column(
             children: [
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  SizedBox(
-                    height: 30,
-                    width: 30,
-                    child: Center(
-                      child: SvgPicture.asset('assets/images/metrika.svg'),
-                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 30,
+                        width: 30,
+                        child: Center(
+                          child: SvgPicture.asset(
+                            'assets/images/metrika.svg',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        width: 8,
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Яндекс Метрика',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+
+                          if (!isAvailable)
+                            Row(
+                              children: [
+                                HeroIcon(
+                                  HeroIcons.informationCircle,
+                                  size: 15,
+                                  color: Colors.deepOrangeAccent,
+                                ),
+                                const SizedBox(
+                                  width: 4,
+                                ),
+                                Text(
+                                  'Доступно в Go и Pro',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.deepOrangeAccent,
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                    ],
                   ),
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  Text(
-                    'Яндекс Метрика',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  !isAvailable
+                      ? SizedBox()
+                      : CupertinoSwitch(
+                          value: isEnabled,
+
+                          thumbColor: AppTheme.secondary,
+                          inactiveThumbColor: AppTheme.border,
+                          activeTrackColor: AppTheme.primary,
+                          onChanged: onChanged,
+                        ),
                 ],
               ),
-              CupertinoSwitch(
-                value: isEnabled,
 
-                thumbColor: AppTheme.secondary,
-                inactiveThumbColor: AppTheme.border,
-                activeTrackColor: AppTheme.primary,
-                onChanged: onChanged,
-              ),
+              if (isEnabled) ...[
+                const SizedBox(
+                  height: 8,
+                ),
+                FFTextField(
+                  maxLines: 1,
+                  prefixIcon: HeroIcon(HeroIcons.codeBracket),
+                  hintText: 'Введите Metrika Id',
+                  onChanged: (value) {
+                    ref
+                        .read(createFormProvider.notifier)
+                        .updateYandexMetrikaId(value);
+                    ref.read(createFormProvider.notifier).markAsChanged();
+                  },
+                  controller: controller,
+                ),
+              ],
             ],
           ),
-
-          if (isEnabled) ...[
-            const SizedBox(
-              height: 8,
-            ),
-            FFTextField(
-              maxLines: 1,
-              prefixIcon: HeroIcon(HeroIcons.codeBracket),
-              hintText: 'Введите Metrika Id',
-              onChanged: (value) {
-                ref
-                    .read(createFormProvider.notifier)
-                    .updateYandexMetrikaId(value);
-                ref.read(createFormProvider.notifier).markAsChanged();
-              },
-              controller: controller,
-            ),
-          ],
         ],
       ),
     );

@@ -174,8 +174,8 @@ class _EditorAppBarState extends State<EditorAppBar> {
         PopupMenuButton<String>(
           icon: Container(
             decoration: BoxDecoration(
-              border: Border.all(color: AppTheme.border),
-              borderRadius: BorderRadius.circular(8),
+              shape: BoxShape.circle,
+              border: Border.all(color: AppTheme.secondary),
             ),
             padding: const EdgeInsets.all(6),
             child: HeroIcon(HeroIcons.ellipsisHorizontal),

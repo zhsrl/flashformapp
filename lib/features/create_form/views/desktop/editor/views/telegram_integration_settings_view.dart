@@ -2,6 +2,7 @@ import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
@@ -44,7 +45,7 @@ class _TelegramBotIntegrationSettingsViewState
       showSnackbar(
         context,
         type: SnackbarType.info,
-        message: 'Заполните Chat ID',
+        message: 'telegram.fill_chat_id'.tr(),
       );
       return;
     }
@@ -55,7 +56,7 @@ class _TelegramBotIntegrationSettingsViewState
     showSnackbar(
       context,
       type: SnackbarType.success,
-      message: 'Telegram настройки сохранены',
+      message: 'telegram.settings_saved'.tr(),
     );
   }
 
@@ -67,7 +68,7 @@ class _TelegramBotIntegrationSettingsViewState
     showSnackbar(
       context,
       type: SnackbarType.info,
-      message: 'Telegram отключен',
+      message: 'telegram.disconnected'.tr(),
     );
   }
 
@@ -94,7 +95,7 @@ class _TelegramBotIntegrationSettingsViewState
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Telegram-уведомления',
+                          'telegram.title'.tr(),
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.w600,
@@ -112,7 +113,7 @@ class _TelegramBotIntegrationSettingsViewState
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: Text(
-                              '✓ Подключено',
+                              'telegram.connected'.tr(),
                               style: TextStyle(
                                 color: Colors.green,
                                 fontSize: 12,
@@ -133,7 +134,7 @@ class _TelegramBotIntegrationSettingsViewState
 
                 // Description
                 Text(
-                  'Получайте данные о новых лидах мгновенно. Не дайте клиенту остыть — реагируйте в первые 60 секунд.',
+                  'telegram.description'.tr(),
                   style: TextStyle(color: Colors.grey[600], fontSize: 13),
                 ),
                 SizedBox(height: 24),
@@ -150,7 +151,7 @@ class _TelegramBotIntegrationSettingsViewState
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '📱 Как подключить:',
+                        'telegram.how_to_connect'.tr(),
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 12,
@@ -158,9 +159,7 @@ class _TelegramBotIntegrationSettingsViewState
                       ),
                       SizedBox(height: 8),
                       Text(
-                        '1. Напишите @fformMeBot боту в Telegram\n'
-                        '2. Нажмите на кнопку - Начать\n'
-                        '3. Скопируйте полученный Chat ID\n',
+                        'telegram.steps'.tr(),
                         style: TextStyle(fontSize: 11, color: Colors.grey[700]),
                       ),
                     ],
@@ -171,7 +170,7 @@ class _TelegramBotIntegrationSettingsViewState
                 // Chat ID field
                 FFTextField(
                   controller: _chatIdController,
-                  title: 'Telegram Chat ID',
+                  title: 'telegram.chat_id_title'.tr(),
                   hintText: '123456789',
                   prefixIcon: HeroIcon(HeroIcons.codeBracket),
                 ),
@@ -182,7 +181,9 @@ class _TelegramBotIntegrationSettingsViewState
                   width: double.infinity,
                   child: FFButton(
                     onPressed: _saveTelegramSettings,
-                    text: isConnected ? 'Обновить' : 'Подключить',
+                    text: isConnected
+                        ? 'telegram.update'.tr()
+                        : 'telegram.connect'.tr(),
                     secondTheme: false,
                   ),
                 ),
@@ -194,7 +195,7 @@ class _TelegramBotIntegrationSettingsViewState
                         onPressed: () {
                           _disconnectTelegram();
                         },
-                        label: Text('Отключить'),
+                        label: Text('telegram.disconnect'.tr()),
                         icon: HeroIcon(HeroIcons.xMark),
                         style: TextButton.styleFrom(
                           foregroundColor: Colors.red,

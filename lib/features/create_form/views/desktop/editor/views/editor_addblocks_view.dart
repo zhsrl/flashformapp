@@ -1,4 +1,5 @@
 import 'package:dashed_border/dashed_border.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
@@ -26,7 +27,7 @@ class _EditorAdditionalBlocksViewState
         return AlertDialog(
           backgroundColor: Colors.white,
           title: Text(
-            'Выберите тип блока',
+            'add_blocks.choose_block_type'.tr(),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -36,7 +37,7 @@ class _EditorAdditionalBlocksViewState
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
-                title: Text('Подвал'),
+                title: Text('add_blocks.block_footer'.tr()),
                 leading: HeroIcon(
                   HeroIcons.viewColumns,
                   color: Colors.blue,
@@ -53,7 +54,7 @@ class _EditorAdditionalBlocksViewState
               ),
 
               ListTile(
-                title: Text('Отзывы'),
+                title: Text('add_blocks.block_reviews'.tr()),
                 leading: HeroIcon(
                   HeroIcons.chatBubbleOvalLeft,
                   color: Colors.red,
@@ -67,7 +68,7 @@ class _EditorAdditionalBlocksViewState
               ),
               ListTile(
                 title: Text(
-                  'Приемущества',
+                  'add_blocks.block_advantages'.tr(),
                 ),
                 leading: HeroIcon(
                   HeroIcons.chartBar,
@@ -81,7 +82,7 @@ class _EditorAdditionalBlocksViewState
                 },
               ),
               ListTile(
-                title: Text('FAQ'),
+                title: Text('add_blocks.block_faq'.tr()),
                 leading: HeroIcon(
                   HeroIcons.questionMarkCircle,
                   color: Colors.deepPurpleAccent,
@@ -123,7 +124,7 @@ class _EditorAdditionalBlocksViewState
                   const SizedBox(
                     width: 8,
                   ),
-                  Text('Footer'),
+                  Text('add_blocks.block_footer'.tr()),
                 ],
               ),
               GestureDetector(
@@ -181,7 +182,7 @@ class _EditorAdditionalBlocksViewState
             ),
             child: Center(
               child: Text(
-                '+ Добавить блок',
+                'add_blocks.add_block'.tr(),
                 style: TextStyle(
                   color: _isHover ? AppTheme.secondary : Colors.grey,
                   fontWeight: _isHover ? FontWeight.bold : FontWeight.normal,

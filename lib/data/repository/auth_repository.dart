@@ -22,8 +22,6 @@ class AuthRepository {
     }
   }
 
-  // CREATE NEW USER BY ONE-TIME-PASSWORD (OTP)
-  // First step. Send code to email
   Future<void> signUpWithOTP(String email) async {
     try {
       await _supabase.client.auth.signInWithOtp(

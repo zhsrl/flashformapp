@@ -1,3 +1,4 @@
+import 'package:flashform_app/data/model/form_link.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
@@ -36,6 +37,10 @@ class FormUIControllers {
   late final TextEditingController thxTitleController;
   late final TextEditingController thxDescriptionController;
 
+  late final TextEditingController footerCompanyNameController;
+  late final TextEditingController footerIdNumberController;
+  late final TextEditingController footerAddressController;
+
   FormUIControllers(this._logicNotifier) {
     titleController = TextEditingController();
     subtitleController = TextEditingController();
@@ -53,6 +58,10 @@ class FormUIControllers {
 
     metaPixelIdController = TextEditingController();
     yandexMetrikaIdController = TextEditingController();
+
+    footerCompanyNameController = TextEditingController();
+    footerIdNumberController = TextEditingController();
+    footerAddressController = TextEditingController();
 
     // Как только юзер печатает, мы обновляем главный стейт
     titleController.addListener(() {
@@ -87,7 +96,8 @@ class FormUIControllers {
       () => _logicNotifier.updateWhatsappNumber(whatsappNumberController.text),
     );
     whatsappMessageController.addListener(
-      () => _logicNotifier.updateWhatsappMessage(whatsappMessageController.text),
+      () =>
+          _logicNotifier.updateWhatsappMessage(whatsappMessageController.text),
     );
     thxTitleController.addListener(
       () => _logicNotifier.updateThxTitle(thxTitleController.text),
@@ -96,10 +106,23 @@ class FormUIControllers {
       () => _logicNotifier.updateThxDescription(thxDescriptionController.text),
     );
     metaPixelIdController.addListener(
-      () => _logicNotifier.updateButtonText(metaPixelIdController.text),
+      () => _logicNotifier.updateMetaPixelId(metaPixelIdController.text),
     );
     yandexMetrikaIdController.addListener(
-      () => _logicNotifier.updateButtonText(yandexMetrikaIdController.text),
+      () =>
+          _logicNotifier.updateYandexMetrikaId(yandexMetrikaIdController.text),
+    );
+
+    footerCompanyNameController.addListener(
+      () => _logicNotifier.updateFooterCompanyName(
+        footerCompanyNameController.text,
+      ),
+    );
+    footerIdNumberController.addListener(
+      () => _logicNotifier.updateFooterIdNumber(footerIdNumberController.text),
+    );
+    footerAddressController.addListener(
+      () => _logicNotifier.updateFooterAddress(footerAddressController.text),
     );
   }
 
@@ -143,8 +166,37 @@ class FormUIControllers {
       }
 
       if (thxTitle != null) thxTitleController.text = thxTitle;
-      if (thxDescription != null)
+      if (thxDescription != null) {
         thxDescriptionController.text = thxDescription;
+      }
+    }
+  }
+
+  void updateHasFooter(bool value) {
+    _logicNotifier.updateHasFooter(value);
+  }
+
+  void updateHasLabel(bool value) {
+    _logicNotifier.updateHasLabel(value);
+  }
+
+  void updateFooterLinks(List<FooterLink> links) {
+    _logicNotifier.updateFooterLinks(links);
+  }
+
+  void updateFooterValues({
+    String? footerCompanyName,
+    String? footerIdNumber,
+    String? footerAddress,
+  }) {
+    if (footerCompanyName != null) {
+      footerCompanyNameController.text = footerCompanyName;
+    }
+    if (footerIdNumber != null) {
+      footerIdNumberController.text = footerIdNumber;
+    }
+    if (footerAddress != null) {
+      footerAddressController.text = footerAddress;
     }
   }
 

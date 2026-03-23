@@ -8,13 +8,29 @@
         "do-you-have-account": "У вас есть аккаунт?",
         "signin-text": "Войти"
     },
+
+    "home": {
+        "new-form-title": "Жаңа форма",
+        "new-form-text": "Форма аты"
+
+    },
+
+
+
+    "nav-bar": {
+        "forms": "Формы",
+        "leads": "Заявки",
+        "settings": "Настройки"
+    },
     "forgot-password" : {
         "title": "Возникли проблемы?",
         "subtitle": "Напишите в поддержку"
     },
     "button" : {
         "signin": "Войти",
-        "signup": "Зарегистрироваться"
+        "signup": "Зарегистрироваться",
+        "new-form-create": "Новая форма",
+        "create": "Создать"
         
     },
     "field": {
@@ -28,12 +44,162 @@
         "lang-kz": "Қазақ тілі"
     },
     "errors": {
-        "invalid_credentials": "Қате эл. пошта немесе құпия сөз",
-        "user_already_registered": "Электрондық пошта бойынша пайдаланушы бұрыннан бар",
-        "anonymous_provider_disabled": "Жасырын кіру өшірілген",
-        "weak_password": "weak_password",
-        "email_not_confirmed": "Электрондық пошта расталмады. Поштаңызды тексеріңіз",
-        "over_email_send_rate_limit": "Сұраныстар тым көп. Сәл күте тұрыңыз",
-        "429": "Тым көп әрекеттер. Кейінірек қайталап көріңіз"
+        "invalid_credentials": "Неверный логин или пароль",
+        "user_already_registered": "Пользователь с таким email уже существует",
+        "anonymous_provider_disabled": "Анонимный вход отключен",
+        "weak_password": "Слишком слабый пароль",
+        "email_not_confirmed": "Электронная почта не подтверждена. Проверьте почту",
+        "over_email_send_rate_limit": "Слишком много запросов. Попробуйте позже",
+        "429": "Слишком много попыток. Повторите позже"
+    },
+    "common": {
+        "cancel": "Отмена",
+        "add": "Добавить",
+        "save": "Сохранить",
+        "open": "Открыть",
+        "publish": "Опубликовать",
+        "error_with_message": "Ошибка: {message}"
+    },
+    "tables": {
+        "leads_title": "Заявки ({count})",
+        "export": "Экспорт",
+        "clear_filters": "Сбросить фильтры",
+        "no_leads": "Нет заявок",
+        "page_of": "Страница {page} из {total}",
+        "back": "Назад",
+        "forward": "Вперед",
+        "created_at": "Дата создания",
+        "data": "Данные",
+        "utm_data": "UTM данные",
+        "location": "Локация",
+        "all_locations": "Все локации",
+        "all_dates": "Все даты",
+        "today_only": "Только сегодня",
+        "select_date": "Выбрать дату",
+        "select_date_with_dots": "Выбрать дату...",
+        "lead_title": "Заявка #{id}",
+        "main_info": "Основная информация",
+        "lead_id": "ID заявки",
+        "form_id": "ID формы",
+        "answers_count": "Ответы ({count})",
+        "geo_data": "Геоданные",
+        "write_whatsapp": "Написать на WhatsApp"
+    },
+    "forms": {
+        "choose_action_type": "Выберите тип действия",
+        "action_type_button_url": "Кнопка со ссылкой",
+        "action_type_form": "Форма",
+        "button_settings": "Настройки кнопки",
+        "button_text": "Текст в кнопке",
+        "url": "URL (ссылка)",
+        "form_settings": "Настройки формы",
+        "fill_form_placeholder": "Заполните форму ...",
+        "form_title": "Заголовок формы",
+        "button_text_example_registration": "например, Регистрация",
+        "success_message_after_submit": "Сообщение после успешной отправки",
+        "success_action_type": "Выберите тип действия после успешной формы",
+        "action_whatsapp": "WhatsApp",
+        "action_redirect": "Перенаправление",
+        "action_thank_you_page": "Thank you страница",
+        "phone_without_code": "Номер телефона (без +7 или 8)",
+        "whatsapp_message_text": "Текст сообщения",
+        "whatsapp_message_placeholder": "Сообщение",
+        "redirect_placeholder": "например, WhatsApp...",
+        "redirect_url": "Ссылка на перенаправление",
+        "thx_title_placeholder": "Заголовок",
+        "thx_title_label": "Напишите заголовок",
+        "thx_description_placeholder": "Описание",
+        "thx_description_label": "Напишите описание",
+        "form_fields": "Поля формы",
+        "no_fields": "Нет полей",
+        "field_type_phone": "Телефон",
+        "field_type_text": "Текст",
+        "choose_color": "Выберите цвет",
+        "add_field": "Добавить поле",
+        "field_name": "Название поля",
+        "field_type": "Тип поля",
+        "field_name_option": "Имя",
+        "field_email_option": "Email",
+        "field_phone_option": "Номер телефона",
+        "field_text_option": "Текст",
+        "footer_title": "Подвал (Footer)",
+        "available_go_pro": "Доступно в Go и Pro",
+        "copy_from_another_form": "Скопировать из другой формы",
+        "legal_data_section": "1. Юридические данные",
+        "company_name": "Название ИП/ТОО",
+        "iin": "ИИН",
+        "address": "Адрес",
+        "links_section": "2. Пункты со ссылкой",
+        "link_name": "Название",
+        "link_url": "Ссылка",
+        "choose_form": "Выберите форму",
+        "no_forms_with_footer": "Нет форм с footer",
+        "legal_short": "Юр. данные",
+        "links_short": "Ссылки"
+    },
+    "add_blocks": {
+        "choose_block_type": "Выберите тип блока",
+        "block_footer": "Подвал",
+        "block_reviews": "Отзывы",
+        "block_advantages": "Преимущества",
+        "block_faq": "FAQ",
+        "add_block": "+ Добавить блок"
+    },
+    "mobile": {
+        "publish_error": "Ошибка публикации",
+        "page_published": "Страница опубликована!",
+        "link_copied": "Ссылка скопирована",
+        "or_disable_page": "или отключить страницу",
+        "page_not_published": "Страница не опубликована",
+        "unsaved_changes_title": "Несохраненные изменения",
+        "unsaved_changes_content": "У вас есть несохраненные изменения. Сохранить их?",
+        "exit_without_saving": "Выйти без сохранения",
+        "edit_form_name": "Изменить название формы",
+        "new_form_name": "Новое название формы",
+        "error_saving_form": "Ошибка при сохранении формы",
+        "tab_editor": "Редактор",
+        "tab_preview": "Превью",
+        "tab_integrations": "Интеграции"
+    },
+    "subscription": {
+        "payment_pending": "Платеж создан и ожидает подтверждения",
+        "free_plan_no_payment": "План {plan} бесплатный. Платеж не требуется",
+        "payment_not_confirmed": "Платеж не был подтвержден",
+        "activated_plan": "Подписка {plan} успешно активирована",
+        "plan_not_selected": "План не выбран",
+        "activated": "Подписка успешно активирована",
+        "auto_renew_disabled": "Автопродление отключено"
+    },
+    "payment": {
+        "test_declined": "Тестовая оплата отклонена",
+        "test_confirmed": "Тестовая оплата подтверждена"
+    },
+    "payment_page": {
+        "title": "Страница оплаты",
+        "scan_qr_or_pay": "Сканируйте QR или нажмите на кнопку оплатить",
+        "pay_plan": "Оплатить план",
+        "send_receipt_hint": "После успешной оплаты нажмите на кнопку и отправьте чек",
+        "send_receipt": "Отправить чек"
+    },
+    "telegram": {
+        "fill_chat_id": "Заполните Chat ID",
+        "settings_saved": "Настройки Telegram сохранены",
+        "disconnected": "Telegram отключен",
+        "title": "Telegram-уведомления",
+        "connected": "✓ Подключено",
+        "description": "Получайте данные о новых лидах мгновенно. Не дайте клиенту остыть, реагируйте в первые 60 секунд.",
+        "how_to_connect": "Как подключить:",
+        "steps": "1. Напишите @fformMeBot боту в Telegram\n2. Нажмите на кнопку - Начать\n3. Скопируйте полученный Chat ID\n",
+        "chat_id_title": "Telegram Chat ID",
+        "update": "Обновить",
+        "connect": "Подключить",
+        "disconnect": "Отключить"
+    },
+    "dialogs": {
+        "form-limit": {
+            "title": "Вы достигли максимума",
+            "description": "Вы создали все доступные формы на текущем тарифе. Чтобы продолжить сбор лидов без ограничений, перейдите на расширенный план.",
+            "button-text": "Перейти на расширенный план"
+        }
     }
 }

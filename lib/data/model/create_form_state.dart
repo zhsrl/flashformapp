@@ -1,4 +1,5 @@
 import 'package:flashform_app/data/model/form.dart';
+import 'package:flashform_app/data/model/form_link.dart';
 import 'package:flutter/material.dart';
 
 const _undefined = Object();
@@ -17,7 +18,7 @@ class CreateFormState {
   final String theme; // 'light' | 'dark'
   final String actionType; // 'button-url' | 'form'
   final Color buttonColor;
-
+  final bool hasLabel; // false | true;
   final Color formButtonColor;
   final double titleFontSize;
   final double subtitleFontSize;
@@ -36,6 +37,11 @@ class CreateFormState {
   final String yandexMetrikaId;
   final bool telegramEnabled;
   final String? telegramChatId;
+  final bool hasFooter;
+  final String? footerCompanyName;
+  final String? footerIdNumber;
+  final String? footerAddress;
+  final List<FooterLink> footerLinks; // Новое поле для хранения ссылок
 
   const CreateFormState({
     this.name,
@@ -58,6 +64,7 @@ class CreateFormState {
     this.hasRedirectUrl = false,
     this.successAction,
     this.redirectUrl,
+    this.hasLabel = true,
     this.whatsappMessage,
     this.whatsappNumber,
     this.thxDescription,
@@ -70,6 +77,11 @@ class CreateFormState {
     this.yandexMetrikaId = '',
     this.telegramEnabled = false,
     this.telegramChatId,
+    this.hasFooter = false,
+    this.footerAddress,
+    this.footerCompanyName,
+    this.footerIdNumber,
+    this.footerLinks = const [],
   });
 
   CreateFormState copyWith({
@@ -100,10 +112,17 @@ class CreateFormState {
     List<FormFields>? fields,
     bool? isPublishing,
     bool? isSaving,
+    bool? hasFooter,
+    bool? hasLabel,
     String? metaPixelId,
     String? yandexMetrikaId,
     bool? telegramEnabled,
     String? telegramChatId,
+
+    String? footerCompanyName,
+    String? footerIdNumber,
+    String? footerAddress,
+    List<FooterLink>? footerLinks,
   }) {
     return CreateFormState(
       name: name ?? this.name,
@@ -113,6 +132,7 @@ class CreateFormState {
       formTitle: formTitle ?? this.formTitle,
       buttonText: buttonText ?? this.buttonText,
       hasChanges: hasChanges ?? this.hasChanges,
+
       formButtonText: formButtonText ?? this.formButtonText,
       successText: successText ?? this.successText,
       buttonUrl: buttonUrl ?? this.buttonUrl,
@@ -138,6 +158,13 @@ class CreateFormState {
       yandexMetrikaId: yandexMetrikaId ?? this.yandexMetrikaId,
       telegramEnabled: telegramEnabled ?? this.telegramEnabled,
       telegramChatId: telegramChatId ?? this.telegramChatId,
+      hasLabel: hasLabel ?? this.hasLabel,
+
+      hasFooter: hasFooter ?? this.hasFooter,
+      footerCompanyName: footerCompanyName ?? this.footerCompanyName,
+      footerIdNumber: footerIdNumber ?? this.footerIdNumber,
+      footerAddress: footerAddress ?? this.footerAddress,
+      footerLinks: footerLinks ?? this.footerLinks,
     );
   }
 }

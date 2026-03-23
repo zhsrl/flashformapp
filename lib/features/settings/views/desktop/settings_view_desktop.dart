@@ -1,9 +1,15 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/features/home/widgets/home_appbar.dart';
-import 'package:flashform_app/features/settings/widgets/profile_widget_desktop.dart';
-import 'package:flashform_app/features/widgets/ff_tabbar.dart';
+import 'package:flashform_app/features/settings/utils/subscription_plans_presenter.dart';
+import 'package:flashform_app/features/settings/views/desktop/profile_view_desktop.dart';
 import 'package:flutter/material.dart';
+
+enum EndDrawerType {
+  none,
+  changePassword,
+  subscriptionPlans,
+}
 
 class SettingsViewDesktop extends StatefulWidget {
   const SettingsViewDesktop({super.key});
@@ -14,26 +20,41 @@ class SettingsViewDesktop extends StatefulWidget {
 
 class _SettingsViewDesktopState extends State<SettingsViewDesktop>
     with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-  int _selectedIndex = 0;
+  EndDrawerType _endDrawerType = EndDrawerType.none;
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+  void _openChangePasswordDrawer() {
+    setState(() => _endDrawerType = EndDrawerType.changePassword);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scaffoldKey.currentState?.openEndDrawer();
+    });
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
+  void _openSubscriptionPlansDrawer() {
+    showSubscriptionPlansPresenter(context);
+  }
+
+  Widget _buildDrawerContent() {
+    switch (_endDrawerType) {
+      case EndDrawerType.changePassword:
+        return ChangePasswordDialog();
+      case EndDrawerType.subscriptionPlans:
+      case EndDrawerType.none:
+        return SizedBox.shrink();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: HomeAppBar(),
-      endDrawer: ChangePasswordDialog(),
+      endDrawer: _endDrawerType != EndDrawerType.none
+          ? Drawer(
+              width: 800,
+              child: _buildDrawerContent(),
+            )
+          : null,
       backgroundColor: AppTheme.background,
       body: Padding(
         padding: context.isMobile
@@ -46,31 +67,9 @@ class _SettingsViewDesktopState extends State<SettingsViewDesktop>
                 maxWidth: 500,
                 minWidth: 300,
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FFTabBar(
-                    controller: _tabController,
-                    onTap: (index) {
-                      setState(() {
-                        _selectedIndex = index;
-                      });
-                    },
-                    tabs: [
-                      Text('Профиль'),
-                      Text('Подписка'),
-                    ],
-                  ),
-                  const SizedBox(
-                    height: 16,
-                  ),
-
-                  [
-                    SettingsProfileView(),
-                    Text('Subscription'),
-                  ].elementAt(_selectedIndex),
-                ],
+              child: SettingsProfileView(
+                onOpenChangePassword: _openChangePasswordDrawer,
+                onOpenSubscriptionPlans: _openSubscriptionPlansDrawer,
               ),
             ),
           ),

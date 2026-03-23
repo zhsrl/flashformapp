@@ -3,6 +3,7 @@ import 'package:flashform_app/data/controller/image_controller.dart';
 import 'package:flashform_app/data/model/create_form_state.dart'
     show CreateFormState;
 import 'package:flashform_app/data/model/form.dart';
+import 'package:flashform_app/data/model/form_link.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
@@ -61,7 +62,8 @@ class CreateFormController extends StateNotifier<CreateFormState> {
       state = state.copyWith(formButtonColor: color);
   void updateHasRedirectUrl(bool hasRedirectUrl) =>
       state = state.copyWith(hasRedirectUrl: hasRedirectUrl);
-
+  void updateHasLabel(bool hasLabel) =>
+      state = state.copyWith(hasLabel: hasLabel);
   void updateFormRedirectUrl(String url) =>
       state = state.copyWith(redirectUrl: url);
   void updateFields(List<FormFields> fields) =>
@@ -90,6 +92,39 @@ class CreateFormController extends StateNotifier<CreateFormState> {
   void updateThxTitle(String title) => state = state.copyWith(thxTitle: title);
   void updateThxDescription(String description) =>
       state = state.copyWith(thxDescription: description);
+
+  // Footer methods
+
+  void updateHasFooter(bool value) {
+    state = state.copyWith(hasFooter: value);
+  }
+
+  void updateFooterCompanyName(String value) {
+    state = state.copyWith(footerCompanyName: value);
+  }
+
+  void updateFooterIdNumber(String value) {
+    state = state.copyWith(footerIdNumber: value);
+  }
+
+  void updateFooterAddress(String value) {
+    state = state.copyWith(footerAddress: value);
+  }
+
+  void updateFooterLinks(List<FooterLink> links) {
+    state = state.copyWith(footerLinks: links);
+  }
+
+  void copyFooterFromForm(CreateFormState sourceForm) {
+    state = state.copyWith(
+      hasFooter: sourceForm.hasFooter,
+      footerCompanyName: sourceForm.footerCompanyName,
+      footerIdNumber: sourceForm.footerIdNumber,
+      footerAddress: sourceForm.footerAddress,
+      footerLinks: sourceForm.footerLinks,
+    );
+    markAsChanged();
+  }
 
   // Telegram methods
   void updateTelegramEnabled(bool enabled) {
@@ -124,12 +159,32 @@ class CreateFormController extends StateNotifier<CreateFormState> {
     final thxTitle = successAction?['thx_title'] as String?;
     final thxDescription = successAction?['thx_description'] as String?;
     final redirectUrl = successAction?['redirect_url'] as String?;
-
+    final hasLabel = data['settings']['has-label'] as bool;
     // Загружаем Telegram настройки
     final notificationSettings = data['notification_settings'] as Map?;
     final telegramSettings = notificationSettings?['telegram'] as Map?;
     final telegramEnabled = telegramSettings?['enabled'] as bool? ?? false;
     final telegramChatId = telegramSettings?['chat_id'] as String?;
+
+    // Загружаем Footer данные
+    final footerData = data['footer'] as Map?;
+    final footerCompanyName =
+        footerData?['legal-info']['company-name'] as String?;
+    final footerIdNumber = footerData?['legal-info']['id-number'] as String?;
+    final footerAddress = footerData?['legal-info']['address'] as String?;
+    final hasFooter = data['footer']['enabled'] as bool;
+    final footerLinksData = footerData?['links'] as List? ?? [];
+    final footerLinks = footerLinksData
+        .map((linkMap) {
+          if (linkMap is Map) {
+            final label = linkMap.keys.first as String;
+            final url = linkMap.values.first as String;
+            return FooterLink(label: label, url: url);
+          }
+          return null;
+        })
+        .whereType<FooterLink>()
+        .toList();
 
     state = state.copyWith(
       name: form.name,
@@ -158,8 +213,14 @@ class CreateFormController extends StateNotifier<CreateFormState> {
       hasRedirectUrl: redirectUrl != null ? true : false,
       yandexMetrikaId: data['settings']['ya-metrika-id'],
       metaPixelId: data['settings']['meta-pixel-id'],
+      hasLabel: hasLabel,
       telegramEnabled: telegramEnabled,
       telegramChatId: telegramChatId,
+      hasFooter: hasFooter,
+      footerCompanyName: footerCompanyName,
+      footerIdNumber: footerIdNumber,
+      footerAddress: footerAddress,
+      footerLinks: footerLinks,
     );
   }
 
@@ -240,12 +301,26 @@ class CreateFormController extends StateNotifier<CreateFormState> {
         'settings': {
           'meta-pixel-id': state.metaPixelId,
           'ya-metrika-id': state.yandexMetrikaId,
+          'has-label': state.hasLabel,
         },
         'notification_settings': {
           'telegram': {
             'enabled': state.telegramEnabled,
             'chat_id': state.telegramChatId,
           },
+        },
+        'footer': {
+          'enabled': state.hasFooter,
+          'legal-info': {
+            'company-name': state.footerCompanyName,
+            'id-number': state.footerIdNumber,
+            'address': state.footerAddress,
+          },
+          'links': state.footerLinks.map((element) {
+            return {
+              element.label: element.url,
+            };
+          }).toList(),
         },
       };
 

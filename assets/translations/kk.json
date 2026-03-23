@@ -8,6 +8,19 @@
         "do-you-have-account": "Сізде аккаунт бар ма?",
         "signin-text": "Кіру"
     },
+
+    "home": {
+        "new-form-title": "Жаңа форма",
+        "new-form-text": "Форма аты"
+
+    },
+
+    "nav-bar": {
+        "forms": "Форма",
+        "leads": "Өтінім",
+        "settings": "Баптаулар"
+    },
+
     "forgot-password" : {
         "title": "Қиындықтар туындап жатыр ма?",
         "subtitle": "Қолдау қызметіне хабарласыңыз"
@@ -15,7 +28,9 @@
 
     "button" : {
         "signin": "Кіру",
-        "signup": "Тіркелу"
+        "signup": "Тіркелу",
+        "new-form-create": "Жаңа форма",
+        "create": "Жасау"
 
     },
     "field": {
@@ -27,5 +42,165 @@
         "language": "Тіл",
         "lang-ru": "Русский",
         "lang-kz": "Қазақ тілі"
+    },
+    "errors": {
+        "invalid_credentials": "Логин немесе құпия сөз қате",
+        "user_already_registered": "Бұл email бойынша пайдаланушы бұрыннан бар",
+        "anonymous_provider_disabled": "Жасырын кіру өшірілген",
+        "weak_password": "Құпия сөз тым әлсіз",
+        "email_not_confirmed": "Электрондық пошта расталмаған. Поштаңызды тексеріңіз",
+        "over_email_send_rate_limit": "Сұраныстар тым көп. Кейінірек қайталап көріңіз",
+        "429": "Тым көп әрекет. Кейінірек қайталап көріңіз"
+    },
+    "common": {
+        "cancel": "Болдырмау",
+        "add": "Қосу",
+        "save": "Сақтау",
+        "open": "Ашу",
+        "publish": "Жариялау",
+        "error_with_message": "Қате: {message}"
+    },
+    
+    "tables": {
+        "leads_title": "Өтінімдер ({count})",
+        "export": "Экспорт",
+        "clear_filters": "Сүзгілерді тазарту",
+        "no_leads": "Өтінімдер жоқ",
+        "page_of": "Бет {page} / {total}",
+        "back": "Артқа",
+        "forward": "Алға",
+        "created_at": "Жасалған күні",
+        "data": "Деректер",
+        "utm_data": "UTM деректері",
+        "location": "Орналасу",
+        "all_locations": "Барлық орналасулар",
+        "all_dates": "Барлық күндер",
+        "today_only": "Тек бүгін",
+        "select_date": "Күнді таңдау",
+        "select_date_with_dots": "Күнді таңдау...",
+        "lead_title": "Өтінім #{id}",
+        "main_info": "Негізгі ақпарат",
+        "lead_id": "Өтінім ID",
+        "form_id": "Форма ID",
+        "answers_count": "Жауаптар ({count})",
+        "geo_data": "Геодеректер",
+        "write_whatsapp": "WhatsApp-қа жазу"
+    },
+    "forms": {
+        "choose_action_type": "Әрекет түрін таңдаңыз",
+        "action_type_button_url": "Сілтемесі бар батырма",
+        "action_type_form": "Форма",
+        "button_settings": "Батырма баптаулары",
+        "button_text": "Батырма мәтіні",
+        "url": "URL (сілтеме)",
+        "form_settings": "Форма баптаулары",
+        "fill_form_placeholder": "Форманы толтырыңыз ...",
+        "form_title": "Форма тақырыбы",
+        "button_text_example_registration": "мысалы, Тіркелу",
+        "success_message_after_submit": "Сәтті жіберуден кейінгі хабарлама",
+        "success_action_type": "Форма сәтті болғаннан кейінгі әрекет түрін таңдаңыз",
+        "action_whatsapp": "WhatsApp",
+        "action_redirect": "Бағыттау",
+        "action_thank_you_page": "Thank you беті",
+        "phone_without_code": "Телефон нөмірі (+7 немесе 8-сыз)",
+        "whatsapp_message_text": "Хабарлама мәтіні",
+        "whatsapp_message_placeholder": "Хабарлама",
+        "redirect_placeholder": "мысалы, WhatsApp...",
+        "redirect_url": "Бағыттау сілтемесі",
+        "thx_title_placeholder": "Тақырып",
+        "thx_title_label": "Тақырып жазыңыз",
+        "thx_description_placeholder": "Сипаттама",
+        "thx_description_label": "Сипаттама жазыңыз",
+        "form_fields": "Форма өрістері",
+        "no_fields": "Өрістер жоқ",
+        "field_type_phone": "Телефон",
+        "field_type_text": "Мәтін",
+        "choose_color": "Түсті таңдаңыз",
+        "add_field": "Өріс қосу",
+        "field_name": "Өріс атауы",
+        "field_type": "Өріс түрі",
+        "field_name_option": "Аты",
+        "field_email_option": "Email",
+        "field_phone_option": "Телефон нөмірі",
+        "field_text_option": "Мәтін",
+        "footer_title": "Төменгі бөлік (Footer)",
+        "available_go_pro": "Go және Pro тарифтерінде қолжетімді",
+        "copy_from_another_form": "Басқа формадан көшіру",
+        "legal_data_section": "1. Заңды деректер",
+        "company_name": "ЖК/ЖШС атауы",
+        "iin": "ЖСН",
+        "address": "Мекенжай",
+        "links_section": "2. Сілтемесі бар тармақтар",
+        "link_name": "Атауы",
+        "link_url": "Сілтеме",
+        "choose_form": "Форманы таңдаңыз",
+        "no_forms_with_footer": "Footer бар формалар жоқ",
+        "legal_short": "Заңды деректер",
+        "links_short": "Сілтемелер"
+    },
+    "add_blocks": {
+        "choose_block_type": "Блок түрін таңдаңыз",
+        "block_footer": "Төменгі бөлік",
+        "block_reviews": "Пікірлер",
+        "block_advantages": "Артықшылықтар",
+        "block_faq": "FAQ",
+        "add_block": "+ Блок қосу"
+    },
+    "mobile": {
+        "publish_error": "Жариялау қатесі",
+        "page_published": "Бет жарияланды!",
+        "link_copied": "Сілтеме көшірілді",
+        "or_disable_page": "немесе бетті өшіру",
+        "page_not_published": "Бет жарияланбаған",
+        "unsaved_changes_title": "Сақталмаған өзгерістер",
+        "unsaved_changes_content": "Сақталмаған өзгерістер бар. Сақтайсыз ба?",
+        "exit_without_saving": "Сақтамай шығу",
+        "edit_form_name": "Форма атауын өзгерту",
+        "new_form_name": "Форманың жаңа атауы",
+        "error_saving_form": "Форманы сақтау қатесі",
+        "tab_editor": "Редактор",
+        "tab_preview": "Алдын ала қарау",
+        "tab_integrations": "Интеграциялар"
+    },
+    "subscription": {
+        "payment_pending": "Төлем жасалды және растауды күтуде",
+        "free_plan_no_payment": "{plan} жоспары тегін. Төлем қажет емес",
+        "payment_not_confirmed": "Төлем расталмады",
+        "activated_plan": "{plan} жазылымы сәтті белсендірілді",
+        "plan_not_selected": "Жоспар таңдалмаған",
+        "activated": "Жазылым сәтті белсендірілді",
+        "auto_renew_disabled": "Автожаңарту өшірілді"
+    },
+    "payment": {
+        "test_declined": "Тесттік төлем қабылданбады",
+        "test_confirmed": "Тесттік төлем расталды"
+    },
+    "payment_page": {
+        "title": "Төлем беті",
+        "scan_qr_or_pay": "QR сканерлеңіз немесе төлеу батырмасын басыңыз",
+        "pay_plan": "Жоспарды төлеу",
+        "send_receipt_hint": "Төлем сәтті аяқталғаннан кейін батырманы басып, чекті жіберіңіз",
+        "send_receipt": "Чекті жіберу"
+    },
+    "telegram": {
+        "fill_chat_id": "Chat ID толтырыңыз",
+        "settings_saved": "Telegram баптаулары сақталды",
+        "disconnected": "Telegram өшірілді",
+        "title": "Telegram хабарламалары",
+        "connected": "✓ Қосылған",
+        "description": "Жаңа лидтер туралы деректерді бірден алыңыз. Клиент суып қалмай тұрып, алғашқы 60 секундта әрекет етіңіз.",
+        "how_to_connect": "Қалай қосу керек:",
+        "steps": "1. Telegram-да @fformMeBot ботына жазыңыз\n2. Бастау батырмасын басыңыз\n3. Алынған Chat ID көшіріңіз\n",
+        "chat_id_title": "Telegram Chat ID",
+        "update": "Жаңарту",
+        "connect": "Қосу",
+        "disconnect": "Өшіру"
+    },
+    "dialogs": {
+        "form-limit": {
+            "title": "Сіз шектеуге жеттіңіз",
+            "description": "Ағымдағы тарифте барлық қолжетімді формаларды жасадыңыз. Шексіз лидтерді жинауды жалғастыру үшін тарифті жаңартыңыз.",
+            "button-text": "Басқа тариф таңдау"
+        }
     }
 }

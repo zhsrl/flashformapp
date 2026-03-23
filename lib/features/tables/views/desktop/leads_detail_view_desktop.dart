@@ -1,9 +1,11 @@
 import 'package:data_table_2/data_table_2.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/core/utils/utils.dart';
 import 'package:flashform_app/data/controller/export_controller.dart';
 import 'package:flashform_app/data/controller/leads_controller.dart';
+import 'package:flashform_app/data/controller/plan_usage_controller.dart';
 import 'package:flashform_app/data/model/lead.dart';
 import 'package:flashform_app/data/repository/leads_repository.dart';
 import 'package:flashform_app/features/home/widgets/home_appbar.dart';
@@ -52,7 +54,9 @@ class _LeadsDetailViewDesktopState
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    'Заявки (${leadsState.totalCount})',
+                    'tables.leads_title'.tr(
+                      namedArgs: {'count': '${leadsState.totalCount}'},
+                    ),
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   Wrap(
@@ -73,21 +77,39 @@ class _LeadsDetailViewDesktopState
                           leadsState,
                         ),
                       ),
-                      FFButton(
-                        onPressed: () async {
-                          await ref
-                              .read(leadsRepoProvider)
-                              .exportDataCSV(
-                                widget.formId,
-                                dateFrom: leadsState.dateFrom,
-                                dateTo: leadsState.dateTo,
-                                city: leadsState.selectedCity,
-                                country: leadsState.selectedCountry,
-                              );
+                      Consumer(
+                        builder: (context, ref, child) {
+                          final usageAsync = ref.watch(planUsageProvider);
+
+                          return usageAsync.when(
+                            data: (usage) {
+                              if (usage.canExport) {
+                                return FFButton(
+                                  onPressed: () async {
+                                    await ref
+                                        .read(leadsRepoProvider)
+                                        .exportDataCSV(
+                                          widget.formId,
+                                          dateFrom: leadsState.dateFrom,
+                                          dateTo: leadsState.dateTo,
+                                          city: leadsState.selectedCity,
+                                          country: leadsState.selectedCountry,
+                                        );
+                                  },
+                                  isLoading: ref.read(exportProvider).isLoading,
+                                  text: 'tables.export'.tr(),
+                                  marginBottom: 0,
+                                );
+                              } else {
+                                return SizedBox();
+                              }
+                            },
+                            error: (er, st) {
+                              return SizedBox();
+                            },
+                            loading: () => SizedBox(),
+                          );
                         },
-                        isLoading: ref.read(exportProvider).isLoading,
-                        text: 'Экспорт',
-                        marginBottom: 0,
                       ),
                       // Clear filters button
                       if (_dateFilter != DateFilterType.all ||
@@ -95,7 +117,7 @@ class _LeadsDetailViewDesktopState
                           leadsState.selectedCountry != null)
                         IconButton(
                           icon: const Icon(Icons.clear),
-                          tooltip: 'Сбросить фильтры',
+                          tooltip: 'tables.clear_filters'.tr(),
                           onPressed: () {
                             setState(() {
                               _dateFilter = DateFilterType.all;
@@ -120,8 +142,8 @@ class _LeadsDetailViewDesktopState
               child: leadsState.isLoading && leadsState.leads.isEmpty
                   ? const Center(child: CircularProgressIndicator())
                   : leadsState.leads.isEmpty
-                  ? const Center(
-                      child: Text('Нет заявок'),
+                  ? Center(
+                      child: Text('tables.no_leads').tr(),
                     )
                   : Builder(
                       builder: (context) {
@@ -167,7 +189,13 @@ class _LeadsDetailViewDesktopState
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Страница ${leadsState.currentPage + 1} из ${leadsState.totalPages > 0 ? leadsState.totalPages : 1}',
+                                    'tables.page_of'.tr(
+                                      namedArgs: {
+                                        'page': '${leadsState.currentPage + 1}',
+                                        'total':
+                                            '${leadsState.totalPages > 0 ? leadsState.totalPages : 1}',
+                                      },
+                                    ),
                                   ),
                                   Row(
                                     children: [
@@ -190,7 +218,7 @@ class _LeadsDetailViewDesktopState
                                               }
                                             : null,
                                         icon: const Icon(Icons.arrow_back),
-                                        label: const Text('Назад'),
+                                        label: Text('tables.back'.tr()),
                                       ),
                                       const SizedBox(width: 8),
                                       ElevatedButton.icon(
@@ -214,7 +242,7 @@ class _LeadsDetailViewDesktopState
                                               }
                                             : null,
                                         icon: const Icon(Icons.arrow_forward),
-                                        label: const Text('Вперед'),
+                                        label: Text('tables.forward'.tr()),
                                       ),
                                     ],
                                   ),
@@ -245,15 +273,13 @@ class _LeadsDetailViewDesktopState
   List<DataColumn> _buildColumns(Set<String> answerKeys) {
     final columns = <DataColumn>[
       // const DataColumn(label: Text('ID заявки')),
-      const DataColumn2(
-        label: Text('Дата создания'),
-      ),
+      DataColumn2(label: Text('tables.created_at'.tr())),
     ];
 
-    columns.add(const DataColumn(label: Text('Данные')));
-    columns.add(const DataColumn(label: Text('UTM данные')));
+    columns.add(DataColumn(label: Text('tables.data'.tr())));
+    columns.add(DataColumn(label: Text('tables.utm_data'.tr())));
     // Add location column
-    columns.add(const DataColumn(label: Text('Локация')));
+    columns.add(DataColumn(label: Text('tables.location'.tr())));
 
     return columns;
   }
@@ -387,20 +413,20 @@ class _LeadsDetailViewDesktopState
       }
       return parts.join(', ');
     }
-    return 'Все локации';
+    return 'tables.all_locations'.tr();
   }
 
   String _getDateFilterLabel() {
     switch (_dateFilter) {
       case DateFilterType.all:
-        return 'Все даты';
+        return 'tables.all_dates'.tr();
       case DateFilterType.today:
-        return 'Только сегодня';
+        return 'tables.today_only'.tr();
       case DateFilterType.custom:
         if (_selectedDate != null) {
           return '${_selectedDate!.day}.${_selectedDate!.month}.${_selectedDate!.year}';
         }
-        return 'Выбрать дату';
+        return 'tables.select_date'.tr();
     }
   }
 
@@ -453,17 +479,17 @@ class _LeadsDetailViewDesktopState
         0,
       ),
       items: [
-        const PopupMenuItem(
+        PopupMenuItem(
           value: DateFilterType.all,
-          child: Text('Все даты'),
+          child: Text('tables.all_dates'.tr()),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: DateFilterType.today,
-          child: Text('Только сегодня'),
+          child: Text('tables.today_only'.tr()),
         ),
-        const PopupMenuItem(
+        PopupMenuItem(
           value: DateFilterType.custom,
-          child: Text('Выбрать дату...'),
+          child: Text('tables.select_date_with_dots'.tr()),
         ),
       ],
     ).then((value) {
@@ -509,9 +535,9 @@ class _LeadsDetailViewDesktopState
         0,
       ),
       items: [
-        const PopupMenuItem(
+        PopupMenuItem(
           value: null,
-          child: Text('Все локации'),
+          child: Text('tables.all_locations'.tr()),
         ),
         ...state.availableLocations.map((location) {
           final city = location['city'] ?? '';
@@ -589,36 +615,41 @@ class LeadDetailsDialog extends StatelessWidget {
       backgroundColor: AppTheme.background,
       content: SizedBox(
         width: context.isMobile ? context.screenWidth : 600,
-        height: 600,
+        height: context.isMobile ? null : 600,
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
-            title: Text('Заявка #${lead.id?.substring(0, 8)}'),
+            title: Text(
+              'tables.lead_title'.tr(
+                namedArgs: {'id': '${lead.id?.substring(0, 8)}'},
+              ),
+            ),
             backgroundColor: Colors.transparent,
             automaticallyImplyLeading: false,
           ),
           body: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildSection(
                   context,
-                  'Основная информация',
+                  'tables.main_info'.tr(),
                   [
                     _buildInfoRow(
                       context,
-                      'ID заявки',
+                      'tables.lead_id'.tr(),
                       lead.id ?? 'N/A',
                     ),
                     _buildInfoRow(
                       context,
-                      'ID формы',
+                      'tables.form_id'.tr(),
                       lead.formId ?? 'N/A',
                     ),
                     _buildInfoRow(
                       context,
-                      'Дата создания',
+                      'tables.created_at'.tr(),
                       lead.createdAt != null
                           ? '${lead.createdAt?.toLocal()}'.split('.')[0]
                           : 'N/A',
@@ -629,7 +660,9 @@ class LeadDetailsDialog extends StatelessWidget {
                   const SizedBox(height: 16),
                   _buildSection(
                     context,
-                    'Ответы (${lead.answers!.length})',
+                    'tables.answers_count'.tr(
+                      namedArgs: {'count': '${lead.answers!.length}'},
+                    ),
                     lead.answers!.entries
                         .map(
                           (entry) => _buildInfoRow(
@@ -645,7 +678,7 @@ class LeadDetailsDialog extends StatelessWidget {
                   const SizedBox(height: 16),
                   _buildSection(
                     context,
-                    'UTM данные',
+                    'tables.utm_data'.tr(),
                     lead.utmData!.entries
                         .map(
                           (entry) => _buildInfoRow(
@@ -661,7 +694,7 @@ class LeadDetailsDialog extends StatelessWidget {
                   const SizedBox(height: 16),
                   _buildSection(
                     context,
-                    'Геоданные',
+                    'tables.geo_data'.tr(),
                     lead.geoData!.entries
                         .map(
                           (entry) => _buildInfoRow(
@@ -743,7 +776,7 @@ class LeadDetailsDialog extends StatelessWidget {
                       await openMessenger('https://wa.me/$value');
                     },
                     label: Text(
-                      'Написать на WhatsApp',
+                      'tables.write_whatsapp'.tr(),
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 10,

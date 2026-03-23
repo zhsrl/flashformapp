@@ -3,7 +3,6 @@ import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/formui_controller.dart';
-import 'package:flashform_app/features/create_form/views/desktop/editor/widgets/ai_text_field.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/material.dart';
@@ -60,8 +59,8 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Выберите тип действия',
+              Text(
+                'forms.choose_action_type'.tr(),
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -85,14 +84,14 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
                     borderRadius: BorderRadius.circular(15),
                   ),
                 ),
-                dropdownMenuEntries: const [
+                dropdownMenuEntries: [
                   DropdownMenuEntry(
                     value: 'button-url',
-                    label: 'Кнопка со ссылкой',
+                    label: 'forms.action_type_button_url'.tr(),
                   ),
                   DropdownMenuEntry(
                     value: 'form',
-                    label: 'Форма',
+                    label: 'forms.action_type_form'.tr(),
                   ),
                 ],
               ),
@@ -164,24 +163,23 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Настройки кнопки',
+          Text(
+            'forms.button_settings'.tr(),
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
-          AiTextField(
+
+          FFTextField(
+            hintText: 'forms.button_text'.tr(),
+
             controller: uiControllers.buttonTextController,
-            label: 'Текст кнопки',
-            hint: 'Текст в кнопке',
-            aiType: 'button',
-            language: context.locale.languageCode,
             onChanged: (value) => {
               controller.updateButtonText(value),
               ref.read(createFormProvider.notifier).markAsChanged(),
             },
           ),
           FFTextField(
-            hintText: 'URL (ссылка)',
+            hintText: 'forms.url'.tr(),
             prefixIcon: const HeroIcon(HeroIcons.link),
             controller: uiControllers.buttonUrlController,
             onChanged: (value) => {
@@ -219,15 +217,15 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Настройки формы',
+          Text(
+            'forms.form_settings'.tr(),
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
           FFTextField(
             prefixIcon: const HeroIcon(HeroIcons.documentText),
-            hintText: 'Заполните форму ...',
-            title: 'Заголовок формы',
+            hintText: 'forms.fill_form_placeholder'.tr(),
+            title: 'forms.form_title'.tr(),
             controller: uiControllers.formTitleController,
             onChanged: (value) => {
               controller.updateFormTitle(value),
@@ -238,8 +236,8 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
           _buildFieldsList(context, formState.fields, controller),
 
           FFTextField(
-            hintText: 'например, Регистрация',
-            title: 'Текст в кнопке',
+            hintText: 'forms.button_text_example_registration'.tr(),
+            title: 'forms.button_text'.tr(),
             controller: uiControllers.formButtonTextController,
             onChanged: (value) => {
               controller.updateFormButtonText(value),
@@ -251,7 +249,7 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
 
           FFTextField(
             hintText: '',
-            title: 'Сообщение после успешной отправки',
+            title: 'forms.success_message_after_submit'.tr(),
             focusNode: widget.focusNode,
             controller: uiControllers.successTextController,
             onChanged: (value) => {
@@ -286,10 +284,11 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
       ),
+      margin: const EdgeInsets.only(bottom: 16),
       child: Column(
         children: [
           Text(
-            'Выберите тип действии после успешной формы',
+            'forms.success_action_type'.tr(),
             style: TextStyle(
               fontWeight: FontWeight.w500,
               fontSize: 16,
@@ -317,17 +316,17 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
             segments: <ButtonSegment<String>>[
               ButtonSegment<String>(
                 value: 'whatsapp',
-                label: Text('WhatsApp'),
+                label: Text('forms.action_whatsapp'.tr()),
                 enabled: true,
               ),
               ButtonSegment<String>(
                 value: 'redirect',
-                label: Text('Перенаправление'),
+                label: Text('forms.action_redirect'.tr()),
                 enabled: true,
               ),
               ButtonSegment<String>(
                 value: 'thx',
-                label: Text('Thank you страница'),
+                label: Text('forms.action_thank_you_page'.tr()),
                 enabled: true,
               ),
             ],
@@ -345,7 +344,7 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
                 FFTextField(
                   hintText: '7771234567',
                   controller: uiControllers.whatsappNumberController,
-                  title: 'Номер телефона (без +7 или 8)',
+                  title: 'forms.phone_without_code'.tr(),
                   prefixIcon: HeroIcon(HeroIcons.phone),
                   onChanged: (value) => {
                     widget.controller.updateWhatsappNumber(value),
@@ -353,8 +352,8 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
                   },
                 ),
                 FFTextField(
-                  title: 'Текст сообщения',
-                  hintText: 'Сообщения',
+                  title: 'forms.whatsapp_message_text'.tr(),
+                  hintText: 'forms.whatsapp_message_placeholder'.tr(),
                   prefixIcon: HeroIcon(HeroIcons.chatBubbleOvalLeft),
                   controller: uiControllers.whatsappMessageController,
                   onChanged: (value) => {
@@ -370,8 +369,8 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
             Column(
               children: [
                 FFTextField(
-                  hintText: 'например, WhatsApp...',
-                  title: 'Ссылка на перенаправление',
+                  hintText: 'forms.redirect_placeholder'.tr(),
+                  title: 'forms.redirect_url'.tr(),
                   controller: uiControllers.formRedirectUrlController,
                   prefixIcon: const HeroIcon(HeroIcons.link),
                   onChanged: (value) => {
@@ -386,8 +385,8 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
             Column(
               children: [
                 FFTextField(
-                  hintText: 'Заголовок',
-                  title: 'Напишите заголовок',
+                  hintText: 'forms.thx_title_placeholder'.tr(),
+                  title: 'forms.thx_title_label'.tr(),
                   controller: uiControllers.thxTitleController,
                   onChanged: (value) => {
                     widget.controller.updateThxTitle(value),
@@ -395,8 +394,8 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
                   },
                 ),
                 FFTextField(
-                  hintText: 'Описание',
-                  title: 'Напишите описание',
+                  hintText: 'forms.thx_description_placeholder'.tr(),
+                  title: 'forms.thx_description_label'.tr(),
                   controller: uiControllers.thxDescriptionController,
                   onChanged: (value) => {
                     widget.controller.updateThxDescription(value),
@@ -425,8 +424,8 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Поля формы',
+              Text(
+                'forms.form_fields'.tr(),
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               IconButton.filled(
@@ -446,7 +445,7 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
               ),
               child: Center(
                 child: Text(
-                  'Нет полей',
+                  'forms.no_fields'.tr(),
                   style: TextStyle(color: AppTheme.secondary.withAlpha(50)),
                 ),
               ),
@@ -468,7 +467,11 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
                   child: ListTile(
                     leading: HeroIcon(_getIconForFieldType(field.type)),
                     title: Text(field.label),
-                    subtitle: Text(field.type == 'phone' ? 'Телефон' : 'Текст'),
+                    subtitle: Text(
+                      field.type == 'phone'
+                          ? 'forms.field_type_phone'.tr()
+                          : 'forms.field_type_text'.tr(),
+                    ),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
                       onPressed: () => controller.removeField(index),
@@ -514,7 +517,7 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
           context: context,
           builder: (context) => AlertDialog(
             backgroundColor: AppTheme.background,
-            title: const Text('Выберите цвет'),
+            title: Text('forms.choose_color'.tr()),
             content: BlockPicker(
               pickerColor: currentColor,
               onColorChanged: (color) {
@@ -551,7 +554,7 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('Выберите цвет', style: TextStyle(fontSize: 16)),
+            Text('forms.choose_color'.tr(), style: TextStyle(fontSize: 16)),
             Container(
               width: 30,
               height: 30,
@@ -579,7 +582,7 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Добавить поле'),
+              title: Text('forms.add_field'.tr()),
               backgroundColor: AppTheme.background,
               content: SizedBox(
                 width: 350,
@@ -588,7 +591,7 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
                   children: [
                     if (fieldType != 'phone') ...[
                       FFTextField(
-                        hintText: 'Название поля',
+                        hintText: 'forms.field_name'.tr(),
                         onChanged: (value) => fieldLabel = value,
                       ),
                       const SizedBox(height: 16),
@@ -597,15 +600,26 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
                       dropdownColor: AppTheme.fourty,
                       style: TextStyle(color: AppTheme.secondary),
                       value: fieldType,
-                      decoration: const InputDecoration(labelText: 'Тип поля'),
-                      items: const [
-                        DropdownMenuItem(value: 'name', child: Text('Имя')),
-                        DropdownMenuItem(value: 'email', child: Text('Email')),
+                      decoration: InputDecoration(
+                        labelText: 'forms.field_type'.tr(),
+                      ),
+                      items: [
+                        DropdownMenuItem(
+                          value: 'name',
+                          child: Text('forms.field_name_option'.tr()),
+                        ),
+                        DropdownMenuItem(
+                          value: 'email',
+                          child: Text('forms.field_email_option'.tr()),
+                        ),
                         DropdownMenuItem(
                           value: 'phone',
-                          child: Text('Номер телефона'),
+                          child: Text('forms.field_phone_option'.tr()),
                         ),
-                        DropdownMenuItem(value: 'text', child: Text('Текст')),
+                        DropdownMenuItem(
+                          value: 'text',
+                          child: Text('forms.field_text_option'.tr()),
+                        ),
                       ],
                       onChanged: (value) => setState(() => fieldType = value!),
                     ),
@@ -615,11 +629,11 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
               actions: [
                 FFButton(
                   onPressed: () => Navigator.pop(context),
-                  text: 'Отмена',
+                  text: 'common.cancel'.tr(),
                 ),
                 FFButton(
                   secondTheme: true,
-                  text: 'Добавить',
+                  text: 'common.add'.tr(),
                   onPressed: () {
                     if (fieldType == 'phone') fieldLabel = 'Телефон';
                     if (fieldLabel.isNotEmpty) {

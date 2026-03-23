@@ -47,7 +47,7 @@ class MyApp extends ConsumerWidget {
         theme: ThemeData(
           fontFamily: 'GoogleSans',
           colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.green,
+            seedColor: AppTheme.secondary,
             primary: AppTheme.primary,
           ),
         ),

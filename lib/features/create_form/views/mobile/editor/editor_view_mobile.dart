@@ -1,13 +1,18 @@
+import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/formui_controller.dart';
+import 'package:flashform_app/data/controller/plan_usage_controller.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/actions_block.dart';
 import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/description_block.dart';
+import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/footer_block.dart';
+import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/label_block.dart';
 import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/main_content_block.dart';
 import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/offer_block.dart';
 import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/theme_block.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class EditorViewMobile extends ConsumerStatefulWidget {
   const EditorViewMobile({
@@ -28,7 +33,7 @@ class _EditorViewMobileState extends ConsumerState<EditorViewMobile>
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(createFormProvider);
-
+    final usageAsync = ref.watch(planUsageProvider);
     final controller = ref.read(createFormProvider.notifier);
     final uiControllers = ref.watch(formUIControllersProvider);
 
@@ -63,6 +68,46 @@ class _EditorViewMobileState extends ConsumerState<EditorViewMobile>
             focusNode: widget.focusNode,
             formState: formState,
             uiControllers: uiControllers,
+          ),
+          usageAsync.when(
+            data: (usage) {
+              return Column(
+                children: [
+                  BuildLabelSettingsBlock(
+                    isAvailable: usage.canRemoveBranding,
+                    formState: formState,
+                    uiControllers: uiControllers,
+                  ),
+                  BuildFooterBlock(
+                    uiControllers: uiControllers,
+                    formState: formState,
+                    isAvailable: usage.hasFooter,
+                  ),
+                ],
+              );
+            },
+            error: (er, st) {
+              return Column(
+                children: [
+                  BuildLabelSettingsBlock(
+                    isAvailable: false,
+                    formState: formState,
+                    uiControllers: uiControllers,
+                  ),
+                  BuildFooterBlock(
+                    uiControllers: uiControllers,
+                    formState: formState,
+                    isAvailable: false,
+                  ),
+                ],
+              );
+            },
+            loading: () => Center(
+              child: LoadingAnimationWidget.waveDots(
+                color: AppTheme.secondary,
+                size: 30,
+              ),
+            ),
           ),
         ],
       ),

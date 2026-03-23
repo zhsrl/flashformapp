@@ -1,4 +1,6 @@
+import 'package:flashform_app/core/mixins/form_loader_mixin.dart';
 import 'package:flashform_app/data/controller/formui_controller.dart';
+import 'package:flashform_app/data/model/form_link.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/features/create_form/views/desktop/editor/views/telegram_integration_settings_view.dart';
 import 'package:flutter_svg/svg.dart';
@@ -33,7 +35,8 @@ class CreateFormDesktopView extends ConsumerStatefulWidget {
       _CreateFormDesktopViewState();
 }
 
-class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
+class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView>
+    with FormLoaderMixin {
   bool _isloadingInitialData = true;
   bool isFormNameChange = false;
   bool isCopy = false;
@@ -43,60 +46,13 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loadFormData();
-  }
-
-  Future<void> _loadFormData() async {
-    try {
-      final formController = ref.read(formControllerProvider.notifier);
-      final form = await formController.fetchForm(widget.formId);
-      final uiControllers = ref.watch(formUIControllersProvider);
-
-      debugPrint('Form: ${form.data}');
-
+    loadFormData(widget.formId, ref, () => mounted, () {
       if (mounted) {
-        ref.read(createFormProvider.notifier).initializeFromModel(form);
-
-        // Загружаем success_action из новой структуры
-        final successAction = form.data?['form']['success_action'] as Map?;
-
-        uiControllers.titleController.text =
-            form.data?['title']['text'] ?? 'Заголовок сайта';
-        uiControllers.subtitleController.text =
-            form.data?['subtitle']['text'] ?? 'Описание';
-        uiControllers.formTitleController.text =
-            form.data?['form']['title'] ?? 'Заголовок формы';
-        uiControllers.buttonTextController.text =
-            form.data?['button']['text'] ?? 'Кнопка';
-        uiControllers.formButtonTextController.text =
-            form.data?['form']['button']['text'] ?? 'Оставить заявку';
-        uiControllers.successTextController.text =
-            form.data?['success_text'] ?? 'Успешная форма';
-
-        // Инициализируем success_action поля
-        uiControllers.formRedirectUrlController.text =
-            successAction?['redirect_url'] ?? '';
-        uiControllers.whatsappNumberController.text =
-            successAction?['whatsapp_number'] ?? '';
-        uiControllers.whatsappMessageController.text =
-            successAction?['whatsapp_message'] ?? '';
-        uiControllers.thxTitleController.text =
-            successAction?['thx_title'] ?? '';
-        uiControllers.thxDescriptionController.text =
-            successAction?['thx_description'] ?? '';
-
-        uiControllers.metaPixelIdController.text =
-            form.data?['settings']['meta-pixel-id'] ?? '';
-        uiControllers.yandexMetrikaIdController.text =
-            form.data?['settings']['ya-metrika-id'] ?? '';
+        setState(() {
+          _isloadingInitialData = false;
+        });
       }
-    } catch (e) {
-      debugPrint('Error loading form: $e');
-    } finally {
-      setState(() {
-        _isloadingInitialData = false;
-      });
-    }
+    });
   }
 
   Future<void> _updateFormName(String name) async {
@@ -104,8 +60,12 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
     final createFormControllerNotifier = ref.read(createFormProvider.notifier);
     await formControllerNotifier.updateFormName(name, widget.formId);
 
+    if (!mounted) return;
+
     ref.invalidate(formControllerProvider);
     createFormControllerNotifier.updateFormName(name);
+
+    if (mounted) {}
 
     setState(() {
       isFormNameChange = false;
@@ -353,6 +313,8 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView> {
   Future<void> _publishAndLeave() async {
     if (mounted) {
       _onPublishTap();
+      if (!mounted) return;
+
       context.pop();
 
       showSnackbar(

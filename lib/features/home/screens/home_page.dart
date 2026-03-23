@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/app_validator.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
@@ -5,6 +6,7 @@ import 'package:flashform_app/data/controller/forms_controller.dart';
 import 'package:flashform_app/data/controller/plan_usage_controller.dart';
 import 'package:flashform_app/data/controller/user_controller.dart';
 import 'package:flashform_app/features/home/widgets/ff_bottom_nav_bar.dart';
+import 'package:flashform_app/features/settings/utils/subscription_plans_presenter.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
@@ -57,10 +59,15 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
+  Future<void> _openSubscriptionPlans() async {
+    if (!mounted) return;
+    await showSubscriptionPlansPresenter(context);
+  }
+
   showFormLimitDialog() {
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         return AlertDialog(
           backgroundColor: AppTheme.secondary,
           content: SizedBox(
@@ -70,7 +77,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Вы достигли максимума',
+                  'dialogs.form-limit.title'.tr(),
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 28,
@@ -81,7 +88,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   height: 8,
                 ),
                 Text(
-                  'Вы создали все доступные формы на текущем тарифе. Чтобы продолжить сбор лидов без ограничений, перейдите на расширенный план.',
+                  'dialogs.form-limit.description'.tr(),
                   style: TextStyle(
                     color: Colors.white,
                   ),
@@ -90,8 +97,11 @@ class _HomePageState extends ConsumerState<HomePage> {
                   height: 16,
                 ),
                 FFButton(
-                  onPressed: () {},
-                  text: 'Перейти на расширенный план',
+                  onPressed: () {
+                    Navigator.of(dialogContext).pop();
+                    _openSubscriptionPlans();
+                  },
+                  text: 'dialogs.form-limit.button-text'.tr(),
                   secondTheme: true,
                   marginBottom: 0,
                 ),
@@ -114,7 +124,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               backgroundColor: AppTheme.background,
 
               title: Text(
-                'Create new form',
+                'home.new-form-title'.tr(),
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
                 ),
@@ -130,7 +140,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           key: _formKey,
                           child: FFTextField(
                             prefixIcon: HeroIcon(HeroIcons.listBullet),
-                            hintText: 'Enter form name',
+                            hintText: 'home-new-form-text'.tr(),
                             controller: _formTitleController,
                             validator: AppValidators.validatorForEmpty,
                           ),
@@ -175,7 +185,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                                 }
                               }
                             },
-                            text: 'Создать',
+                            text: 'button.create'.tr(),
                           ),
                         ),
                       ],
@@ -193,8 +203,6 @@ class _HomePageState extends ConsumerState<HomePage> {
   @override
   Widget build(BuildContext context) {
     final String location = GoRouterState.of(context).uri.path;
-
-    final usageAsync = ref.read(planUsageProvider);
     return Scaffold(
       // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: context.isMobile
@@ -216,7 +224,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     showSnackbar(
                       context,
                       type: SnackbarType.error,
-                      message: 'Ошибка: $er',
+                      message: 'Error: $er',
                     );
                   },
                 );
@@ -250,7 +258,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               items: [
                 BottomNavigationBarItem(
                   icon: HeroIcon(HeroIcons.inbox),
-                  label: 'Формы',
+                  label: 'nav-bar.forms'.tr(),
                   activeIcon: HeroIcon(
                     HeroIcons.inbox,
                     style: HeroIconStyle.solid,
@@ -258,7 +266,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
                 BottomNavigationBarItem(
                   icon: HeroIcon(HeroIcons.squares2x2),
-                  label: 'Заявки',
+                  label: 'nav-bar.leads'.tr(),
                   activeIcon: HeroIcon(
                     HeroIcons.squares2x2,
                     style: HeroIconStyle.solid,
@@ -266,7 +274,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                 ),
                 BottomNavigationBarItem(
                   icon: HeroIcon(HeroIcons.cog6Tooth),
-                  label: 'Настройки',
+                  label: 'nav-bar.settings'.tr(),
                   activeIcon: HeroIcon(
                     HeroIcons.cog6Tooth,
                     style: HeroIconStyle.solid,
@@ -303,7 +311,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                     showSnackbar(
                       context,
                       type: SnackbarType.error,
-                      message: 'Ошибка: $er',
+                      message: 'Error: $er',
                     );
                   },
                 );

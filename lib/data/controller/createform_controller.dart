@@ -147,9 +147,14 @@ class CreateFormController extends StateNotifier<CreateFormState> {
 
   void initializeFromModel(FormModel form) {
     final data = form.data ?? {};
+
+    debugPrint('Data: $data');
     final fieldsList = (data['form']['fields'] as List? ?? [])
         .map((e) => FormFields.fromJson(e))
         .toList();
+
+    final title = data['title']['text'] as String;
+    final subtitle = data['subtitle']['text'] as String;
 
     // Загружаем success_action из новой структуры
     final successAction = data['form']['success_action'] as Map?;
@@ -188,8 +193,8 @@ class CreateFormController extends StateNotifier<CreateFormState> {
 
     state = state.copyWith(
       name: form.name,
-      title: data['title']['text'],
-      subtitle: data['subtitle']['text'],
+      title: title,
+      subtitle: subtitle,
       formTitle: data['form']['title'],
       theme: data['theme'] ?? 'light',
       heroImageUrl: data['image'],

@@ -1,0 +1,6 @@
+flutter_native_splash:
+  ios: false
+  android: false
+  web: true
+
+  image: assets/images/fulllogopng.png

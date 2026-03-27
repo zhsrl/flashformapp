@@ -60,6 +60,7 @@ dependencies:
   highlight: ^0.7.0
   flutter_highlight: ^0.7.0
   google_generative_ai: ^0.4.7
+  flutter_native_splash: ^2.4.7
 
 dev_dependencies:
   flutter_test:
@@ -93,6 +94,9 @@ flutter:
     - assets/images/metrika.svg
     - assets/images/telegram.svg
     - assets/images/kaspiqr.png
+    - assets/images/logopng.png
+    - assets/images/fulllogopng.png
+    - assets/images/loading.json
 
   fonts:
     - family: GoogleSans

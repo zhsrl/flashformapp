@@ -20,8 +20,8 @@ enum SubscriptionPlan {
   // Сумма для платежа в тенге (0 для бесплатного плана)
   int get amountKzt => switch (this) {
     spark => 0,
-    go => 5000,
-    pro => 14000,
+    go => 4990,
+    pro => 13990,
   };
 
   // Текущий биллинговый период
@@ -33,14 +33,14 @@ enum SubscriptionPlan {
 
   // Лимит форм
   int get formsLimit => switch (this) {
-    spark => 3,
+    spark => 2,
     go => 10,
     pro => 1000,
   };
 
   // Лимит лидов в месяц (null = безлимит)
   int? get leadsPerMonthLimit => switch (this) {
-    spark => 300,
+    spark => 500,
     go => 3000,
     pro => null,
   };
@@ -51,7 +51,7 @@ enum SubscriptionPlan {
   // Экспорт таблицы в CSV
   bool get hasExport => switch (this) {
     spark => false,
-    go => false,
+    go => true,
     pro => true,
   };
 

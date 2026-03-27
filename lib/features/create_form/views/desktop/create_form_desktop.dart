@@ -1,6 +1,5 @@
 import 'package:flashform_app/core/mixins/form_loader_mixin.dart';
 import 'package:flashform_app/data/controller/formui_controller.dart';
-import 'package:flashform_app/data/model/form_link.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/features/create_form/views/desktop/editor/views/telegram_integration_settings_view.dart';
 import 'package:flutter_svg/svg.dart';
@@ -417,6 +416,7 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView>
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(createFormProvider);
+    ref.watch(formUIControllersProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.background,

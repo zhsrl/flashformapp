@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flashform_app/core/router/adaptive_page.dart';
 import 'package:flashform_app/features/auth/confirm_email.dart';
+import 'package:flashform_app/features/auth/reset_password_page.dart';
 import 'package:flashform_app/features/auth/signup_page.dart';
 import 'package:flashform_app/features/create_form/screens/create_form_page.dart';
 import 'package:flashform_app/features/forms/views/forms_screen.dart';
@@ -25,15 +26,16 @@ final routerProvider = Provider<GoRouter>(
       redirect: (context, state) {
         final session = supabase.auth.currentSession;
 
-        final location = state.uri.toString();
-        final isAuthPage = location == '/signin' || location == '/signup';
+        final location = state.uri.path;
+        final isSigninOrSignup = location == '/signin' || location == '/signup';
+        final isResetPassword = location == '/reset-password';
 
-        if (session == null && !isAuthPage) {
+        if (session == null && !isSigninOrSignup && !isResetPassword) {
           return '/signin';
         }
 
-        if (session != null && isAuthPage) {
-          return '/';
+        if (session != null && isSigninOrSignup) {
+          return '/forms';
         }
 
         return null;
@@ -49,6 +51,12 @@ final routerProvider = Provider<GoRouter>(
           path: '/signup',
           pageBuilder: (context, state) => NoTransitionPage(
             child: SignupPage(),
+          ),
+        ),
+        GoRoute(
+          path: '/reset-password',
+          pageBuilder: (context, state) => NoTransitionPage(
+            child: ResetPasswordPage(),
           ),
         ),
         GoRoute(

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -47,9 +48,7 @@ class AuthRepository {
         },
       );
     } on AuthException catch (e) {
-      throw Exception(e);
-    } catch (e) {
-      throw Exception(e);
+      throw Exception(e.code);
     }
   }
 
@@ -63,6 +62,27 @@ class AuthRepository {
       );
     } on AuthException catch (e) {
       throw Exception(e);
+    }
+  }
+
+  Future<void> resetPassword(String email) async {
+    try {
+      await _supabase.client.auth.resetPasswordForEmail(
+        email.trim(),
+        redirectTo: kIsWeb ? '${Uri.base.origin}/reset-password' : null,
+      );
+    } on AuthException catch (e) {
+      throw Exception(e.code);
+    }
+  }
+
+  Future<void> setNewPassword(String newPassword) async {
+    try {
+      await _supabase.client.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+    } on AuthException catch (e) {
+      throw Exception(e.code);
     }
   }
 
@@ -101,7 +121,7 @@ class AuthRepository {
           email: email,
           password: oldPassword,
         );
-      } on AuthException catch (e) {
+      } on AuthException {
         throw Exception('Неверный текущий пароль');
       }
 

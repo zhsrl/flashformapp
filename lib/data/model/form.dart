@@ -23,7 +23,8 @@ class FormModel {
   final String? userId;
   final String slug;
   final String name;
-
+  final String? title;
+  final String? subtitle;
   final bool isActive;
 
   final DateTime? createdAt;
@@ -36,7 +37,8 @@ class FormModel {
     required this.slug,
     this.data,
     this.name = '',
-
+    this.title,
+    this.subtitle,
     this.isActive = true,
     this.createdAt,
     this.updatedAt,
@@ -48,7 +50,10 @@ class FormModel {
     'slug': slug,
     'data': data,
     'name': name,
-
+    'title': {
+      'size': 1,
+      'text': title,
+    },
     'is_active': isActive,
 
     if (createdAt != null) 'created_at': createdAt!.toIso8601String(),
@@ -61,6 +66,8 @@ class FormModel {
     data: json['data'],
     name: json['name'] as String,
     slug: json['slug'] as String,
+    title: json['data']['title']['text'] as String,
+    subtitle: json['data']['subtitle']['text'] as String,
 
     isActive: json['is_active'] as bool? ?? true,
     createdAt: json['created_at'] != null

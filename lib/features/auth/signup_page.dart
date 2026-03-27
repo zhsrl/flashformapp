@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/app_validator.dart';
+import 'package:flashform_app/core/utils/auth_error_localizer.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/core/utils/utils.dart';
 import 'package:flashform_app/data/controller/auth_controller.dart';
@@ -40,22 +41,21 @@ class _SigninPageState extends ConsumerState<SignupPage> {
     String password,
     String name,
   ) async {
-    try {
-      await ref
-          .read(authControllerProvider.notifier)
-          .signUpWithEmailAndPassword(email, password, name)
-          .then(
-            (_) {
-              if (mounted) {
-                context.push('/confirm-email');
-              }
-            },
-          );
-    } catch (e) {
-      String message = e.toString().replaceAll('Exception: ', '');
+    await ref
+        .read(authControllerProvider.notifier)
+        .signUpWithEmailAndPassword(email, password, name);
+
+    final authState = ref.read(authControllerProvider);
+    if (authState.hasError) {
+      final message = localizeAuthError(authState.error!);
       if (mounted) {
         showSnackbar(context, type: SnackbarType.error, message: message);
       }
+      return;
+    }
+
+    if (mounted) {
+      context.go('/signin');
     }
   }
 

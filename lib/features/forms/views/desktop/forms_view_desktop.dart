@@ -1,9 +1,7 @@
 import 'package:dashed_border/dashed_border.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/app_validator.dart';
-import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
-import 'package:flashform_app/features/home/widgets/ff_bottom_nav_bar.dart';
 import 'package:flashform_app/features/home/widgets/home_appbar.dart';
 import 'package:flashform_app/features/forms/widgets/shared/form_card.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
@@ -41,10 +39,10 @@ class _HomePageDesktopViewState extends ConsumerState<FormsViewDesktop> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              backgroundColor: AppTheme.background,
+              backgroundColor: Colors.white,
 
               title: Text(
-                'Create new form',
+                'Новая страница',
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
                 ),
@@ -60,7 +58,7 @@ class _HomePageDesktopViewState extends ConsumerState<FormsViewDesktop> {
                           key: _formKey,
                           child: FFTextField(
                             prefixIcon: HeroIcon(HeroIcons.listBullet),
-                            hintText: 'Enter form name',
+                            hintText: 'Напишите название',
                             controller: _formTitleController,
                             validator: AppValidators.validatorForEmpty,
                           ),
@@ -105,7 +103,7 @@ class _HomePageDesktopViewState extends ConsumerState<FormsViewDesktop> {
                                 }
                               }
                             },
-                            text: 'Create',
+                            text: 'Создать',
                           ),
                         ),
                       ],
@@ -138,7 +136,9 @@ class _HomePageDesktopViewState extends ConsumerState<FormsViewDesktop> {
                   if (forms.isEmpty) {
                     return Center(
                       child: InkWell(
-                        onTap: () {},
+                        onTap: () {
+                          showCreateFormDialog();
+                        },
                         borderRadius: BorderRadius.circular(20),
                         child: Container(
                           width: 200,

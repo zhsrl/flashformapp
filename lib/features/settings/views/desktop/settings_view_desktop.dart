@@ -51,7 +51,7 @@ class _SettingsViewDesktopState extends State<SettingsViewDesktop>
       appBar: HomeAppBar(),
       endDrawer: _endDrawerType != EndDrawerType.none
           ? Drawer(
-              width: 800,
+              width: 400,
               child: _buildDrawerContent(),
             )
           : null,

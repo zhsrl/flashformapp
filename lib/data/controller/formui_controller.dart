@@ -81,16 +81,17 @@ class FormUIControllers {
       () => _logicNotifier.updateButtonText(buttonTextController.text),
     );
     formButtonTextController.addListener(
-      () => _logicNotifier.updateButtonText(formButtonTextController.text),
+      () => _logicNotifier.updateFormButtonText(formButtonTextController.text),
     );
     successTextController.addListener(
-      () => _logicNotifier.updateButtonText(successTextController.text),
+      () => _logicNotifier.updateSuccessText(successTextController.text),
     );
     buttonUrlController.addListener(
-      () => _logicNotifier.updateButtonText(buttonUrlController.text),
+      () => _logicNotifier.updateButtonUrl(buttonUrlController.text),
     );
     formRedirectUrlController.addListener(
-      () => _logicNotifier.updateButtonText(formRedirectUrlController.text),
+      () =>
+          _logicNotifier.updateFormRedirectUrl(formRedirectUrlController.text),
     );
     whatsappNumberController.addListener(
       () => _logicNotifier.updateWhatsappNumber(whatsappNumberController.text),
@@ -150,25 +151,21 @@ class FormUIControllers {
     if (buttonText != null) buttonTextController.text = buttonText;
     if (successText != null) successTextController.text = successText;
     if (buttonUrl != null) buttonUrlController.text = buttonUrl;
-    if (formRedirectUrl != null) {
+    if (formRedirectUrl != null)
       formRedirectUrlController.text = formRedirectUrl;
-
-      if (metaPixelId != null) metaPixelIdController.text = metaPixelId;
-      if (yandexMetrikaId != null) {
-        yandexMetrikaIdController.text = yandexMetrikaId;
-      }
-
-      if (whatsappNumber != null) {
-        whatsappNumberController.text = whatsappNumber;
-      }
-      if (whatsappMessage != null) {
-        whatsappMessageController.text = whatsappMessage;
-      }
-
-      if (thxTitle != null) thxTitleController.text = thxTitle;
-      if (thxDescription != null) {
-        thxDescriptionController.text = thxDescription;
-      }
+    if (metaPixelId != null) metaPixelIdController.text = metaPixelId;
+    if (yandexMetrikaId != null) {
+      yandexMetrikaIdController.text = yandexMetrikaId;
+    }
+    if (whatsappNumber != null) {
+      whatsappNumberController.text = whatsappNumber;
+    }
+    if (whatsappMessage != null) {
+      whatsappMessageController.text = whatsappMessage;
+    }
+    if (thxTitle != null) thxTitleController.text = thxTitle;
+    if (thxDescription != null) {
+      thxDescriptionController.text = thxDescription;
     }
   }
 
@@ -215,5 +212,8 @@ class FormUIControllers {
     whatsappMessageController.dispose();
     thxTitleController.dispose();
     thxDescriptionController.dispose();
+    footerCompanyNameController.dispose();
+    footerIdNumberController.dispose();
+    footerAddressController.dispose();
   }
 }

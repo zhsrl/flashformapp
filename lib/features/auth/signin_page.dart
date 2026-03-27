@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/app_validator.dart';
+import 'package:flashform_app/core/utils/auth_error_localizer.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/core/utils/utils.dart';
 import 'package:flashform_app/data/controller/auth_controller.dart';
@@ -35,24 +36,108 @@ class _SigninPageState extends ConsumerState<SigninPage> {
   }
 
   Future<void> signIn(String email, String password) async {
-    try {
-      await ref.read(authControllerProvider.notifier).signIn(email, password);
+    debugPrint('auth started');
+    await ref.read(authControllerProvider.notifier).signIn(email, password);
 
-      final currentUser = Supabase.instance.client.auth.currentUser;
-
-      if (currentUser != null) {
-        if (mounted) {
-          context.replace('/forms');
-        }
-      }
-    } catch (e) {
-      String message = e.toString().replaceAll('Exception: ', '');
+    final authState = ref.read(authControllerProvider);
+    if (authState.hasError) {
+      final message = localizeAuthError(authState.error!);
       debugPrint('Signin error: $message');
 
       if (mounted) {
         showSnackbar(context, type: SnackbarType.error, message: message);
       }
+      return;
     }
+
+    final currentUser = Supabase.instance.client.auth.currentUser;
+    if (currentUser != null && mounted) {
+      context.replace('/forms');
+    }
+  }
+
+  Future<void> _openForgotPasswordDialog() async {
+    final emailController = TextEditingController(text: _emailController.text);
+
+    await showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text('forgot-password.title'.tr()),
+          backgroundColor: AppTheme.background,
+          content: SizedBox(
+            width: 360,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'forgot-password.subtitle'.tr(),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                FFTextField(
+                  hintText: 'forgot-password.email-hint'.tr(),
+                  prefixIcon: HeroIcon(HeroIcons.envelope),
+                  controller: emailController,
+                  bottomMargin: 0,
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: FFButton(
+                    text: 'forgot-password.send'.tr(),
+                    onPressed: () async {
+                      final email = emailController.text.trim();
+                      final emailError = AppValidators.email(email);
+
+                      if (emailError != null) {
+                        showSnackbar(
+                          dialogContext,
+                          type: SnackbarType.error,
+                          message: emailError,
+                        );
+                        return;
+                      }
+
+                      await ref
+                          .read(authControllerProvider.notifier)
+                          .resetPassword(email);
+
+                      final authState = ref.read(authControllerProvider);
+                      if (authState.hasError) {
+                        final message = localizeAuthError(authState.error!);
+                        if (!dialogContext.mounted) return;
+                        showSnackbar(
+                          dialogContext,
+                          type: SnackbarType.error,
+                          message: message,
+                        );
+                        return;
+                      }
+
+                      if (!dialogContext.mounted) return;
+                      Navigator.of(dialogContext).pop();
+
+                      if (!mounted) return;
+                      showSnackbar(
+                        context,
+                        type: SnackbarType.info,
+                        message: 'forgot-password.success'.tr(),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    emailController.dispose();
   }
 
   @override
@@ -164,63 +249,7 @@ class _SigninPageState extends ConsumerState<SigninPage> {
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: Text('forgot-password.title'.tr()),
-                                backgroundColor: AppTheme.background,
-                                content: SizedBox(
-                                  width: 350,
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        'forgot-password.subtitle'.tr(),
-                                        style: TextStyle(
-                                          fontSize: 18,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        height: 12,
-                                      ),
-                                      Row(
-                                        children: [
-                                          Expanded(
-                                            child: FFButton(
-                                              onPressed: () {
-                                                openMessenger(
-                                                  'https://t.me/flashform',
-                                                );
-                                              },
-
-                                              text: 'Telegram',
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            width: 12,
-                                          ),
-                                          Expanded(
-                                            child: FFButton(
-                                              onPressed: () {
-                                                openMessenger(
-                                                  'https://api.whatsapp.com/send/?phone=77066215981&text&type=phone_number&app_absent=0',
-                                                );
-                                              },
-                                              text: 'WhatsApp',
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            },
-                          );
-                        },
+                        onTap: _openForgotPasswordDialog,
                         child: SizedBox(
                           width: 150,
                           child: Text(
@@ -241,71 +270,74 @@ class _SigninPageState extends ConsumerState<SigninPage> {
             ),
           ),
           if (MediaQuery.of(context).viewInsets.bottom == 0)
-            Positioned(
-              bottom: 32,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    'global.language'.tr(),
-                    style: TextStyle(
-                      color: AppTheme.tertiary,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTapDown: (TapDownDetails details) {
-                      showMenu(
-                        color: AppTheme.background,
-                        elevation: 0,
-
-                        shape: RoundedRectangleBorder(
-                          side: BorderSide(
-                            width: 1,
-                            color: AppTheme.border,
-                          ),
-                          borderRadius: BorderRadiusGeometry.circular(16),
-                        ),
-                        position: RelativeRect.fromLTRB(
-                          details.globalPosition.dx,
-                          details.globalPosition.dy,
-                          details.globalPosition.dx,
-                          details.globalPosition.dy,
-                        ),
-                        context: context,
-                        items: [
-                          PopupMenuItem(
-                            onTap: () {
-                              context.setLocale(Locale('kk'));
-                            },
-                            child: Text(
-                              '${countryCodeToEmoji('KZ')} ${'global.lang-kz'.tr()}',
-                            ),
-                          ),
-
-                          PopupMenuItem(
-                            onTap: () {
-                              context.setLocale(Locale('ru'));
-                            },
-                            child: Text(
-                              '${countryCodeToEmoji('RU')} ${'global.lang-ru'.tr()}',
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                    child: Text(
-                      context.locale == Locale('ru')
-                          ? 'global.lang-ru'.tr()
-                          : 'global.lang-kz'.tr(),
+            Visibility(
+              visible: false,
+              child: Positioned(
+                bottom: 32,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'global.language'.tr(),
                       style: TextStyle(
-                        color: AppTheme.secondary,
+                        color: AppTheme.tertiary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                  ),
-                ],
+                    GestureDetector(
+                      onTapDown: (TapDownDetails details) {
+                        showMenu(
+                          color: AppTheme.background,
+                          elevation: 0,
+
+                          shape: RoundedRectangleBorder(
+                            side: BorderSide(
+                              width: 1,
+                              color: AppTheme.border,
+                            ),
+                            borderRadius: BorderRadiusGeometry.circular(16),
+                          ),
+                          position: RelativeRect.fromLTRB(
+                            details.globalPosition.dx,
+                            details.globalPosition.dy,
+                            details.globalPosition.dx,
+                            details.globalPosition.dy,
+                          ),
+                          context: context,
+                          items: [
+                            PopupMenuItem(
+                              onTap: () {
+                                context.setLocale(Locale('kk'));
+                              },
+                              child: Text(
+                                '${countryCodeToEmoji('KZ')} ${'global.lang-kz'.tr()}',
+                              ),
+                            ),
+
+                            PopupMenuItem(
+                              onTap: () {
+                                context.setLocale(Locale('ru'));
+                              },
+                              child: Text(
+                                '${countryCodeToEmoji('RU')} ${'global.lang-ru'.tr()}',
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                      child: Text(
+                        context.locale == Locale('ru')
+                            ? 'global.lang-ru'.tr()
+                            : 'global.lang-kz'.tr(),
+                        style: TextStyle(
+                          color: AppTheme.secondary,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
         ],

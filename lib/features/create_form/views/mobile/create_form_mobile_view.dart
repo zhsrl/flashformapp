@@ -4,6 +4,7 @@ import 'package:flashform_app/core/mixins/form_loader_mixin.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
+import 'package:flashform_app/data/controller/formui_controller.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/features/create_form/views/desktop/editor/views/editor_integration_view.dart';
 import 'package:flashform_app/features/create_form/views/desktop/editor/views/telegram_integration_settings_view.dart';
@@ -430,6 +431,7 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(createFormProvider);
+    ref.watch(formUIControllersProvider);
     return Scaffold(
       endDrawer: TelegramBotIntegrationSettingsView(),
       backgroundColor: AppTheme.background,

@@ -48,15 +48,21 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
   void _onItemTapped(int index, BuildContext context) {
-    switch (index) {
-      case 0:
-        context.go('/forms');
-      case 1:
-        context.go('/tables');
+    final routes = <int, String>{
+      0: '/forms',
+      1: '/tables',
+      2: '/settings',
+    };
 
-      case 2:
-        context.go('/settings');
-    }
+    final targetRoute = routes[index];
+    if (targetRoute == null) return;
+
+    final currentRoute = GoRouter.of(
+      context,
+    ).routeInformationProvider.value.uri.path;
+
+    if (currentRoute == targetRoute) return;
+    context.go(targetRoute);
   }
 
   Future<void> _openSubscriptionPlans() async {
@@ -121,7 +127,7 @@ class _HomePageState extends ConsumerState<HomePage> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return AlertDialog(
-              backgroundColor: AppTheme.background,
+              backgroundColor: Colors.white,
 
               title: Text(
                 'home.new-form-title'.tr(),
@@ -140,7 +146,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                           key: _formKey,
                           child: FFTextField(
                             prefixIcon: HeroIcon(HeroIcons.listBullet),
-                            hintText: 'home-new-form-text'.tr(),
+                            hintText: 'home.new-form-text'.tr(),
                             controller: _formTitleController,
                             validator: AppValidators.validatorForEmpty,
                           ),
@@ -202,123 +208,131 @@ class _HomePageState extends ConsumerState<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final String location = GoRouterState.of(context).uri.path;
-    return Scaffold(
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: context.isMobile
-          ? FloatingActionButton(
-              onPressed: () async {
-                final usageAsync = ref.read(planUsageProvider);
+    final router = GoRouter.of(context);
 
-                await usageAsync.when(
-                  data: (usage) {
-                    if (usage.isFormsLimitReached) {
-                      showFormLimitDialog();
-                    } else {
-                      showCreateFormDialog();
-                    }
-                  },
-                  loading: () {},
+    return AnimatedBuilder(
+      animation: router.routerDelegate,
+      builder: (context, _) {
+        final location = router.routeInformationProvider.value.uri.path;
 
-                  error: (er, st) {
-                    showSnackbar(
-                      context,
-                      type: SnackbarType.error,
-                      message: 'Error: $er',
+        return Scaffold(
+          // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          floatingActionButton: context.isMobile
+              ? FloatingActionButton(
+                  onPressed: () async {
+                    final usageAsync = ref.read(planUsageProvider);
+
+                    await usageAsync.when(
+                      data: (usage) {
+                        if (usage.isFormsLimitReached) {
+                          showFormLimitDialog();
+                        } else {
+                          showCreateFormDialog();
+                        }
+                      },
+                      loading: () {},
+
+                      error: (er, st) {
+                        showSnackbar(
+                          context,
+                          type: SnackbarType.error,
+                          message: 'Error: $er',
+                        );
+                      },
                     );
                   },
-                );
-              },
-              backgroundColor: AppTheme.secondary,
-              foregroundColor: AppTheme.primary,
-              child: HeroIcon(HeroIcons.plus),
-              // child: Row(
-              //   children: [
-              //     HeroIcon(HeroIcons.plus),
-              //     const SizedBox(
-              //       width: 8,
-              //     ),
-              //     Text('Создать'),
-              //   ],
-              // ),
-            )
-          : null,
-      bottomNavigationBar: context.isMobile
-          ? BottomNavigationBar(
-              onTap: (index) {
-                _onItemTapped(index, context);
-              },
-              backgroundColor: AppTheme.background,
-              selectedItemColor: AppTheme.secondary,
-              unselectedItemColor: AppTheme.secondary.withAlpha(50),
-              iconSize: 20,
-              showUnselectedLabels: false,
-
-              currentIndex: _getSelectedindex(location),
-              items: [
-                BottomNavigationBarItem(
-                  icon: HeroIcon(HeroIcons.inbox),
-                  label: 'nav-bar.forms'.tr(),
-                  activeIcon: HeroIcon(
-                    HeroIcons.inbox,
-                    style: HeroIconStyle.solid,
-                  ),
-                ),
-                BottomNavigationBarItem(
-                  icon: HeroIcon(HeroIcons.squares2x2),
-                  label: 'nav-bar.leads'.tr(),
-                  activeIcon: HeroIcon(
-                    HeroIcons.squares2x2,
-                    style: HeroIconStyle.solid,
-                  ),
-                ),
-                BottomNavigationBarItem(
-                  icon: HeroIcon(HeroIcons.cog6Tooth),
-                  label: 'nav-bar.settings'.tr(),
-                  activeIcon: HeroIcon(
-                    HeroIcons.cog6Tooth,
-                    style: HeroIconStyle.solid,
-                  ),
-                ),
-              ],
-            )
-          : SizedBox(),
-      body: Stack(
-        children: [
-          widget.child,
-
-          if (context.isDesktop || context.isTablet)
-            FFBottomNavBar(
-              selectedIndex: _getSelectedindex(location),
-              onItemTapped: (index) {
-                _onItemTapped(index, context);
-              },
-
-              onCreateForm: () async {
-                final usageAsync = ref.read(planUsageProvider);
-
-                await usageAsync.when(
-                  data: (usage) {
-                    if (usage.isFormsLimitReached) {
-                      showFormLimitDialog();
-                    } else {
-                      showCreateFormDialog();
-                    }
+                  backgroundColor: AppTheme.secondary,
+                  foregroundColor: AppTheme.primary,
+                  child: HeroIcon(HeroIcons.plus),
+                  // child: Row(
+                  //   children: [
+                  //     HeroIcon(HeroIcons.plus),
+                  //     const SizedBox(
+                  //       width: 8,
+                  //     ),
+                  //     Text('Создать'),
+                  //   ],
+                  // ),
+                )
+              : null,
+          bottomNavigationBar: context.isMobile
+              ? BottomNavigationBar(
+                  onTap: (index) {
+                    _onItemTapped(index, context);
                   },
-                  loading: () {},
+                  backgroundColor: AppTheme.background,
+                  selectedItemColor: AppTheme.secondary,
+                  unselectedItemColor: AppTheme.secondary.withAlpha(50),
+                  iconSize: 20,
+                  showUnselectedLabels: false,
 
-                  error: (er, st) {
-                    showSnackbar(
-                      context,
-                      type: SnackbarType.error,
-                      message: 'Error: $er',
+                  currentIndex: _getSelectedindex(location),
+                  items: [
+                    BottomNavigationBarItem(
+                      icon: HeroIcon(HeroIcons.inbox),
+                      label: 'nav-bar.forms'.tr(),
+                      activeIcon: HeroIcon(
+                        HeroIcons.inbox,
+                        style: HeroIconStyle.solid,
+                      ),
+                    ),
+                    BottomNavigationBarItem(
+                      icon: HeroIcon(HeroIcons.squares2x2),
+                      label: 'nav-bar.leads'.tr(),
+                      activeIcon: HeroIcon(
+                        HeroIcons.squares2x2,
+                        style: HeroIconStyle.solid,
+                      ),
+                    ),
+                    BottomNavigationBarItem(
+                      icon: HeroIcon(HeroIcons.cog6Tooth),
+                      label: 'nav-bar.settings'.tr(),
+                      activeIcon: HeroIcon(
+                        HeroIcons.cog6Tooth,
+                        style: HeroIconStyle.solid,
+                      ),
+                    ),
+                  ],
+                )
+              : SizedBox(),
+          body: Stack(
+            children: [
+              widget.child,
+
+              if (context.isDesktop || context.isTablet)
+                FFBottomNavBar(
+                  selectedIndex: _getSelectedindex(location),
+                  onItemTapped: (index) {
+                    _onItemTapped(index, context);
+                  },
+
+                  onCreateForm: () async {
+                    final usageAsync = ref.read(planUsageProvider);
+
+                    await usageAsync.when(
+                      data: (usage) {
+                        if (usage.isFormsLimitReached) {
+                          showFormLimitDialog();
+                        } else {
+                          showCreateFormDialog();
+                        }
+                      },
+                      loading: () {},
+
+                      error: (er, st) {
+                        showSnackbar(
+                          context,
+                          type: SnackbarType.error,
+                          message: 'Error: $er',
+                        );
+                      },
                     );
                   },
-                );
-              },
-            ),
-        ],
-      ),
+                ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

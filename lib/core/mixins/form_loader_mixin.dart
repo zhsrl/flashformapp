@@ -15,14 +15,14 @@ mixin FormLoaderMixin {
     try {
       final formController = ref.read(formControllerProvider.notifier);
       final form = await formController.fetchForm(formId);
-      final uiControllers = ref.watch(formUIControllersProvider);
-
-      debugPrint('📌 loadFormData: Форма загружена - ${form.name}');
-
       if (!isMounted()) {
         debugPrint('⚠️ loadFormData: Widget был размонтирован');
         return;
       }
+
+      final uiControllers = ref.read(formUIControllersProvider);
+
+      debugPrint('📌 loadFormData: Форма загружена - ${form.name}');
 
       debugPrint('📌 loadFormData: Загружаю данные в контроллер...');
       ref.read(createFormProvider.notifier).initializeFromModel(form);
@@ -44,7 +44,7 @@ mixin FormLoaderMixin {
       uiControllers.formButtonTextController.text =
           form.data?['form']['button']['text'] ?? 'Оставить заявку';
       uiControllers.successTextController.text =
-          form.data?['success_text'] ?? 'Успешная форма';
+          form.data?['form']['success_text'] ?? 'Успешная форма';
 
       // ===== SUCCESS ACTION ДАННЫЕ =====
       uiControllers.formRedirectUrlController.text =

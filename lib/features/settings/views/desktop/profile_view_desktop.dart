@@ -349,75 +349,72 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 400,
-      child: Drawer(
-        backgroundColor: Colors.white,
-        child: Padding(
-          padding: EdgeInsetsGeometry.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Изменить пароль',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w500,
-                    ),
+    return Drawer(
+      backgroundColor: Colors.white,
+      child: Padding(
+        padding: EdgeInsetsGeometry.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Изменить пароль',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
                   ),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: HeroIcon(HeroIcons.xMark),
+                ),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context);
+                  },
+                  child: HeroIcon(HeroIcons.xMark),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 16,
+            ),
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  FFTextField(
+                    title: 'Старый пароль',
+                    hintText: 'Введите пароль',
+                    isPassword: true,
+                    validator: AppValidators.password,
+                    controller: _oldPasswordController,
+                  ),
+                  FFTextField(
+                    title: 'Новый пароль',
+                    hintText: 'Придумайте новый пароль',
+                    isPassword: true,
+                    validator: AppValidators.password,
+                    controller: _newPasswordController,
                   ),
                 ],
               ),
-              const SizedBox(
-                height: 16,
-              ),
-              Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    FFTextField(
-                      title: 'Старый пароль',
-                      hintText: 'Введите пароль',
-                      isPassword: true,
-                      validator: AppValidators.password,
-                      controller: _oldPasswordController,
-                    ),
-                    FFTextField(
-                      title: 'Новый пароль',
-                      hintText: 'Придумайте новый пароль',
-                      isPassword: true,
-                      validator: AppValidators.password,
-                      controller: _newPasswordController,
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                width: context.screenWidth,
+            ),
+            SizedBox(
+              width: context.screenWidth,
 
-                child: FFButton(
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      String oldPass = _oldPasswordController.text;
-                      String newPass = _newPasswordController.text;
+              child: FFButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    String oldPass = _oldPasswordController.text;
+                    String newPass = _newPasswordController.text;
 
-                      _changePassword(oldPass, newPass);
-                    }
-                  },
-                  text: 'Изменить',
-                ),
+                    _changePassword(oldPass, newPass);
+                  }
+                },
+                text: 'Изменить',
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

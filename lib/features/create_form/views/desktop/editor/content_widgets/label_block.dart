@@ -51,7 +51,7 @@ class _BuildLabelSettingsBlockState extends State<BuildLabelSettingsBlock> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Удалить Made on Flashform',
+                'Логотип Made on Flashform',
                 style: TextStyle(
                   fontWeight: FontWeight.w500,
                   fontSize: 16,

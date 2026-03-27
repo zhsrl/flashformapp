@@ -32,10 +32,9 @@ class FFBottomNavBar extends StatefulWidget {
 }
 
 class _FFBottomNavBarState extends State<FFBottomNavBar> {
-  int selectedIndex = 0;
   int? _hoveredIndex;
 
-  final List<FFBottomItem> _items = [
+  List<FFBottomItem> get _items => [
     FFBottomItem(icon: HeroIcons.inbox, title: 'nav-bar.forms'.tr()),
     FFBottomItem(icon: HeroIcons.squares2x2, title: 'nav-bar.leads'.tr()),
     FFBottomItem(icon: HeroIcons.cog6Tooth, title: 'nav-bar.settings'.tr()),

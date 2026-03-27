@@ -37,7 +37,7 @@ Future<void> showSubscriptionKaspiQR(BuildContext context) async {
               const SizedBox(
                 height: 32,
               ),
-              Image.asset('images/kaspiqr.png'),
+              Image.asset('assets/images/kaspiqr.png'),
               const SizedBox(
                 height: 16,
               ),

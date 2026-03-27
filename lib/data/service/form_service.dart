@@ -42,6 +42,7 @@ class FormService {
           'text': 'Описание',
           'font-size': 24,
         },
+
         'content-type': 'image',
         'action-type': 'url',
         'button': {

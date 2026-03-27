@@ -583,7 +583,7 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
           builder: (context, setState) {
             return AlertDialog(
               title: Text('forms.add_field'.tr()),
-              backgroundColor: AppTheme.background,
+              backgroundColor: Colors.white,
               content: SizedBox(
                 width: 350,
                 child: Column(

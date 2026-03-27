@@ -132,7 +132,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                             SizedBox(
                               width: 250,
                               child: Text(
-                                'Лимит на формы исчерпан. Удалите один из форм или оформите другой тарифный план',
+                                'Достигнут лимит форм. Пожалуйста, удалите одну из форм или перейдите на другой тарифный план.',
                                 style: TextStyle(
                                   color: Colors.red,
                                   fontSize: 12,
@@ -231,7 +231,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                             SizedBox(
                               width: 250,
                               child: Text(
-                                'Лимит на заявок на этот месяц исчерпан. Со следующий месяц лимит обнуляется автоматически',
+                                'Лимит заявок на этот месяц исчерпан. Лимит будет автоматически продлен на следующий месяц.',
                                 style: TextStyle(
                                   color: Colors.red,
                                   fontSize: 12,
@@ -366,20 +366,25 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
           width: 10,
         ),
 
-        Container(
-          height: 40,
-          width: 40,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: AppTheme.fourty,
-            border: Border.all(
-              width: 1,
-              color: AppTheme.border,
+        GestureDetector(
+          onTap: () {
+            context.go('/settings');
+          },
+          child: Container(
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.fourty,
+              border: Border.all(
+                width: 1,
+                color: AppTheme.border,
+              ),
             ),
-          ),
-          child: HeroIcon(
-            HeroIcons.user,
-            color: AppTheme.secondary,
+            child: HeroIcon(
+              HeroIcons.user,
+              color: AppTheme.secondary,
+            ),
           ),
         ),
       ],

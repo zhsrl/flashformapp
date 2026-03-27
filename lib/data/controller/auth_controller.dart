@@ -40,6 +40,18 @@ class AuthController extends StateNotifier<AsyncValue<void>> {
     state = await AsyncValue.guard(() => _repository.verifyOtp(email, code));
   }
 
+  Future<void> resetPassword(String email) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() => _repository.resetPassword(email));
+  }
+
+  Future<void> setNewPassword(String newPassword) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(
+      () => _repository.setNewPassword(newPassword),
+    );
+  }
+
   Future<void> signOut() async {
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() => _repository.signOut());

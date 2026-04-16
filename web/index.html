@@ -112,9 +112,9 @@
   </picture>
 
   <script>
-    window.addEventListener('error', function(event) {
+    <!-- window.addEventListener('error', function(event) {
       console.error('🔴 GLOBAL ERROR:', event.error);
-    });
+    }); -->
     window.addEventListener('unhandledrejection', function(event) {
       const reason = event.reason;
       if (reason && reason.message && reason.message.includes('Could not establish connection')) {

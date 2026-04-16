@@ -4,24 +4,71 @@ import 'package:flutter/material.dart';
 
 const _undefined = Object();
 
+class MainPageButtonModel {
+  MainPageButtonModel({
+    this.text,
+    this.type,
+    this.anchor,
+    this.enabled,
+    this.url,
+  });
+
+  final String? text;
+  final String? type;
+  final String? url;
+  final String? anchor;
+  final bool? enabled;
+}
+
 class CreateFormState {
   final String? name;
+
+  // Main Content
   final String? title;
   final String? subtitle;
-  final String? slug;
-  final String? formTitle;
-  final String? buttonText;
-  final String? formButtonText;
-  final bool hasChanges;
-  final String? successText;
   final String? heroImageUrl;
+
+  final MainPageButtonModel? mainFirstButton;
+  final MainPageButtonModel? mainSecondButton;
+  final bool hasSecondButton;
+
+  final String? badge;
+  final bool hasBadge;
+
+  // Branding
   final String theme; // 'light' | 'dark'
-  final String actionType; // 'button-url' | 'form'
-  final Color buttonColor;
+  final Color? primaryColor;
+  final String? logo;
+
+  // Settings - Footer
+  final bool hasFooter;
+  final String? footerCompanyName;
+  final String? footerIdNumber;
+  final String? footerAddress;
+  final List<FooterLink> footerLinks; // Новое поле для хранения ссылок
+
+  // Settings - Watermark Flashform
   final bool hasLabel; // false | true;
-  final Color formButtonColor;
-  final double titleFontSize;
-  final double subtitleFontSize;
+
+  // Settings - Integrations
+  final String metaPixelId;
+  final String yandexMetrikaId;
+  final bool telegramEnabled;
+  final String? telegramChatId;
+
+  // Settings - Page slug
+  final String? slug;
+
+  // States
+  final bool hasChanges;
+  final bool isPublishing;
+  final bool isSaving;
+
+  // Settings - Form
+  final String? formTitle;
+  final String? formButtonText;
+  final String? successText;
+  final String actionType; // 'button-url' | 'form'
   final bool hasRedirectUrl;
   final String? redirectUrl;
   final String? whatsappNumber;
@@ -30,18 +77,7 @@ class CreateFormState {
   final String? thxDescription;
   final String? successAction;
   final List<FormFields> fields;
-  final bool isPublishing;
-  final bool isSaving;
   final String? buttonUrl;
-  final String metaPixelId;
-  final String yandexMetrikaId;
-  final bool telegramEnabled;
-  final String? telegramChatId;
-  final bool hasFooter;
-  final String? footerCompanyName;
-  final String? footerIdNumber;
-  final String? footerAddress;
-  final List<FooterLink> footerLinks; // Новое поле для хранения ссылок
 
   const CreateFormState({
     this.name,
@@ -49,7 +85,14 @@ class CreateFormState {
     this.title,
     this.subtitle,
     this.formTitle,
-    this.buttonText,
+    this.badge,
+    this.hasBadge = false,
+    this.logo,
+    this.primaryColor,
+    this.mainFirstButton,
+    this.mainSecondButton,
+    this.hasSecondButton = false,
+
     this.hasChanges = false,
     this.formButtonText,
     this.successText = '',
@@ -57,10 +100,7 @@ class CreateFormState {
     this.buttonUrl,
     this.theme = 'light',
     this.actionType = 'button-url',
-    this.buttonColor = Colors.blue,
-    this.formButtonColor = Colors.blue,
-    this.titleFontSize = 42,
-    this.subtitleFontSize = 22,
+
     this.hasRedirectUrl = false,
     this.successAction,
     this.redirectUrl,
@@ -85,23 +125,31 @@ class CreateFormState {
   });
 
   CreateFormState copyWith({
-    String? title,
     String? name,
-    String? slug,
+    // Main
+    String? title,
     String? subtitle,
+    Object? heroImageUrl = _undefined,
+    MainPageButtonModel? mainFirstButton,
+
+    MainPageButtonModel? mainSecondButton,
+    bool? hasSecondButton,
+    String? badge,
+    bool? hasBadge,
+
+    // Branding
+    String? theme,
+    Color? primaryColor,
+    String? logo,
+
+    // Settings
+    String? slug,
     String? formTitle,
-    String? buttonText,
     String? formButtonText,
     String? successText,
     String? buttonUrl,
-    Object? heroImageUrl = _undefined,
-    String? theme,
     String? actionType,
     bool? hasChanges,
-    Color? buttonColor,
-    Color? formButtonColor,
-    double? titleFontSize,
-    double? subtitleFontSize,
     bool? hasRedirectUrl,
     String? redirectUrl,
     String? successAction,
@@ -118,7 +166,6 @@ class CreateFormState {
     String? yandexMetrikaId,
     bool? telegramEnabled,
     String? telegramChatId,
-
     String? footerCompanyName,
     String? footerIdNumber,
     String? footerAddress,
@@ -130,7 +177,14 @@ class CreateFormState {
       title: title ?? this.title,
       subtitle: subtitle ?? this.subtitle,
       formTitle: formTitle ?? this.formTitle,
-      buttonText: buttonText ?? this.buttonText,
+      badge: badge ?? this.badge,
+      hasBadge: hasBadge ?? this.hasBadge,
+      mainFirstButton: mainFirstButton ?? this.mainFirstButton,
+      mainSecondButton: mainSecondButton ?? this.mainSecondButton,
+      hasSecondButton: hasSecondButton ?? this.hasSecondButton,
+      primaryColor: primaryColor ?? this.primaryColor,
+      logo: logo ?? this.logo,
+
       hasChanges: hasChanges ?? this.hasChanges,
 
       formButtonText: formButtonText ?? this.formButtonText,
@@ -140,11 +194,10 @@ class CreateFormState {
           ? this.heroImageUrl
           : heroImageUrl as String?,
       theme: theme ?? this.theme,
+      isPublishing: isPublishing ?? this.isPublishing,
+      isSaving: isSaving ?? this.isSaving,
       actionType: actionType ?? this.actionType,
-      buttonColor: buttonColor ?? this.buttonColor,
-      formButtonColor: formButtonColor ?? this.formButtonColor,
-      titleFontSize: titleFontSize ?? this.titleFontSize,
-      subtitleFontSize: subtitleFontSize ?? this.subtitleFontSize,
+
       hasRedirectUrl: hasRedirectUrl ?? this.hasRedirectUrl,
       redirectUrl: redirectUrl ?? this.redirectUrl,
       whatsappMessage: whatsappMessage ?? this.whatsappMessage,

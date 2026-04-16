@@ -124,36 +124,83 @@ class _PreviewViewState extends ConsumerState<PreviewView>
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: formState.theme == 'light'
-            ? const Color(0xFFF1F2F7)
-            : const Color(0xFF0f0d12),
-        borderRadius: BorderRadius.circular(20),
+            ? Colors.white
+            : const Color(0xFF191D1F),
+        borderRadius: BorderRadius.circular(25),
         border: Border.all(width: 1, color: AppTheme.border),
       ),
       child: Stack(
         alignment: Alignment.topCenter,
         children: [
-          // CONTENT LAYER
+          // FIRST PAGE DETAILS
           Column(
             children: [
-              // Hero Image
-              _buildHeroImage(formState, imageState),
-              const SizedBox(height: 8),
+              Container(
+                width: 400,
 
-              SizedBox(
-                width:
-                    350, // Контент всегда ограничен шириной мобилки для читаемости
+                decoration: BoxDecoration(
+                  color: formState.theme == 'light'
+                      ? Color(0xFFEFEFEF)
+                      : Color(0xFF292D30),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+
+                padding: EdgeInsets.all(32),
+
                 child: Column(
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: .min,
                   children: [
-                    // Title
+                    if (formState.hasBadge)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 16.0),
+                        child: Row(
+                          crossAxisAlignment: .center,
+                          mainAxisAlignment: .spaceBetween,
+                          children: [
+                            // SizedBox(),
+                            Container(
+                              decoration: BoxDecoration(
+                                color: Colors.transparent,
+                                borderRadius: BorderRadius.circular(100),
+                                border: Border.all(
+                                  width: 1.5,
+                                  color: formState.theme == 'light'
+                                      ? Colors.black
+                                      : Colors.white,
+                                ),
+                              ),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 3,
+                              ),
+                              child: ListenableBuilder(
+                                listenable: uiControllers.badgeController,
+                                builder: (context, child) {
+                                  return Text(
+                                    uiControllers.badgeController.text,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: formState.theme == 'light'
+                                          ? Colors.black
+                                          : Colors.white,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ListenableBuilder(
                       listenable: uiControllers.titleController,
                       builder: (_, __) => Text(
                         uiControllers.titleController.text,
-                        textAlign: TextAlign.center,
+                        textAlign: TextAlign.start,
+
                         style: TextStyle(
-                          height: 1.2,
-                          fontSize: formState.titleFontSize, // Берем из стейта
+                          height: 1.1,
+                          letterSpacing: -0.5,
+                          fontSize: 34,
                           color: formState.theme == 'light'
                               ? Colors.black
                               : Colors.white,
@@ -168,21 +215,106 @@ class _PreviewViewState extends ConsumerState<PreviewView>
                       listenable: uiControllers.subtitleController,
                       builder: (_, __) => Text(
                         uiControllers.subtitleController.text,
-                        textAlign: TextAlign.center,
+                        textAlign: TextAlign.start,
                         style: TextStyle(
                           height: 1.2,
-                          fontSize:
-                              formState.subtitleFontSize, // Берем из стейта
+                          letterSpacing: -0.015,
+                          fontSize: 16,
                           color: formState.theme == 'light'
                               ? Colors.black
                               : Colors.white,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
 
+                    // FIRST BUTTON
+                    Container(
+                      width: isDesktop
+                          ? context.screenWidth
+                          : 350, // Адаптивная ширина
+                      margin: EdgeInsets.only(
+                        top: 32,
+                      ),
+                      height: 60,
+                      child: ElevatedButton(
+                        onPressed: () {},
+                        style: ElevatedButton.styleFrom(
+                          elevation: 0,
+                          backgroundColor: formState.primaryColor, // Из стейта
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(500),
+                          ),
+                        ),
+                        child: ListenableBuilder(
+                          listenable: uiControllers.mainFirstButtonController,
+                          builder: (_, __) => Text(
+                            uiControllers.mainFirstButtonController.text,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // SECOND BUTTON
+                    if (formState.hasSecondButton)
+                      Container(
+                        width: isDesktop
+                            ? context.screenWidth
+                            : 350, // Адаптивная ширина
+                        margin: EdgeInsets.only(
+                          top: 8,
+                        ),
+                        height: 60,
+                        child: OutlinedButton(
+                          onPressed: () {},
+                          style: OutlinedButton.styleFrom(
+                            elevation: 0,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(500),
+                              side: BorderSide(
+                                width: 2,
+                                color: formState.theme == 'dark'
+                                    ? Colors.white
+                                    : Colors.black,
+                              ),
+                            ),
+                          ),
+                          child: ListenableBuilder(
+                            listenable:
+                                uiControllers.mainSecondButtonController,
+                            builder: (_, __) => Text(
+                              uiControllers.mainSecondButtonController.text,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(
+                height: 16,
+              ),
+              // Hero Image
+              _buildHeroImage(formState, imageState, _tabIndex),
+
+              SizedBox(
+                width: _tabController.index == 0
+                    ? 350
+                    : 400, // Контент всегда ограничен шириной мобилки для читаемости
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     // Action Widget (Button or Form)
-                    _buildWidgetByActionType(formState, uiControllers),
+                    // _buildWidgetByActionType(formState, uiControllers),
                     // Footer
                     if (formState.hasFooter) _buildFooter(formState),
                     // Branding
@@ -260,41 +392,47 @@ class _PreviewViewState extends ConsumerState<PreviewView>
   Widget _buildHeroImage(
     CreateFormState formState,
     ImageUploadState imageState,
+    int index,
   ) {
     if (imageState.localImageBytes != null) {
       return Container(
+        width: index == 0 ? 350 : 400,
+        height: index == 0 ? 350 : 400,
         clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(15)),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(40)),
         child: Image.memory(
           imageState.localImageBytes!,
-          width: 318,
-          height: 318,
+
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildPlaceholder(formState),
+          errorBuilder: (_, __, ___) => _buildPlaceholder(formState, index),
         ),
       );
     }
     if (formState.heroImageUrl != null) {
       return Container(
         clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(15)),
+        width: index == 0 ? 350 : 400,
+        height: index == 0 ? 350 : 400,
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(40)),
         child: Image.network(
           formState.heroImageUrl!,
-          width: 318,
-          height: 318,
+
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildPlaceholder(formState),
+          errorBuilder: (_, __, ___) => _buildPlaceholder(formState, index),
         ),
       );
     }
 
-    return _buildPlaceholder(formState);
+    return _buildPlaceholder(formState, index);
   }
 
-  Widget _buildPlaceholder(CreateFormState formState) {
+  Widget _buildPlaceholder(
+    CreateFormState formState,
+    int index,
+  ) {
     return Container(
-      width: 320,
-      height: 320,
+      width: index == 0 ? 350 : 400,
+      height: index == 0 ? 350 : 400,
       decoration: BoxDecoration(
         color: formState.theme == 'light' ? AppTheme.border : AppTheme.fourty,
         borderRadius: BorderRadius.circular(15),
@@ -328,7 +466,7 @@ class _PreviewViewState extends ConsumerState<PreviewView>
           onPressed: () {},
           style: ElevatedButton.styleFrom(
             elevation: 0,
-            backgroundColor: formState.buttonColor, // Из стейта
+            backgroundColor: formState.primaryColor, // Из стейта
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
@@ -417,7 +555,7 @@ class _PreviewViewState extends ConsumerState<PreviewView>
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
-                  backgroundColor: formState.formButtonColor, // Из стейта
+                  backgroundColor: formState.primaryColor, // Из стейта
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),

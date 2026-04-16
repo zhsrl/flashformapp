@@ -162,7 +162,12 @@ class FormRepository {
         .eq('id', formId)
         .single();
 
-    return response['data']['settings']['meta-pixel-id'];
+    final data = response['data'] as Map?;
+    final settings = data?['settings'] as Map?;
+    final integrations = settings?['integrations'] as Map?;
+    final metaPixel = integrations?['meta_pixel_id'] as Map?;
+
+    return metaPixel?['id'] as String? ?? '';
   }
 
   Future<String> getYandexMetrikaId(String formId) async {
@@ -176,7 +181,12 @@ class FormRepository {
         .eq('id', formId)
         .single();
 
-    return response['data']['settings']['ya-metrika-id'];
+    final data = response['data'] as Map?;
+    final settings = data?['settings'] as Map?;
+    final integrations = settings?['integrations'] as Map?;
+    final yandexMetrika = integrations?['ya_metrika_id'] as Map?;
+
+    return yandexMetrika?['id'] as String? ?? '';
   }
 
   /// Безопасное обновление Meta Pixel без потери других данных
@@ -184,38 +194,59 @@ class FormRepository {
     if (formId.isEmpty)
       return; // pixelId может быть пустым, если мы хотим стереть его
 
-    await _updateSettingsField(formId, 'meta-pixel-id', pixelId);
+    await _updateIntegrationField(
+      formId,
+      'meta_pixel_id',
+      id: pixelId.isEmpty ? null : pixelId,
+      enabled: pixelId.isNotEmpty,
+    );
   }
 
   /// Безопасное обновление Yandex Metrika без потери других данных
   Future<void> setYandexMetrikaId(String formId, String pixelId) async {
     if (formId.isEmpty) return;
 
-    await _updateSettingsField(formId, 'ya-metrika-id', pixelId);
+    await _updateIntegrationField(
+      formId,
+      'ya_metrika_id',
+      id: pixelId.isEmpty ? null : pixelId,
+      enabled: pixelId.isNotEmpty,
+    );
   }
 
   Future<void> deleteMetaPixelId(String formId) async {
     if (formId.isEmpty) return;
 
-    await _updateSettingsField(formId, 'meta-pixel-id', '');
+    await _updateIntegrationField(
+      formId,
+      'meta_pixel_id',
+      id: null,
+      enabled: false,
+    );
   }
 
   Future<void> deleteYandexMetrikaId(String formId) async {
     if (formId.isEmpty) return;
 
-    await _updateSettingsField(formId, 'ya-metrika-id', '');
+    await _updateIntegrationField(
+      formId,
+      'ya_metrika_id',
+      id: null,
+      enabled: false,
+    );
   }
 
   Future<void> deleteForm(String formId) async {
     await _client.from('forms').delete().eq('id', formId);
   }
 
-  /// Приватный метод для безопасного слияния настроек (Deep Merge)
-  Future<void> _updateSettingsField(
+  /// Приватный метод для безопасного слияния интеграций (Deep Merge)
+  Future<void> _updateIntegrationField(
     String formId,
-    String key,
-    String value,
-  ) async {
+    String key, {
+    String? id,
+    bool? enabled,
+  }) async {
     // 1. Читаем текущие данные
     final response = await _client
         .from('forms')
@@ -227,15 +258,24 @@ class FormRepository {
         ? Map<String, dynamic>.from(response['data'])
         : <String, dynamic>{};
 
-    // 2. Инициализируем settings если их нет
-    if (!currentData.containsKey('settings')) {
-      currentData['settings'] = <String, dynamic>{};
-    }
+    final settings =
+        (currentData['settings'] as Map?)?.cast<String, dynamic>() ??
+        <String, dynamic>{};
+    final integrations =
+        (settings['integrations'] as Map?)?.cast<String, dynamic>() ??
+        <String, dynamic>{};
 
-    // 3. Обновляем конкретный ключ
-    currentData['settings'][key] = value;
+    final integration =
+        (integrations[key] as Map?)?.cast<String, dynamic>() ??
+        <String, dynamic>{};
 
-    // 4. Записываем обратно полный объект
+    integration['id'] = id;
+    integration['enabled'] = enabled;
+
+    integrations[key] = integration;
+    settings['integrations'] = integrations;
+    currentData['settings'] = settings;
+
     await _client.from('forms').update({'data': currentData}).eq('id', formId);
   }
 }

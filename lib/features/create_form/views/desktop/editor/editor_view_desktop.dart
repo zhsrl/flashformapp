@@ -6,6 +6,11 @@ import 'package:flashform_app/features/create_form/views/desktop/editor/views/ed
 import 'package:flashform_app/features/widgets/ff_tabbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
+
+var editorTabIndexProvider = StateProvider.autoDispose<int>((ref) {
+  return 0;
+});
 
 class EditorView extends ConsumerStatefulWidget {
   const EditorView({
@@ -23,7 +28,6 @@ class EditorView extends ConsumerStatefulWidget {
 
 class _SettingsPanelViewState extends ConsumerState<EditorView>
     with SingleTickerProviderStateMixin {
-  int _tabIndex = 0;
   late TabController _tabController;
   late final ScrollController _contentScrollController;
   late final ScrollController _integrationScrollController;
@@ -31,14 +35,16 @@ class _SettingsPanelViewState extends ConsumerState<EditorView>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this, initialIndex: 0);
+    _tabController = TabController(
+      length: 4,
+      vsync: this,
+      initialIndex: ref.read(editorTabIndexProvider),
+    );
     _contentScrollController = ScrollController();
     _integrationScrollController = ScrollController();
-    _tabController.addListener(() {
-      setState(() {
-        _tabIndex = _tabController.index;
-      });
-    });
+    // _tabController.addListener(() {
+    //   ref.read(editorTabIndexProvider.notifier).state = _tabController.index;
+    // });
   }
 
   @override
@@ -46,6 +52,7 @@ class _SettingsPanelViewState extends ConsumerState<EditorView>
     _tabController.dispose();
     _contentScrollController.dispose();
     _integrationScrollController.dispose();
+
     super.dispose();
   }
 
@@ -56,34 +63,52 @@ class _SettingsPanelViewState extends ConsumerState<EditorView>
     final currentFormId = ref.watch(currentFormIdProvider);
     final controller = ref.read(createFormProvider.notifier);
     final uiControllers = ref.watch(formUIControllersProvider);
+    final selectedIndex = ref.watch(editorTabIndexProvider);
+
+    ref.listen<int>(editorTabIndexProvider, (prev, next) {
+      if (next != _tabController.index) {
+        _tabController.animateTo(next);
+      }
+    });
 
     return SizedBox(
-      width: 350,
+      width: 400,
       child: Column(
         children: [
           FFTabBar(
             tabs: [
               Text(
-                'Контент',
+                'Главный',
                 style: TextStyle(
-                  // fontSize: 12,
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
               Text(
-                'Интеграции',
+                'Брендинг',
                 style: TextStyle(
-                  // fontSize: 12,
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'Блоки',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'Настройки',
+                style: TextStyle(
+                  fontSize: 12,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ],
             controller: _tabController,
             onTap: (index) {
-              setState(() {
-                _tabIndex = index;
-              });
+              ref.read(editorTabIndexProvider.notifier).state = index;
             },
           ),
           const SizedBox(
@@ -95,7 +120,7 @@ class _SettingsPanelViewState extends ConsumerState<EditorView>
                 context,
               ).copyWith(scrollbars: false),
               child: IndexedStack(
-                index: _tabIndex,
+                index: selectedIndex,
                 children: [
                   SingleChildScrollView(
                     key: const PageStorageKey('editor-content-scroll'),
@@ -109,6 +134,22 @@ class _SettingsPanelViewState extends ConsumerState<EditorView>
                       labelOnChanged: (value) {},
                       ref: ref,
                       uiControllers: uiControllers,
+                    ),
+                  ),
+                  SingleChildScrollView(
+                    key: const PageStorageKey('editor-blocks-scroll'),
+                    controller: _contentScrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Center(
+                      child: Text('Branding'),
+                    ),
+                  ),
+                  SingleChildScrollView(
+                    key: const PageStorageKey('editor-blocks-scroll'),
+                    controller: _contentScrollController,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    child: Center(
+                      child: Text('Blocks'),
                     ),
                   ),
                   SingleChildScrollView(

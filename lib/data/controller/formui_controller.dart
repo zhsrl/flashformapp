@@ -19,8 +19,15 @@ final formUIControllersProvider = Provider.autoDispose<FormUIControllers>((
 class FormUIControllers {
   final CreateFormController _logicNotifier;
 
+  // Main
   late final TextEditingController titleController;
   late final TextEditingController subtitleController;
+  late final TextEditingController mainFirstButtonController;
+  late final TextEditingController mainSecondButtonController;
+  late final TextEditingController badgeController;
+  late final TextEditingController mainFirstButtonRedirectUrlController;
+  late final TextEditingController mainSecondButtonRedirectUrlController;
+
   late final TextEditingController formTitleController;
   late final TextEditingController buttonTextController;
   late final TextEditingController formButtonTextController;
@@ -42,10 +49,17 @@ class FormUIControllers {
   late final TextEditingController footerAddressController;
 
   FormUIControllers(this._logicNotifier) {
+    // Main
     titleController = TextEditingController();
     subtitleController = TextEditingController();
+    mainFirstButtonController = TextEditingController(text: 'Кнопка');
+    mainSecondButtonController = TextEditingController(text: 'Кнопка');
+    badgeController = TextEditingController(text: 'Тег');
+    mainFirstButtonRedirectUrlController = TextEditingController();
+    mainSecondButtonRedirectUrlController = TextEditingController();
+
     formTitleController = TextEditingController();
-    buttonTextController = TextEditingController();
+    buttonTextController = mainFirstButtonController;
     formButtonTextController = TextEditingController();
     successTextController = TextEditingController();
     buttonUrlController = TextEditingController();
@@ -69,6 +83,20 @@ class FormUIControllers {
       // _logicNotifier.markAsChanged(); // Помечаем, что есть изменения
     });
 
+    mainFirstButtonController.addListener(() {
+      _logicNotifier.updateMainFirstButtonText(mainFirstButtonController.text);
+    });
+
+    mainSecondButtonController.addListener(() {
+      _logicNotifier.updateMainSecondButtonText(
+        mainSecondButtonController.text,
+      );
+    });
+
+    badgeController.addListener(() {
+      _logicNotifier.updateBadge(badgeController.text);
+    });
+
     subtitleController.addListener(() {
       _logicNotifier.updateSubtitle(subtitleController.text);
     });
@@ -77,9 +105,6 @@ class FormUIControllers {
       () => _logicNotifier.updateFormTitle(formTitleController.text),
     );
 
-    buttonTextController.addListener(
-      () => _logicNotifier.updateButtonText(buttonTextController.text),
-    );
     formButtonTextController.addListener(
       () => _logicNotifier.updateFormButtonText(formButtonTextController.text),
     );
@@ -200,8 +225,13 @@ class FormUIControllers {
   void dispose() {
     titleController.dispose();
     subtitleController.dispose();
+    mainFirstButtonController.dispose();
+    mainSecondButtonController.dispose();
+    badgeController.dispose();
     formTitleController.dispose();
-    buttonTextController.dispose();
+    if (!identical(buttonTextController, mainFirstButtonController)) {
+      buttonTextController.dispose();
+    }
     formButtonTextController.dispose();
     successTextController.dispose();
     buttonUrlController.dispose();

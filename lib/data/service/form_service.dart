@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flashform_app/data/model/form.dart';
 import 'package:flashform_app/data/repository/auth_repository.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
-import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -34,26 +33,74 @@ class FormService {
       'name': name,
       'slug': slug,
       'data': {
-        'title': {
-          'text': 'Заголовок',
-          'font-size': 42,
+        'form': {
+          'title': 'Заголовок формы',
+          'button': {
+            'text': 'Оставить заявку',
+            'color': 'FFd0f20b',
+          },
+          'fields': [],
+          'success_text': '',
+          'success_action': {
+            'type': 'thx',
+            'thx_title': null,
+            'redirect_url': null,
+            'thx_description': null,
+            'whatsapp_number': null,
+            'whatsapp_message': null,
+          },
         },
-        'subtitle': {
-          'text': 'Описание',
-          'font-size': 24,
+        'main': {
+          'image': null,
+          'label': null,
+          'title': 'Заголовок',
+          'subtitle': 'Описание',
+          'button_1': {
+            'url': null,
+            'text': 'Кнопка',
+            'type': 'form',
+            'anchor': null,
+          },
+          'button_2': {
+            'url': null,
+            'text': null,
+            'type': 'anchor',
+            'anchor': null,
+            'enabled': false,
+          },
         },
-
-        'content-type': 'image',
-        'action-type': 'url',
-        'button': {
-          'color': 'd0f20b',
-          'text': 'Кнопка',
-          'url': '',
+        'branding': {
+          'theme': 'light',
+          'primary_color': 'FFd0f20b',
+          'logo': null,
+        },
+        'blocks': [],
+        'footer': {
+          'links': [],
+          'enabled': false,
+          'legal-info': {
+            'address': null,
+            'id-number': null,
+            'company-name': null,
+          },
         },
         'settings': {
-          'has-label': true,
+          'integrations': {
+            'meta_pixel_id': {
+              'id': null,
+              'enabled': false,
+            },
+            'ya_metrika_id': {
+              'id': null,
+              'enabled': false,
+            },
+            'telegram_bot': {
+              'chat_id': null,
+              'enabled': false,
+            },
+          },
+          'is_branded': true,
         },
-        'success-text': '',
       },
       'is_active': false,
     };

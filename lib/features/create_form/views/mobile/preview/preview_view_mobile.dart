@@ -87,7 +87,7 @@ class _PreviewViewState extends ConsumerState<PreviewViewMobile>
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           height: 1.2,
-                          fontSize: formState.titleFontSize, // Берем из стейта
+                          // fontSize: formState.titleFontSize, // Берем из стейта
                           color: formState.theme == 'light'
                               ? Colors.black
                               : Colors.white,
@@ -105,8 +105,8 @@ class _PreviewViewState extends ConsumerState<PreviewViewMobile>
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           height: 1.2,
-                          fontSize:
-                              formState.subtitleFontSize, // Берем из стейта
+                          // fontSize:
+                          //     formState.subtitleFontSize, // Берем из стейта
                           color: formState.theme == 'light'
                               ? Colors.black
                               : Colors.white,
@@ -261,7 +261,7 @@ class _PreviewViewState extends ConsumerState<PreviewViewMobile>
           onPressed: () {},
           style: ElevatedButton.styleFrom(
             elevation: 0,
-            backgroundColor: formState.buttonColor, // Из стейта
+            // backgroundColor: formState.buttonColor, // Из стейта
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
             ),
@@ -351,7 +351,7 @@ class _PreviewViewState extends ConsumerState<PreviewViewMobile>
                 onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
-                  backgroundColor: formState.formButtonColor, // Из стейта
+                  // backgroundColor: formState.formButtonColor, // Из стейта
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),

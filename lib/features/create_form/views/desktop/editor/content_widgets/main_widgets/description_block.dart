@@ -2,14 +2,12 @@ import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/formui_controller.dart';
-import 'package:flashform_app/features/create_form/views/desktop/editor/widgets/ai_text_field.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class BuildOfferBlock extends ConsumerWidget {
-  const BuildOfferBlock({
+class BuildDescriptionBlock extends ConsumerWidget {
+  const BuildDescriptionBlock({
     super.key,
     required this.onChanged,
     required this.formState,
@@ -79,44 +77,19 @@ class BuildOfferBlock extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Заголовок',
+            'Описание',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
           FFTextField(
-            hintText: 'Напишите заголовок',
+            hintText: 'Напишите описание',
+            controller: uiControllers.subtitleController,
             onChanged: (value) {
-              onChanged();
-              controller.updateTitle(value);
+              controller.updateSubtitle(value);
               ref.read(createFormProvider.notifier).markAsChanged();
             },
-            controller: uiControllers.titleController,
           ),
-          // AiTextField(
-          //   controller: uiControllers.titleController,
-          //   label: 'Заголовок',
-          //   hint: 'Напишите заголовок',
-          //   aiType: 'title',
-          //   language: EasyLocalization.of(context)!.currentLocale!.languageCode,
-          //   minLines: 1,
-          //   maxLines: 3,
-          //   onChanged: (value) {
-          //     onChanged();
-          //     controller.updateTitle(value);
-          //     ref.read(createFormProvider.notifier).markAsChanged();
-          //   },
-          // ),
           const SizedBox(width: 8),
-          _buildSizeSlider(
-            label: 'Размер текста',
-            value: formState.titleFontSize,
-            max: 42,
-            min: 24,
-            onChanged: (val) => {
-              controller.updateTitleFontSize(val),
-              ref.read(createFormProvider.notifier).markAsChanged(),
-            },
-          ),
         ],
       ),
     );

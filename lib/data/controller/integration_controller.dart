@@ -1,6 +1,5 @@
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
@@ -27,7 +26,7 @@ class MetaPixelController extends StateNotifier<AsyncValue<String>> {
   Future<void> save(String formId) async {
     final formState = _ref.read(createFormProvider);
 
-    if (formState.metaPixelId == '') {
+    if (formState.yandexMetrikaId == '') {
       state = const AsyncValue.data('');
       return;
     }
@@ -79,7 +78,7 @@ class YandexMetrikaController extends StateNotifier<AsyncValue<String>> {
           .read(formRepoProvider)
           .setYandexMetrikaId(formId, formState.yandexMetrikaId);
 
-      return formState.metaPixelId;
+      return formState.yandexMetrikaId;
     });
   }
 
@@ -89,7 +88,7 @@ class YandexMetrikaController extends StateNotifier<AsyncValue<String>> {
     state = await AsyncValue.guard(() async {
       await _ref.read(formRepoProvider).deleteYandexMetrikaId(formId);
 
-      return formState.metaPixelId;
+      return formState.yandexMetrikaId;
     });
   }
 

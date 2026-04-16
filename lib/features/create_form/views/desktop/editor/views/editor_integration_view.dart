@@ -40,6 +40,9 @@ class _SettingsIntergrationViewDesktopState
     final form = await ref
         .watch(formControllerProvider.notifier)
         .fetchForm(widget.formId);
+    final integrations =
+        (form.data?['settings']?['integrations'] as Map?) ?? {};
+    final metaPixel = integrations['meta_pixel_id'] as Map?;
     if (formState.metaPixelId.isNotEmpty) {
       _showDeleteDialog(
         'Meta Pixel',
@@ -51,7 +54,7 @@ class _SettingsIntergrationViewDesktopState
         }),
 
         onConfirm: () async {
-          if ((form.data?['settings']['meta-pixel-id'] as String).isNotEmpty) {
+          if ((metaPixel?['id'] as String? ?? '').isNotEmpty) {
             debugPrint('confirmed');
             await ref
                 .watch(metaPixelControllerProvider.notifier)
@@ -147,9 +150,12 @@ class _SettingsIntergrationViewDesktopState
                     .watch(formControllerProvider.notifier)
                     .fetchForm(widget.formId);
 
+                final integrations =
+                    (form.data?['settings']?['integrations'] as Map?) ?? {};
+                final yandexMetrika = integrations['ya_metrika_id'] as Map?;
+
                 if (value == false &&
-                    (form.data?['settings']['ya-metrika-id'] as String)
-                        .isNotEmpty) {
+                    (yandexMetrika?['id'] as String? ?? '').isNotEmpty) {
                   await _deleteYandexMetrikaId();
                 }
 

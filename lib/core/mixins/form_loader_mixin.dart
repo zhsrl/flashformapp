@@ -15,6 +15,12 @@ mixin FormLoaderMixin {
     try {
       final formController = ref.read(formControllerProvider.notifier);
       final form = await formController.fetchForm(formId);
+      final data = form.data ?? <String, dynamic>{};
+      final formMainData = data['main'] as Map?;
+      final formData = data['form'] as Map?;
+      final settingsData = data['settings'] as Map?;
+      final integrationsData = settingsData?['integrations'] as Map?;
+
       if (!isMounted()) {
         debugPrint('⚠️ loadFormData: Widget был размонтирован');
         return;
@@ -30,21 +36,25 @@ mixin FormLoaderMixin {
       debugPrint('📌 loadFormData: Загружаю данные в uiControllers...');
 
       // Загружаем success_action из новой структуры
-      final successAction = form.data?['form']['success_action'] as Map?;
+      final successAction = formData?['success_action'] as Map?;
+      final mainButton = formMainData?['button_1'] as Map?;
+      final metaPixel = integrationsData?['meta_pixel_id'] as Map?;
+      final yandexMetrika = integrationsData?['ya_metrika_id'] as Map?;
+      final footerLegal = (data['footer'] as Map?)?['legal-info'] as Map?;
 
       // ===== ОСНОВНЫЕ ДАННЫЕ =====
       uiControllers.titleController.text =
-          form.data?['title']['text'] ?? 'Заголовок сайта';
+          formMainData?['title'] ?? 'Заголовок сайта';
       uiControllers.subtitleController.text =
-          form.data?['subtitle']['text'] ?? 'Описание';
+          formMainData?['subtitle'] ?? 'Описание';
       uiControllers.formTitleController.text =
-          form.data?['form']['title'] ?? 'Заголовок формы';
-      uiControllers.buttonTextController.text =
-          form.data?['button']['text'] ?? 'Кнопка';
+          formData?['title'] ?? 'Заголовок формы';
+      uiControllers.buttonTextController.text = mainButton?['text'] ?? 'Кнопка';
+      uiControllers.buttonUrlController.text = mainButton?['url'] ?? '';
       uiControllers.formButtonTextController.text =
-          form.data?['form']['button']['text'] ?? 'Оставить заявку';
+          (formData?['button'] as Map?)?['text'] ?? 'Оставить заявку';
       uiControllers.successTextController.text =
-          form.data?['form']['success_text'] ?? 'Успешная форма';
+          formData?['success_text'] ?? 'Успешная форма';
 
       // ===== SUCCESS ACTION ДАННЫЕ =====
       uiControllers.formRedirectUrlController.text =
@@ -58,18 +68,16 @@ mixin FormLoaderMixin {
           successAction?['thx_description'] ?? '';
 
       // ===== ИНТЕГРАЦИИ =====
-      uiControllers.metaPixelIdController.text =
-          form.data?['settings']['meta-pixel-id'] ?? '';
-      uiControllers.yandexMetrikaIdController.text =
-          form.data?['settings']['ya-metrika-id'] ?? '';
+      uiControllers.metaPixelIdController.text = metaPixel?['id'] ?? '';
+      uiControllers.yandexMetrikaIdController.text = yandexMetrika?['id'] ?? '';
 
       // ===== FOOTER ДАННЫЕ =====
       uiControllers.footerCompanyNameController.text =
-          form.data?['footer']['legal-info']['company-name'] ?? '';
+          footerLegal?['company-name'] ?? '';
       uiControllers.footerIdNumberController.text =
-          form.data?['footer']['legal-info']['id-number'] ?? '';
+          footerLegal?['id-number'] ?? '';
       uiControllers.footerAddressController.text =
-          form.data?['footer']['legal-info']['address'] ?? '';
+          footerLegal?['address'] ?? '';
 
       debugPrint('✅ loadFormData: Все данные загружены успешно!');
     } catch (e, stackTrace) {

@@ -2,13 +2,11 @@ import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/formui_controller.dart';
 import 'package:flashform_app/data/controller/plan_usage_controller.dart';
-import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/actions_block.dart';
-import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/description_block.dart';
-import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/footer_block.dart';
-import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/label_block.dart';
+import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/main_widgets/badge_block.dart';
+import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/main_widgets/buttons_block.dart';
+import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/main_widgets/description_block.dart';
 import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/main_content_block.dart';
-import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/offer_block.dart';
-import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/theme_block.dart';
+import 'package:flashform_app/features/create_form/views/desktop/editor/content_widgets/main_widgets/offer_block.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,14 +47,6 @@ class EditorContentView extends ConsumerWidget {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            BuildThemeBlock(
-              currentTheme: formState.theme,
-              controller: controller,
-              onChanged: onChanged,
-            ),
-            BuildMainContentBlock(
-              contentUrl: formState.heroImageUrl,
-            ),
             BuildOfferBlock(
               onChanged: onChanged,
               formState: formState,
@@ -70,22 +60,18 @@ class EditorContentView extends ConsumerWidget {
               controller: controller,
               uiControllers: uiControllers,
             ),
-            BuildActionsBlock(
-              currentType: formState.actionType,
+            BuildButtonsBlock(
+              formState: formState,
               controller: controller,
-              focusNode: focusNode,
-              formState: formState,
               uiControllers: uiControllers,
             ),
-            BuildLabelSettingsBlock(
-              isAvailable: usage.canRemoveBranding,
+            BuildBadgeBlock(
               formState: formState,
+              controller: controller,
               uiControllers: uiControllers,
             ),
-            BuildFooterBlock(
-              uiControllers: uiControllers,
-              formState: formState,
-              isAvailable: usage.hasFooter,
+            BuildMainContentBlock(
+              contentUrl: formState.heroImageUrl,
             ),
           ],
         );
@@ -101,14 +87,6 @@ class EditorContentView extends ConsumerWidget {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            BuildThemeBlock(
-              currentTheme: formState.theme,
-              controller: controller,
-              onChanged: onChanged,
-            ),
-            BuildMainContentBlock(
-              contentUrl: formState.heroImageUrl,
-            ),
             BuildOfferBlock(
               onChanged: onChanged,
               formState: formState,
@@ -122,22 +100,9 @@ class EditorContentView extends ConsumerWidget {
               controller: controller,
               uiControllers: uiControllers,
             ),
-            BuildActionsBlock(
-              currentType: formState.actionType,
-              controller: controller,
-              focusNode: focusNode,
-              formState: formState,
-              uiControllers: uiControllers,
-            ),
-            BuildLabelSettingsBlock(
-              isAvailable: false,
-              formState: formState,
-              uiControllers: uiControllers,
-            ),
-            BuildFooterBlock(
-              uiControllers: uiControllers,
-              formState: formState,
-              isAvailable: false,
+
+            BuildMainContentBlock(
+              contentUrl: formState.heroImageUrl,
             ),
           ],
         );

@@ -174,7 +174,6 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
 
             controller: uiControllers.buttonTextController,
             onChanged: (value) => {
-              controller.updateButtonText(value),
               ref.read(createFormProvider.notifier).markAsChanged(),
             },
           ),
@@ -191,7 +190,7 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
             context: context,
             currentColor: formState.buttonColor,
             onColorChanged: (color) => {
-              controller.updateButtonColor(color),
+              // controller.updateButtonColor(color),
               ref.read(createFormProvider.notifier).markAsChanged(),
             },
           ),
@@ -262,7 +261,7 @@ class _BuildActionsBlockState extends ConsumerState<BuildActionsBlock> {
             context: context,
             currentColor: formState.formButtonColor,
             onColorChanged: (color) => {
-              controller.updateFormButtonColor(color),
+              // controller.updateFormButtonColor(color),
               ref.read(createFormProvider.notifier).markAsChanged(),
             },
           ),

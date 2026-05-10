@@ -104,6 +104,21 @@ class FormRepository {
     return response['slug'] as String? ?? '';
   }
 
+  Future<void> updateFormSlug(String formId, String newSlug) async {
+    await _client.from('forms').update({'slug': newSlug}).eq('id', formId);
+  }
+
+  Future<bool> isSlugAvailable(String newSlug, {String? currentPageId}) async {
+    var query = _client.from('forms').select('id').eq('slug', newSlug);
+    if (currentPageId != null) {
+      query = query.neq('id', currentPageId);
+    }
+
+    var response = await query.maybeSingle();
+
+    return response == null;
+  }
+
   Future<List<FormModel>> getAllForms() async {
     // Убран try-catch: throw Exception(e) скрывал реальную причину (сеть, права доступа)
     if (_currentUser == null) {

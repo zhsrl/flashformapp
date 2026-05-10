@@ -39,6 +39,12 @@ class _HomePageState extends ConsumerState<HomePage> {
     });
   }
 
+  @override
+  void dispose() {
+    _formTitleController.dispose();
+    super.dispose();
+  }
+
   int _getSelectedindex(String location) {
     if (location.startsWith('/forms')) return 0;
     if (location.startsWith('/tables')) return 1;

@@ -24,6 +24,7 @@ class FFTextField extends StatefulWidget {
     this.maxLength,
     this.maxLines,
     this.fillColor,
+    this.prefixText,
   });
 
   final String? hintText;
@@ -44,6 +45,7 @@ class FFTextField extends StatefulWidget {
   final int? maxLength;
   final int? maxLines;
   final FocusNode? focusNode;
+  final String? prefixText;
 
   @override
   State<FFTextField> createState() => _FFTextFieldState();
@@ -99,6 +101,8 @@ class _FFTextFieldState extends State<FFTextField> {
             inputFormatters: widget.formatters,
             cursorColor: AppTheme.secondary,
             decoration: InputDecoration(
+              prefixText: widget.prefixText,
+
               hintMaxLines: 1,
               suffixIcon: widget.isPassword == true
                   ? GestureDetector(

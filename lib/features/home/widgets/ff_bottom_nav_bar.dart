@@ -34,11 +34,17 @@ class FFBottomNavBar extends StatefulWidget {
 class _FFBottomNavBarState extends State<FFBottomNavBar> {
   int? _hoveredIndex;
 
-  List<FFBottomItem> get _items => [
-    FFBottomItem(icon: HeroIcons.inbox, title: 'nav-bar.forms'.tr()),
-    FFBottomItem(icon: HeroIcons.squares2x2, title: 'nav-bar.leads'.tr()),
-    FFBottomItem(icon: HeroIcons.cog6Tooth, title: 'nav-bar.settings'.tr()),
-  ];
+  late List<FFBottomItem> _items;
+
+  @override
+  void initState() {
+    super.initState();
+    _items = [
+      FFBottomItem(icon: HeroIcons.inbox, title: 'nav-bar.forms'.tr()),
+      FFBottomItem(icon: HeroIcons.squares2x2, title: 'nav-bar.leads'.tr()),
+      FFBottomItem(icon: HeroIcons.cog6Tooth, title: 'nav-bar.settings'.tr()),
+    ];
+  }
 
   Widget _buildNavigationItem(
     FFBottomItem item,

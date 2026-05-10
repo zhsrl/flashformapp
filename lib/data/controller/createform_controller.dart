@@ -1,6 +1,7 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
 import 'package:flashform_app/data/controller/image_controller.dart';
+import 'package:flashform_app/data/controller/plan_usage_controller.dart';
 import 'package:flashform_app/data/model/create_form_state.dart'
     show CreateFormState, MainPageButtonModel;
 import 'package:flashform_app/data/model/form.dart';
@@ -37,13 +38,31 @@ class CreateFormController extends StateNotifier<CreateFormState> {
   bool get hasUnsavedChanges => _hasUnsavedChanges;
 
   // Setters for UI
-  void updateTitle(String value) => state = state.copyWith(title: value);
-  void updateSubtitle(String value) => state = state.copyWith(subtitle: value);
-  void updateFormTitle(String value) =>
-      state = state.copyWith(formTitle: value);
-  void updateTheme(String value) => state = state.copyWith(theme: value);
-  void updateHeroImage(String? url) =>
-      state = state.copyWith(heroImageUrl: url);
+  void updateTitle(String value) {
+    state = state.copyWith(title: value);
+    markAsChanged();
+  }
+
+  void updateSubtitle(String value) {
+    state = state.copyWith(subtitle: value);
+    markAsChanged();
+  }
+
+  void updateFormTitle(String value) {
+    state = state.copyWith(formTitle: value);
+    markAsChanged();
+  }
+
+  void updateTheme(String value) {
+    state = state.copyWith(theme: value);
+    markAsChanged();
+  }
+
+  void updateHeroImage(String? url) {
+    state = state.copyWith(heroImageUrl: url);
+    markAsChanged();
+  }
+
   void updateHasChanges(bool hasChanges) {
     state = state.copyWith(hasChanges: hasChanges);
   }
@@ -56,35 +75,71 @@ class CreateFormController extends StateNotifier<CreateFormState> {
     state = state.copyWith(hasBadge: value);
   }
 
-  void updateBadge(String value) {
-    state = state.copyWith(badge: value);
+  void updateLogo(String? url) {
+    state = state.copyWith(logo: url);
   }
 
-  void updateActionType(String value) =>
-      state = state.copyWith(actionType: value);
-  void updateFormName(String name) => state = state.copyWith(name: name);
+  void updatePrimaryColor(Color value) {
+    state = state.copyWith(primaryColor: value);
+  }
 
-  void updateHasRedirectUrl(bool hasRedirectUrl) =>
-      state = state.copyWith(hasRedirectUrl: hasRedirectUrl);
-  void updateHasLabel(bool hasLabel) =>
-      state = state.copyWith(hasLabel: hasLabel);
-  void updateFormRedirectUrl(String url) =>
-      state = state.copyWith(redirectUrl: url);
+  void updateBadge(String value) {
+    state = state.copyWith(badge: value);
+    markAsChanged();
+  }
+
+  void updateActionType(String value) {
+    state = state.copyWith(actionType: value);
+    markAsChanged();
+  }
+
+  void updateFormName(String name) {
+    state = state.copyWith(name: name);
+    markAsChanged();
+  }
+
+  void updateHasRedirectUrl(bool hasRedirectUrl) {
+    state = state.copyWith(hasRedirectUrl: hasRedirectUrl);
+    markAsChanged();
+  }
+
+  void updateHasLabel(bool hasLabel) {
+    state = state.copyWith(hasLabel: hasLabel);
+    markAsChanged();
+  }
+
+  void updateFormRedirectUrl(String url) {
+    state = state.copyWith(redirectUrl: url);
+    markAsChanged();
+  }
+
   void updateFields(List<FormFields> fields) =>
-      state = state.copyWith(fields: fields);
+      state = state.copyWith(fields: _normalizeFieldsByIndex(fields));
   void updateIsPublishing(bool isPublishing) =>
       state = state.copyWith(isPublishing: isPublishing);
   void updateIsSaving(bool isSaving) =>
       state = state.copyWith(isSaving: isSaving);
   void updateSuccessText(String successText) =>
       state = state.copyWith(successText: successText);
-  void updateMetaPixelId(String id) => state = state.copyWith(metaPixelId: id);
-  void updateYandexMetrikaId(String id) =>
-      state = state.copyWith(yandexMetrikaId: id);
-  void updateButtonUrl(String url) => state = state.copyWith(buttonUrl: url);
+  void updateMetaPixelId(String id) {
+    state = state.copyWith(metaPixelId: id);
+    markAsChanged();
+  }
 
-  void updateFormButtonText(String text) =>
-      state = state.copyWith(formButtonText: text);
+  void updateYandexMetrikaId(String id) {
+    state = state.copyWith(yandexMetrikaId: id);
+    markAsChanged();
+  }
+
+  void updateButtonUrl(String url) {
+    state = state.copyWith(buttonUrl: url);
+    markAsChanged();
+  }
+
+  void updateFormButtonText(String text) {
+    state = state.copyWith(formButtonText: text);
+    markAsChanged();
+  }
 
   void updateMainFirstButton({
     String? text,
@@ -97,13 +152,14 @@ class CreateFormController extends StateNotifier<CreateFormState> {
 
     state = state.copyWith(
       mainFirstButton: MainPageButtonModel(
-        text: text ?? current?.text,
-        type: type ?? current?.type,
+        text: text ?? current?.text ?? '',
+        type: type ?? current?.type ?? 'form',
         url: url ?? current?.url,
         anchor: anchor ?? current?.anchor,
-        enabled: enabled ?? current?.enabled,
+        enabled: enabled ?? current?.enabled ?? false,
       ),
     );
+    markAsChanged();
   }
 
   void updateMainSecondButton({
@@ -113,54 +169,44 @@ class CreateFormController extends StateNotifier<CreateFormState> {
     String? anchor,
     bool? enabled,
   }) {
-    final current = state.mainFirstButton;
+    final current = state.mainSecondButton;
 
     state = state.copyWith(
       mainSecondButton: MainPageButtonModel(
         text: text ?? current?.text,
-        type: type ?? current?.type,
+        type: type ?? current?.type ?? 'anchor',
         url: url ?? current?.url,
         anchor: anchor ?? current?.anchor,
-        enabled: enabled ?? current?.enabled,
+        enabled: enabled ?? current?.enabled ?? false,
       ),
     );
+    markAsChanged();
   }
 
-  void updateMainFirstButtonText(String text) {
-    final current = state.mainFirstButton;
-    state = state.copyWith(
-      mainFirstButton: MainPageButtonModel(
-        text: text,
-        type: current?.type,
-        url: current?.url,
-        anchor: current?.anchor,
-        enabled: current?.enabled,
-      ),
-    );
+  void updateSuccessAction(String action) {
+    state = state.copyWith(successAction: action);
+    markAsChanged();
   }
 
-  void updateMainSecondButtonText(String text) {
-    final current = state.mainSecondButton;
-    state = state.copyWith(
-      mainSecondButton: MainPageButtonModel(
-        text: text,
-        type: current?.type,
-        url: current?.url,
-        anchor: current?.anchor,
-        enabled: current?.enabled,
-      ),
-    );
+  void updateWhatsappNumber(String number) {
+    state = state.copyWith(whatsappNumber: number);
+    markAsChanged();
   }
 
-  void updateSuccessAction(String action) =>
-      state = state.copyWith(successAction: action);
-  void updateWhatsappNumber(String number) =>
-      state = state.copyWith(whatsappNumber: number);
-  void updateWhatsappMessage(String message) =>
-      state = state.copyWith(whatsappMessage: message);
-  void updateThxTitle(String title) => state = state.copyWith(thxTitle: title);
-  void updateThxDescription(String description) =>
-      state = state.copyWith(thxDescription: description);
+  void updateWhatsappMessage(String message) {
+    state = state.copyWith(whatsappMessage: message);
+    markAsChanged();
+  }
+
+  void updateThxTitle(String title) {
+    state = state.copyWith(thxTitle: title);
+    markAsChanged();
+  }
+
+  void updateThxDescription(String description) {
+    state = state.copyWith(thxDescription: description);
+    markAsChanged();
+  }
 
   // Footer methods
 
@@ -170,18 +216,22 @@ class CreateFormController extends StateNotifier<CreateFormState> {
 
   void updateFooterCompanyName(String value) {
     state = state.copyWith(footerCompanyName: value);
+    markAsChanged();
   }
 
   void updateFooterIdNumber(String value) {
     state = state.copyWith(footerIdNumber: value);
+    markAsChanged();
   }
 
   void updateFooterAddress(String value) {
     state = state.copyWith(footerAddress: value);
+    markAsChanged();
   }
 
   void updateFooterLinks(List<FooterLink> links) {
     state = state.copyWith(footerLinks: links);
+    markAsChanged();
   }
 
   void copyFooterFromForm(CreateFormState sourceForm) {
@@ -215,156 +265,244 @@ class CreateFormController extends StateNotifier<CreateFormState> {
   }
 
   void initializeFromModel(FormModel form) {
-    final data = form.data ?? <String, dynamic>{};
-    final mainData =
-        (data['main'] as Map?)?.cast<String, dynamic>() ?? <String, dynamic>{};
-    final formData =
-        (data['form'] as Map?)?.cast<String, dynamic>() ?? <String, dynamic>{};
-    final brandingData =
-        (data['branding'] as Map?)?.cast<String, dynamic>() ??
-        <String, dynamic>{};
-    final settingsData =
-        (data['settings'] as Map?)?.cast<String, dynamic>() ??
-        <String, dynamic>{};
-    final integrationsData =
-        (settingsData['integrations'] as Map?)?.cast<String, dynamic>() ??
-        <String, dynamic>{};
+    try {
+      final data = form.data ?? <String, dynamic>{};
+      final mainData =
+          (data['main'] as Map?)?.cast<String, dynamic>() ??
+          <String, dynamic>{};
+      final formData =
+          (data['form'] as Map?)?.cast<String, dynamic>() ??
+          <String, dynamic>{};
+      final brandingData =
+          (data['branding'] as Map?)?.cast<String, dynamic>() ??
+          <String, dynamic>{};
+      final settingsData =
+          (data['settings'] as Map?)?.cast<String, dynamic>() ??
+          <String, dynamic>{};
+      final integrationsData =
+          (settingsData['integrations'] as Map?)?.cast<String, dynamic>() ??
+          <String, dynamic>{};
 
-    debugPrint('main data: $mainData');
+      debugPrint('main data: $mainData');
 
-    final fieldsList = (formData['fields'] as List? ?? [])
-        .whereType<Map>()
-        .map((e) => FormFields.fromJson(Map<String, dynamic>.from(e)))
-        .toList();
-
-    final mainButton1Data = (mainData['button_1'] as Map?)
-        ?.cast<String, dynamic>();
-    final mainButton2Data = (mainData['button_2'] as Map?)
-        ?.cast<String, dynamic>();
-
-    final mainFirstButton = mainButton1Data == null
-        ? null
-        : MainPageButtonModel(
-            text: mainButton1Data['text'] as String?,
-            type: mainButton1Data['type'] as String?,
-            url: mainButton1Data['url'] as String?,
-            anchor: mainButton1Data['anchor'] as String?,
-            enabled: mainButton1Data['enabled'] as bool?,
+      final rawFields = (formData['fields'] as List? ?? [])
+          .whereType<Map>()
+          .toList();
+      final fieldsList = _normalizeFieldsFromStorage(
+        rawFields.asMap().entries.map((entry) {
+          return FormFields.fromJson(
+            Map<String, dynamic>.from(entry.value),
+            fallbackOrder: entry.key,
           );
+        }).toList(),
+      );
 
-    final mainSecondButton = mainButton2Data == null
-        ? null
-        : MainPageButtonModel(
-            text: mainButton2Data['text'] as String?,
-            type: mainButton2Data['type'] as String?,
-            url: mainButton2Data['url'] as String?,
-            anchor: mainButton2Data['anchor'] as String?,
-            enabled: mainButton2Data['enabled'] as bool?,
-          );
+      final mainButton1Data = (mainData['button_1'] as Map?)
+          ?.cast<String, dynamic>();
+      final mainButton2Data = (mainData['button_2'] as Map?)
+          ?.cast<String, dynamic>();
 
-    final successAction = (formData['success_action'] as Map?)
-        ?.cast<String, dynamic>();
-    final successActionType = successAction?['type'] as String? ?? 'thx';
-    final whatsappNumber = successAction?['whatsapp_number'] as String?;
-    final whatsappMessage = successAction?['whatsapp_message'] as String?;
-    final thxTitle = successAction?['thx_title'] as String?;
-    final thxDescription = successAction?['thx_description'] as String?;
-    final redirectUrl = successAction?['redirect_url'] as String?;
+      final mainFirstButton = mainButton1Data == null
+          ? null
+          : MainPageButtonModel(
+              text: mainButton1Data['text'] as String?,
+              type: mainButton1Data['type'] as String?,
+              url: mainButton1Data['url'] as String?,
+              anchor: mainButton1Data['anchor'] as String?,
+              enabled: mainButton1Data['enabled'] as bool?,
+            );
 
-    final metaPixel = (integrationsData['meta_pixel_id'] as Map?)
-        ?.cast<String, dynamic>();
-    final yandexMetrika = (integrationsData['ya_metrika_id'] as Map?)
-        ?.cast<String, dynamic>();
-    final telegramBot = (integrationsData['telegram_bot'] as Map?)
-        ?.cast<String, dynamic>();
+      final mainSecondButton = mainButton2Data == null
+          ? null
+          : MainPageButtonModel(
+              text: mainButton2Data['text'] as String?,
+              type: mainButton2Data['type'] as String?,
+              url: mainButton2Data['url'] as String?,
+              anchor: mainButton2Data['anchor'] as String?,
+              enabled: mainButton2Data['enabled'] as bool?,
+            );
 
-    final metaPixelId = metaPixel?['id'] as String? ?? '';
-    final yandexMetrikaId = yandexMetrika?['id'] as String? ?? '';
-    final telegramEnabled = telegramBot?['enabled'] as bool? ?? false;
-    final telegramChatId = telegramBot?['chat_id'] as String?;
+      final successAction = (formData['success_action'] as Map?)
+          ?.cast<String, dynamic>();
+      final successActionType = successAction?['type'] as String? ?? 'thx';
+      final whatsappNumber = successAction?['whatsapp_number'] as String?;
+      final whatsappMessage = successAction?['whatsapp_message'] as String?;
+      final thxTitle = successAction?['thx_title'] as String?;
+      final thxDescription = successAction?['thx_description'] as String?;
+      final redirectUrl = successAction?['redirect_url'] as String?;
 
-    final footerData = (data['footer'] as Map?)?.cast<String, dynamic>();
-    final footerLegal = (footerData?['legal-info'] as Map?)
-        ?.cast<String, dynamic>();
-    final footerLinksData = footerData?['links'] as List? ?? [];
-    final footerLinks = footerLinksData
-        .map((linkMap) {
-          if (linkMap is Map) {
-            final label = linkMap.keys.first as String;
-            final url = linkMap.values.first as String;
-            return FooterLink(label: label, url: url);
-          }
-          return null;
-        })
-        .whereType<FooterLink>()
-        .toList();
+      final metaPixel = (integrationsData['meta_pixel_id'] as Map?)
+          ?.cast<String, dynamic>();
+      final yandexMetrika = (integrationsData['ya_metrika_id'] as Map?)
+          ?.cast<String, dynamic>();
+      final telegramBot = (integrationsData['telegram_bot'] as Map?)
+          ?.cast<String, dynamic>();
 
-    final primaryColorHex = brandingData['primary_color'] as String?;
-    final primaryColor = (primaryColorHex != null && primaryColorHex.isNotEmpty)
-        ? primaryColorHex.toColor()
-        : null;
+      final metaPixelId = metaPixel?['id'] as String? ?? '';
+      final yandexMetrikaId = yandexMetrika?['id'] as String? ?? '';
+      final telegramEnabled = telegramBot?['enabled'] as bool? ?? false;
+      final telegramChatId = telegramBot?['chat_id'] as String?;
 
-    final formButtonData = (formData['button'] as Map?)
-        ?.cast<String, dynamic>();
+      final footerData = (data['footer'] as Map?)?.cast<String, dynamic>();
+      final footerLegal = (footerData?['legal-info'] as Map?)
+          ?.cast<String, dynamic>();
+      final footerLinksData = footerData?['links'] as List? ?? [];
+      final footerLinks = footerLinksData
+          .map((linkMap) {
+            if (linkMap is Map) {
+              final label = linkMap.keys.first as String;
+              final url = linkMap.values.first as String;
+              return FooterLink(label: label, url: url);
+            }
+            return null;
+          })
+          .whereType<FooterLink>()
+          .toList();
 
-    final mainActionType = mainFirstButton?.type == 'form'
-        ? 'form'
-        : 'button-url';
+      final primaryColorHex = brandingData['primary_color'] as String?;
+      final primaryColor =
+          (primaryColorHex != null && primaryColorHex.isNotEmpty)
+          ? primaryColorHex.toColor()
+          : null;
 
-    state = state.copyWith(
-      name: form.name,
-      slug: form.slug,
-      title: mainData['title'] as String?,
-      subtitle: mainData['subtitle'] as String?,
-      heroImageUrl: mainData['image'] as String?,
-      badge: mainData['label'] as String?,
-      mainFirstButton: mainFirstButton,
-      mainSecondButton: mainSecondButton,
-      theme: brandingData['theme'] as String? ?? 'light',
-      primaryColor: primaryColor,
-      logo: brandingData['logo'] as String?,
-      formTitle: formData['title'] as String?,
-      formButtonText: formButtonData?['text'] as String?,
-      successText: formData['success_text'] as String? ?? '',
-      fields: fieldsList,
-      actionType: mainActionType,
-      buttonUrl: mainFirstButton?.url,
-      successAction: successActionType,
-      whatsappNumber: whatsappNumber,
-      whatsappMessage: whatsappMessage,
-      thxTitle: thxTitle,
-      thxDescription: thxDescription,
-      redirectUrl: redirectUrl,
-      hasRedirectUrl: redirectUrl != null && redirectUrl.isNotEmpty,
-      yandexMetrikaId: yandexMetrikaId,
-      metaPixelId: metaPixelId,
-      hasLabel: settingsData['is_branded'] as bool? ?? true,
-      telegramEnabled: telegramEnabled,
-      telegramChatId: telegramChatId,
-      hasFooter: footerData?['enabled'] as bool? ?? false,
-      footerCompanyName: footerLegal?['company-name'] as String?,
-      footerIdNumber: footerLegal?['id-number'] as String?,
-      footerAddress: footerLegal?['address'] as String?,
-      footerLinks: footerLinks,
-    );
+      final formButtonData = (formData['button'] as Map?)
+          ?.cast<String, dynamic>();
+
+      final mainActionType = mainFirstButton?.type == 'form'
+          ? 'form'
+          : 'button-url';
+      final hasSecondButton =
+          (mainSecondButton?.enabled ?? false) ||
+          ((mainSecondButton?.text?.isNotEmpty ?? false) ||
+              (mainSecondButton?.url?.isNotEmpty ?? false) ||
+              (mainSecondButton?.anchor?.isNotEmpty ?? false));
+
+      state = state.copyWith(
+        name: form.name,
+        slug: form.slug,
+        title: mainData['title'] as String?,
+        subtitle: mainData['subtitle'] as String?,
+        heroImageUrl: mainData['image'] as String?,
+        badge: mainData['label'] as String?,
+        hasBadge: mainData['label'] != null,
+        mainFirstButton: mainFirstButton,
+        mainSecondButton: mainSecondButton,
+        hasSecondButton: hasSecondButton,
+        theme: brandingData['theme'] as String? ?? 'light',
+        primaryColor: primaryColor,
+        logo: brandingData['logo'] as String?,
+        formTitle: formData['title'] as String?,
+        formButtonText: formButtonData?['text'] as String?,
+        successText: formData['success_text'] as String? ?? '',
+        fields: fieldsList,
+        actionType: mainActionType,
+        buttonUrl: mainFirstButton?.url,
+        successAction: successActionType,
+        whatsappNumber: whatsappNumber,
+        whatsappMessage: whatsappMessage,
+        thxTitle: thxTitle,
+        thxDescription: thxDescription,
+        redirectUrl: redirectUrl,
+        hasRedirectUrl: redirectUrl != null && redirectUrl.isNotEmpty,
+        yandexMetrikaId: yandexMetrikaId,
+        metaPixelId: metaPixelId,
+        hasLabel: settingsData['is_branded'] as bool? ?? true,
+        telegramEnabled: telegramEnabled,
+        telegramChatId: telegramChatId,
+        hasFooter: footerData?['enabled'] as bool? ?? false,
+        footerCompanyName: footerLegal?['company-name'] as String?,
+        footerIdNumber: footerLegal?['id-number'] as String?,
+        footerAddress: footerLegal?['address'] as String?,
+        footerLinks: footerLinks,
+      );
+    } catch (e) {
+      debugPrint('❌ Error initializing form from model: $e');
+      rethrow;
+    }
   }
 
   void addField(String label, String type) {
-    final newField = FormFields(label: label, type: type);
-    state = state.copyWith(fields: [...state.fields, newField]);
+    final newField = FormFields(
+      label: label,
+      type: type,
+      order: state.fields.length,
+    );
+    state = state.copyWith(
+      fields: _normalizeFieldsByIndex([...state.fields, newField]),
+    );
+    markAsChanged();
   }
 
   void removeField(int index) {
     final newFields = List<FormFields>.from(state.fields)..removeAt(index);
-    state = state.copyWith(fields: newFields);
+    state = state.copyWith(fields: _normalizeFieldsByIndex(newFields));
+    markAsChanged();
+  }
+
+  void reorderField(int oldIndex, int newIndex) {
+    final updatedFields = List<FormFields>.from(state.fields);
+    if (oldIndex < newIndex) {
+      newIndex -= 1;
+    }
+    final moved = updatedFields.removeAt(oldIndex);
+    updatedFields.insert(newIndex, moved);
+    state = state.copyWith(fields: _normalizeFieldsByIndex(updatedFields));
+    markAsChanged();
+  }
+
+  void updateFieldRequired(int index, bool required) {
+    if (index >= 0 && index < state.fields.length) {
+      final updatedFields = List<FormFields>.from(state.fields);
+      updatedFields[index] = updatedFields[index].copyWith(
+        requiredField: required,
+      );
+      state = state.copyWith(fields: updatedFields);
+      markAsChanged();
+    }
+  }
+
+  void updateFieldLabel(int index, String label) {
+    if (index >= 0 && index < state.fields.length) {
+      final updatedFields = List<FormFields>.from(state.fields);
+      updatedFields[index] = updatedFields[index].copyWith(label: label);
+      state = state.copyWith(fields: updatedFields);
+      markAsChanged();
+    }
+  }
+
+  List<FormFields> _normalizeFieldsFromStorage(List<FormFields> fields) {
+    final sorted = [...fields]..sort((a, b) => a.order.compareTo(b.order));
+    return _normalizeFieldsByIndex(sorted);
+  }
+
+  List<FormFields> _normalizeFieldsByIndex(List<FormFields> fields) {
+    return [
+      for (var i = 0; i < fields.length; i++) fields[i].copyWith(order: i),
+    ];
   }
 
   Future<bool> publishForm(String formId) async {
     final imageNotifier = ref.read(imageControllerProvider.notifier);
-
     final imageState = ref.read(imageControllerProvider);
 
-    if (state.fields.isEmpty && state.actionType == 'form') {
+    // Validation before publishing
+    if (state.actionType == 'form' && state.fields.isEmpty) {
+      debugPrint('❌ Form validation failed: No fields added');
+      return false;
+    }
+
+    if (state.formTitle == null || state.formTitle!.isEmpty) {
+      debugPrint('❌ Form validation failed: Form title is empty');
+      return false;
+    }
+
+    if (state.formButtonText == null || state.formButtonText!.isEmpty) {
+      debugPrint('❌ Form validation failed: Button text is empty');
+      return false;
+    }
+
+    if (state.title == null || state.title!.isEmpty) {
+      debugPrint('❌ Form validation failed: Main title is empty');
       return false;
     }
 
@@ -389,6 +527,13 @@ class CreateFormController extends StateNotifier<CreateFormState> {
           ? state.primaryColor!.toHex().replaceFirst('#', '')
           : null;
 
+      // Check if user has access to footer feature
+      final planUsageAsync = ref.read(planUsageProvider);
+      bool canShowFooter = false;
+      if (planUsageAsync is AsyncData) {
+        canShowFooter = (planUsageAsync as AsyncData).value.hasFooter;
+      }
+
       final response = {
         'id': formId,
         'name': state.name,
@@ -398,7 +543,9 @@ class CreateFormController extends StateNotifier<CreateFormState> {
           'logo': state.logo,
         },
         'footer': {
-          'enabled': state.hasFooter,
+          // Only show footer on public site if user has access to this feature
+          // Data is preserved in DB for when user re-subscribes
+          'enabled': state.hasFooter && canShowFooter,
           'legal-info': {
             'company-name': state.footerCompanyName,
             'id-number': state.footerIdNumber,
@@ -453,8 +600,14 @@ class CreateFormController extends StateNotifier<CreateFormState> {
           'label': state.badge,
           'button_1': {
             'text': state.mainFirstButton?.text,
-            'type': state.actionType == 'form' ? 'form' : 'url',
-            'url': state.actionType == 'form' ? null : state.buttonUrl,
+            'type':
+                state.mainFirstButton?.type ??
+                (state.actionType == 'form' ? 'form' : 'url'),
+            'url':
+                (state.mainFirstButton?.type == 'form' ||
+                    state.actionType == 'form')
+                ? null
+                : (state.mainFirstButton?.url ?? state.buttonUrl),
             'anchor': state.mainFirstButton?.anchor,
           },
           'button_2': {
@@ -462,10 +615,12 @@ class CreateFormController extends StateNotifier<CreateFormState> {
             'type': state.mainSecondButton?.type,
             'url': state.mainSecondButton?.url,
             'anchor': state.mainSecondButton?.anchor,
-            'enabled': state.mainSecondButton?.enabled,
+            'enabled': state.hasSecondButton,
           },
         },
       };
+
+      debugPrint('Response fields: ${response['form']}');
 
       await ref.read(formControllerProvider.notifier).publishForm(response);
 

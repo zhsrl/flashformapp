@@ -4,6 +4,7 @@ import 'package:flashform_app/data/model/form.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/data/repository/storage_repository.dart';
 import 'package:flashform_app/data/service/form_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final formControllerProvider =
@@ -42,7 +43,7 @@ class FormController extends AsyncNotifier<List<FormModel>> {
   }
 
   Future<void> publishForm(Map<String, dynamic> data) async {
-    state = AsyncLoading();
+    // state = AsyncLoading();
     state = await AsyncValue.guard(
       () async {
         final repository = ref.read(formRepoProvider);
@@ -55,7 +56,7 @@ class FormController extends AsyncNotifier<List<FormModel>> {
   }
 
   Future<void> unpublishForm(String formId) async {
-    state = AsyncLoading();
+    // state = AsyncLoading();
 
     state = await AsyncValue.guard(
       () async {
@@ -72,7 +73,7 @@ class FormController extends AsyncNotifier<List<FormModel>> {
     String name,
     String id,
   ) async {
-    state = AsyncLoading();
+    // state = AsyncLoading();
     state = await AsyncValue.guard(
       () async {
         final repository = ref.read(formRepoProvider);
@@ -84,20 +85,41 @@ class FormController extends AsyncNotifier<List<FormModel>> {
     );
   }
 
+  Future<void> updateFormSlug(
+    String newSlug,
+    String id,
+  ) async {
+    state = await AsyncValue.guard(() async {
+      final repository = ref.read(formRepoProvider);
+      await repository.updateFormSlug(id, newSlug);
+
+      return repository.getAllForms();
+    });
+  }
+
   Future<void> deleteForm(String formId, {String? imageUrl}) async {
     state = AsyncLoading();
     state = await AsyncValue.guard(
       () async {
-        // Если есть фото — удаляем из Storage
-        if (imageUrl != null && imageUrl.isNotEmpty) {
-          final storageRepo = ref.read(storageRepoProvider);
-          await storageRepo.deleteImage(imageUrl);
+        try {
+          // Если есть фото — удаляем из Storage
+          if (imageUrl != null && imageUrl.isNotEmpty) {
+            debugPrint('🗑️ Deleting image: $imageUrl');
+            final storageRepo = ref.read(storageRepoProvider);
+            await storageRepo.deleteImage(imageUrl);
+            debugPrint('✅ Image deleted successfully');
+          }
+
+          debugPrint('🗑️ Deleting form: $formId');
+          final repository = ref.read(formRepoProvider);
+          await repository.deleteForm(formId);
+          debugPrint('✅ Form deleted successfully');
+
+          return repository.getAllForms();
+        } catch (e) {
+          debugPrint('❌ Error deleting form: $e');
+          rethrow;
         }
-
-        final repository = ref.read(formRepoProvider);
-        await repository.deleteForm(formId);
-
-        return repository.getAllForms();
       },
     );
   }

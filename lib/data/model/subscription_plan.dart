@@ -68,6 +68,11 @@ enum SubscriptionPlan {
     pro => true,
   };
 
+  bool get canChangeSlug => switch (this) {
+    spark => false,
+    go => true,
+    pro => true,
+  };
   // Доступ к Яндекс Метрике
   bool get hasYaMetrikaIntegration => switch (this) {
     spark => false,

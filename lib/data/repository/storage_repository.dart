@@ -86,37 +86,6 @@ class StorageRepository {
     }
   }
 
-  // Future<String> updateImage(
-  //   String? oldImageUrl,
-  //   String formId,
-  //   Uint8List newImageBytes, {
-  //   String? folder,
-  // }) async {
-  //   try {
-  //     final user = _supabase.auth.currentUser;
-
-  //     if (user == null) {
-  //       throw Exception('User is null');
-  //     }
-
-  //     if (oldImageUrl != null && oldImageUrl.isNotEmpty) {
-  //       await deleteImage(oldImageUrl);
-  //     }
-
-  //     final newImageUrl = await uploadImage(
-  //       newImageBytes,
-
-  //       folder: folder,
-  //     );
-
-  //     return newImageUrl;
-  //   } on StorageException catch (e) {
-  //     throw Exception('Exception at deleting old image: ${e.message}');
-  //   } catch (e) {
-  //     throw Exception('Exception at deleting old image: $e');
-  //   }
-  // }
-
   Future<void> ensureBucketExists() async {
     try {
       final buckets = await _supabase.storage.listBuckets();

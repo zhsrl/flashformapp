@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flashform_app/core/router/adaptive_page.dart';
-import 'package:flashform_app/features/auth/confirm_email.dart';
-import 'package:flashform_app/features/auth/reset_password_page.dart';
-import 'package:flashform_app/features/auth/signup_page.dart';
-import 'package:flashform_app/features/create_form/screens/create_form_page.dart';
+import 'package:flashform_app/features/auth/presentation/pages/confirm_email.dart';
+import 'package:flashform_app/features/auth/presentation/pages/reset_password_page.dart';
+import 'package:flashform_app/features/auth/presentation/pages/signup_page.dart';
+import 'package:flashform_app/features/create_form/presentation/create_form_page.dart';
 import 'package:flashform_app/features/forms/views/forms_screen.dart';
 import 'package:flashform_app/features/home/screens/home_page.dart';
-import 'package:flashform_app/features/auth/signin_page.dart';
+import 'package:flashform_app/features/auth/presentation/pages/signin_page.dart';
 import 'package:flashform_app/features/settings/settings_screen.dart';
 import 'package:flashform_app/features/tables/leads_detail_screen.dart';
 import 'package:flashform_app/features/tables/leads_screen.dart';
@@ -60,7 +60,7 @@ final routerProvider = Provider<GoRouter>(
           ),
         ),
         GoRoute(
-          path: '/cofirm-email',
+          path: '/confirm-email',
           pageBuilder: (context, state) => NoTransitionPage(
             child: ConfirmEmailPage(),
           ),

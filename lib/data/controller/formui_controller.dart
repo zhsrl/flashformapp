@@ -28,7 +28,9 @@ class FormUIControllers {
   late final TextEditingController mainFirstButtonRedirectUrlController;
   late final TextEditingController mainSecondButtonRedirectUrlController;
 
+  // Settings: Form
   late final TextEditingController formTitleController;
+
   late final TextEditingController buttonTextController;
   late final TextEditingController formButtonTextController;
   late final TextEditingController successTextController;
@@ -52,15 +54,19 @@ class FormUIControllers {
     // Main
     titleController = TextEditingController();
     subtitleController = TextEditingController();
-    mainFirstButtonController = TextEditingController(text: 'Кнопка');
-    mainSecondButtonController = TextEditingController(text: 'Кнопка');
-    badgeController = TextEditingController(text: 'Тег');
+    mainFirstButtonController = TextEditingController();
+    mainSecondButtonController = TextEditingController();
+    badgeController = TextEditingController();
+
     mainFirstButtonRedirectUrlController = TextEditingController();
     mainSecondButtonRedirectUrlController = TextEditingController();
 
+    // Settings: Form
     formTitleController = TextEditingController();
-    buttonTextController = mainFirstButtonController;
     formButtonTextController = TextEditingController();
+
+    buttonTextController = mainFirstButtonController;
+
     successTextController = TextEditingController();
     buttonUrlController = TextEditingController();
 
@@ -83,22 +89,24 @@ class FormUIControllers {
       // _logicNotifier.markAsChanged(); // Помечаем, что есть изменения
     });
 
-    mainFirstButtonController.addListener(() {
-      _logicNotifier.updateMainFirstButtonText(mainFirstButtonController.text);
-    });
-
-    mainSecondButtonController.addListener(() {
-      _logicNotifier.updateMainSecondButtonText(
-        mainSecondButtonController.text,
-      );
-    });
-
     badgeController.addListener(() {
       _logicNotifier.updateBadge(badgeController.text);
     });
 
     subtitleController.addListener(() {
       _logicNotifier.updateSubtitle(subtitleController.text);
+    });
+
+    mainFirstButtonController.addListener(() {
+      _logicNotifier.updateMainFirstButton(
+        text: mainFirstButtonController.text,
+      );
+    });
+
+    mainSecondButtonController.addListener(() {
+      _logicNotifier.updateMainSecondButton(
+        text: mainSecondButtonController.text,
+      );
     });
 
     formTitleController.addListener(
@@ -108,6 +116,7 @@ class FormUIControllers {
     formButtonTextController.addListener(
       () => _logicNotifier.updateFormButtonText(formButtonTextController.text),
     );
+
     successTextController.addListener(
       () => _logicNotifier.updateSuccessText(successTextController.text),
     );
@@ -118,6 +127,21 @@ class FormUIControllers {
       () =>
           _logicNotifier.updateFormRedirectUrl(formRedirectUrlController.text),
     );
+
+    mainFirstButtonRedirectUrlController.addListener(() {
+      _logicNotifier.updateMainFirstButton(
+        url: mainFirstButtonRedirectUrlController.text,
+      );
+      _logicNotifier.updateButtonUrl(
+        mainFirstButtonRedirectUrlController.text,
+      );
+    });
+
+    mainSecondButtonRedirectUrlController.addListener(() {
+      _logicNotifier.updateMainSecondButton(
+        url: mainSecondButtonRedirectUrlController.text,
+      );
+    });
     whatsappNumberController.addListener(
       () => _logicNotifier.updateWhatsappNumber(whatsappNumberController.text),
     );
@@ -150,48 +174,6 @@ class FormUIControllers {
     footerAddressController.addListener(
       () => _logicNotifier.updateFooterAddress(footerAddressController.text),
     );
-  }
-
-  // Метод для заполнения данными при загрузке страницы
-  void initializeValues({
-    String? title,
-    String? subtitle,
-    String? formTitle,
-    String? formButtonText,
-    String? buttonText,
-    String? successText,
-    String? buttonUrl,
-    String? formRedirectUrl,
-    String? whatsappNumber,
-    String? whatsappMessage,
-    String? thxTitle,
-    String? thxDescription,
-    String? metaPixelId,
-    String? yandexMetrikaId,
-  }) {
-    if (title != null) titleController.text = title;
-    if (subtitle != null) subtitleController.text = subtitle;
-    if (formTitle != null) formTitleController.text = formTitle;
-    if (formButtonText != null) formButtonTextController.text = formButtonText;
-    if (buttonText != null) buttonTextController.text = buttonText;
-    if (successText != null) successTextController.text = successText;
-    if (buttonUrl != null) buttonUrlController.text = buttonUrl;
-    if (formRedirectUrl != null)
-      formRedirectUrlController.text = formRedirectUrl;
-    if (metaPixelId != null) metaPixelIdController.text = metaPixelId;
-    if (yandexMetrikaId != null) {
-      yandexMetrikaIdController.text = yandexMetrikaId;
-    }
-    if (whatsappNumber != null) {
-      whatsappNumberController.text = whatsappNumber;
-    }
-    if (whatsappMessage != null) {
-      whatsappMessageController.text = whatsappMessage;
-    }
-    if (thxTitle != null) thxTitleController.text = thxTitle;
-    if (thxDescription != null) {
-      thxDescriptionController.text = thxDescription;
-    }
   }
 
   void updateHasFooter(bool value) {
@@ -228,7 +210,10 @@ class FormUIControllers {
     mainFirstButtonController.dispose();
     mainSecondButtonController.dispose();
     badgeController.dispose();
+    mainFirstButtonRedirectUrlController.dispose();
+    mainSecondButtonRedirectUrlController.dispose();
     formTitleController.dispose();
+
     if (!identical(buttonTextController, mainFirstButtonController)) {
       buttonTextController.dispose();
     }

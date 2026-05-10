@@ -59,8 +59,8 @@ dependencies:
   code_text_field: ^1.1.0
   highlight: ^0.7.0
   flutter_highlight: ^0.7.0
-  google_generative_ai: ^0.4.7
   flutter_native_splash: ^2.4.7
+  http: ^1.6.0
 
 dev_dependencies:
   flutter_test:

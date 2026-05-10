@@ -1,12 +1,9 @@
-import 'dart:convert';
 import 'dart:typed_data';
-
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/data/repository/storage_repository.dart';
 import 'package:flashform_app/data/service/image_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ImageUploadState {
   final bool isLoading;
@@ -97,11 +94,12 @@ class ImageController extends StateNotifier<ImageUploadState> {
         maxImageWidth: maxWidth,
       );
 
+      // User cancelled the picker
       if (compressedBytes == null) {
         state = state.copyWith(
           isLoading: false,
         );
-
+        debugPrint('ℹ️ User cancelled image picker');
         return null;
       }
 
@@ -117,7 +115,26 @@ class ImageController extends StateNotifier<ImageUploadState> {
 
       return compressedBytes;
     } catch (e) {
-      throw Exception(e);
+      // Differentiate between error types
+      String errorMessage;
+      if (e.toString().contains('Permission')) {
+        errorMessage = '❌ Permission denied: Need access to gallery/camera';
+        debugPrint(errorMessage);
+      } else if (e.toString().contains('compress')) {
+        errorMessage = '❌ Image compression failed: ${e.toString()}';
+        debugPrint(errorMessage);
+      } else {
+        errorMessage = '❌ Image pick error: ${e.toString()}';
+        debugPrint(errorMessage);
+      }
+
+      state = state.copyWith(
+        isLoading: false,
+        errorMessage: errorMessage,
+        localImageBytes: null,
+      );
+
+      rethrow;
     }
   }
 
@@ -136,7 +153,7 @@ class ImageController extends StateNotifier<ImageUploadState> {
         state = state.copyWith(
           isLoading: false,
         );
-
+        debugPrint('⚠️ Upload cancelled: No image bytes provided');
         return null;
       }
 
@@ -152,16 +169,36 @@ class ImageController extends StateNotifier<ImageUploadState> {
         localImageBytes: null,
       );
 
+      debugPrint('✅ Image uploaded successfully: $imageUrl');
       return imageUrl;
     } catch (e) {
+      // Differentiate between error types
+      String errorMessage;
+      if (e.toString().contains('network') ||
+          e.toString().contains('timeout')) {
+        errorMessage = '❌ Network error: Check your connection';
+        debugPrint(errorMessage);
+      } else if (e.toString().contains('Permission') ||
+          e.toString().contains('permission')) {
+        errorMessage = '❌ Permission denied: Cannot access storage';
+        debugPrint(errorMessage);
+      } else if (e.toString().contains('size') ||
+          e.toString().contains('quota')) {
+        errorMessage = '❌ Storage quota exceeded';
+        debugPrint(errorMessage);
+      } else {
+        errorMessage = '❌ Upload failed: ${e.toString()}';
+        debugPrint(errorMessage);
+      }
+
       state = state.copyWith(
         isLoading: false,
-        errorMessage: e.toString(),
+        errorMessage: errorMessage,
         uploadProgress: null,
         localImageBytes: null,
       );
 
-      throw Exception('Upload image exception: $e');
+      rethrow;
     }
   }
 

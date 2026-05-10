@@ -1,21 +1,53 @@
 class FormFields {
+  final String? id;
   final String label;
-  final String type; // 'text' или 'phone'
+  final String type;
+  final int order;
+  final bool requiredField;
 
   FormFields({
+    this.id,
     required this.label,
     required this.type,
+    required this.order,
+    this.requiredField = false,
   });
+
+  FormFields copyWith({
+    String? label,
+    String? type,
+    int? order,
+    bool? requiredField,
+  }) => FormFields(
+    id: DateTime.now().millisecondsSinceEpoch.toString(),
+    label: label ?? this.label,
+    type: type ?? this.type,
+    order: order ?? this.order,
+    requiredField: requiredField ?? this.requiredField,
+  );
 
   Map<String, dynamic> toJson() => {
     'label': label,
     'type': type,
+    'order': order,
+    'required': requiredField,
   };
 
-  factory FormFields.fromJson(Map<String, dynamic> json) => FormFields(
-    label: json['label'] as String,
-    type: json['type'] as String,
-  );
+  factory FormFields.fromJson(
+    Map<String, dynamic> json, {
+    int fallbackOrder = 0,
+  }) {
+    final orderValue = json['order'];
+    final resolvedOrder = orderValue is num
+        ? orderValue.toInt()
+        : fallbackOrder;
+    return FormFields(
+      label: json['label'] as String,
+      type: json['type'] as String,
+      order: resolvedOrder,
+      requiredField: json['required'] as bool,
+    );
+  }
 }
 
 class FormModel {

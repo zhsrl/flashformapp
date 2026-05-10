@@ -34,6 +34,8 @@ class PlanUsage {
   // Можно ли убрать брендинг
   bool get canRemoveBranding => plan.canRemoveBranding;
 
+  bool get canChangeSlug => plan.canChangeSlug;
+
   bool get hasFooter => plan.hasFooter;
   bool get hasYaMetrikaIntegration => plan.hasYaMetrikaIntegration;
   bool get hasTelegramBotIntegration => plan.hasTelegramBotIntegration;

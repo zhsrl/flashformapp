@@ -1,11 +1,19 @@
 {
-  "buildCommand": "flutter build web --release",
   "outputDirectory": "build/web",
+  "cleanUrls": true,
+  "trailingSlash": false,
   "env": {
     "FLUTTER_WEB_CANVASKIT_URL": "canvaskit/"
   },
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)", "destination": "/index.html" }
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html",
+      "status": 200
+    }
   ]
 }

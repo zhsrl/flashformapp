@@ -1,9 +1,11 @@
 {
+  "buildCommand": "flutter build web --release",
   "outputDirectory": "build/web",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ],
+  "env": {
+    "FLUTTER_WEB_CANVASKIT_URL": "canvaskit/"
+  },
   "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" }
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "destination": "/index.html" }
   ]
 }

@@ -1,0 +1,4 @@
+build/
+node_modules/
+.dart_tool/
+.git/

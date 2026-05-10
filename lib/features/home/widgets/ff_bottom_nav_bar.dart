@@ -109,27 +109,11 @@ class _FFBottomNavBarState extends State<FFBottomNavBar> {
                   mainAxisSize: MainAxisSize.min,
                   children: List.generate(
                     _items.length,
-                    (index) => MouseRegion(
-                      onEnter: (event) {
-                        setState(() {
-                          _hoveredIndex = index;
-                        });
-                      },
-                      onExit: (event) {
-                        setState(() {
-                          _hoveredIndex = null;
-                        });
-                      },
-                      child: AnimatedScale(
-                        scale: _hoveredIndex == index ? 1.1 : 1,
-                        duration: Duration(milliseconds: 100),
-                        child: _buildNavigationItem(
-                          _items[index],
-                          index,
-                          selected: widget.selectedIndex == index,
-                          onTap: widget.onItemTapped,
-                        ),
-                      ),
+                    (index) => _buildNavigationItem(
+                      _items[index],
+                      index,
+                      selected: widget.selectedIndex == index,
+                      onTap: widget.onItemTapped,
                     ),
                   ),
                 ),

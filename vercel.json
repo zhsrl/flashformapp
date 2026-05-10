@@ -2,18 +2,16 @@
   "outputDirectory": "build/web",
   "cleanUrls": true,
   "trailingSlash": false,
-  "env": {
-    "FLUTTER_WEB_CANVASKIT_URL": "canvaskit/"
-  },
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
     {
       "src": "/(.*)",
       "dest": "/index.html",
       "status": 200
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
     }
+    
   ]
 }

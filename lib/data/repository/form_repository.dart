@@ -127,7 +127,9 @@ class FormRepository {
 
     final response = await _client
         .from('forms')
-        .select()
+        .select(
+          'id, user_id, name, slug, is_active, created_at, updated_at',
+        )
         .eq('user_id', _currentUser!.id)
         .order('created_at', ascending: false);
 

@@ -55,96 +55,99 @@ class _SettingsFormWidgetState extends ConsumerState<SettingsFormWidget> {
         widget.controller ?? ref.read(createFormProvider.notifier);
     final FormUIControllers uiControllers =
         widget.uiControllers ?? ref.watch(formUIControllersProvider);
-    return Container(
-      width: context.screenWidth,
+    return GestureDetector(
+      onTap: () {},
+      child: Container(
+        width: context.screenWidth,
 
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: Colors.white,
-        border: Border.all(width: 1.5, color: AppTheme.border),
-      ),
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: .start,
-        children: [
-          FFTextField(
-            title: 'Заголовок формы',
-            controller: uiControllers.formTitleController,
-          ),
-          FFTextField(
-            hintText: 'Кнопка',
-            title: 'Текст кнопки',
-            controller: uiControllers.formButtonTextController,
-          ),
-          Row(
-            mainAxisAlignment: .spaceBetween,
-            children: [
-              Text(
-                'Поля ввода',
-                style: TextStyle(
-                  fontWeight: .w500,
-                ),
-              ),
-              TextButton.icon(
-                onPressed: () {
-                  showAddInputFieldDialog(controller);
-                },
-                style: TextButton.styleFrom(
-                  backgroundColor: AppTheme.secondary,
-                ),
-                icon: Icon(Icons.add),
-                label: Text('Добавить поле'),
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 8,
-          ),
-          if (fields.isNotEmpty)
-            ReorderableListView.builder(
-              shrinkWrap: true,
-              buildDefaultDragHandles: false,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: fields.length,
-              padding: .zero,
-              onReorder: (oldIndex, newIndex) {
-                controller.reorderField(oldIndex, newIndex);
-              },
-              itemBuilder: (context, index) {
-                final field = fields[index];
-                return InputFieldOptions(
-                  title: field.label,
-                  type: field.type,
-                  id: field.id,
-                  onRemove: () => controller.removeField(index),
-                  key: ValueKey(field),
-                  index: index,
-                  isRequired: field.requiredField,
-                  onRequiredChanged: (value) =>
-                      controller.updateFieldRequired(index, value),
-                  onLabelChanged: (label) =>
-                      controller.updateFieldLabel(index, label),
-                );
-              },
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          color: Colors.white,
+          border: Border.all(width: 1.5, color: AppTheme.border),
+        ),
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: .start,
+          children: [
+            FFTextField(
+              title: 'Заголовок формы',
+              controller: uiControllers.formTitleController,
             ),
+            FFTextField(
+              hintText: 'Кнопка',
+              title: 'Текст кнопки',
+              controller: uiControllers.formButtonTextController,
+            ),
+            Row(
+              mainAxisAlignment: .spaceBetween,
+              children: [
+                Text(
+                  'Поля ввода',
+                  style: TextStyle(
+                    fontWeight: .w500,
+                  ),
+                ),
+                TextButton.icon(
+                  onPressed: () {
+                    showAddInputFieldDialog(controller);
+                  },
+                  style: TextButton.styleFrom(
+                    backgroundColor: AppTheme.secondary,
+                  ),
+                  icon: Icon(Icons.add),
+                  label: Text('Добавить поле'),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 8,
+            ),
+            if (fields.isNotEmpty)
+              ReorderableListView.builder(
+                shrinkWrap: true,
+                buildDefaultDragHandles: false,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: fields.length,
+                padding: .zero,
+                onReorder: (oldIndex, newIndex) {
+                  controller.reorderField(oldIndex, newIndex);
+                },
+                itemBuilder: (context, index) {
+                  final field = fields[index];
+                  return InputFieldOptions(
+                    title: field.label,
+                    type: field.type,
+                    id: field.id,
+                    onRemove: () => controller.removeField(index),
+                    key: ValueKey(field),
+                    index: index,
+                    isRequired: field.requiredField,
+                    onRequiredChanged: (value) =>
+                        controller.updateFieldRequired(index, value),
+                    onLabelChanged: (label) =>
+                        controller.updateFieldLabel(index, label),
+                  );
+                },
+              ),
 
-          // _buildActionTypeWidget(
-          //   context,
-          //   formState,
-          //   controller,
-          //   uiControllers,
-          //   ref,
-          // ),
-          _buildActionAfterSuccessForm(
-            context,
-            formState,
-            controller,
-            uiControllers,
-            ref,
-            successSelection,
-          ),
-        ],
+            // _buildActionTypeWidget(
+            //   context,
+            //   formState,
+            //   controller,
+            //   uiControllers,
+            //   ref,
+            // ),
+            _buildActionAfterSuccessForm(
+              context,
+              formState,
+              controller,
+              uiControllers,
+              ref,
+              successSelection,
+            ),
+          ],
+        ),
       ),
     );
   }

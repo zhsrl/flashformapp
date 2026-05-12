@@ -53,8 +53,8 @@ class FormService {
         'main': {
           'image': null,
           'label': null,
-          'title': 'Заголовок страницы',
-          'subtitle': 'Описание страницы',
+          'title': 'Ваш оффер',
+          'subtitle': 'Текст',
           'button_1': {
             'url': null,
             'text': 'Кнопка',
@@ -63,8 +63,8 @@ class FormService {
           },
           'button_2': {
             'url': null,
-            'text': 'Кнопка 2',
-            'type': 'anchor',
+            'text': 'Вторая кнопка',
+            'type': 'url',
             'anchor': null,
             'enabled': false,
           },

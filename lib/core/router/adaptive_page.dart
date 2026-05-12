@@ -6,6 +6,7 @@ Page adaptivePage({
   required BuildContext context,
   required Widget child,
   String? name,
+  LocalKey? key,
 }) {
   final isDesktop = context.isDesktop;
 
@@ -13,12 +14,14 @@ Page adaptivePage({
     return NoTransitionPage(
       child: child,
       name: name,
+      key: key,
     );
   }
 
   return CustomTransitionPage(
     child: child,
     name: name,
+    key: key,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
       const begin = Offset(1.0, 0.0);
       const end = Offset.zero;

@@ -2,6 +2,7 @@ import 'package:dashed_border/dashed_border.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/app_validator.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
+import 'package:flashform_app/data/model/form.dart';
 import 'package:flashform_app/features/home/widgets/home_appbar.dart';
 import 'package:flashform_app/features/forms/widgets/shared/form_card.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
@@ -128,84 +129,91 @@ class _HomePageDesktopViewState extends ConsumerState<FormsViewDesktop> {
 
       body: Stack(
         children: [
-          SizedBox.expand(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: formsAsync.when(
-                data: (forms) {
-                  if (forms.isEmpty) {
-                    return Center(
-                      child: InkWell(
-                        onTap: () {
-                          showCreateFormDialog();
-                        },
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          width: 200,
-                          height: 200,
-                          padding: EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            border: DashedBorder(
-                              color: AppTheme.secondary.withAlpha(100),
-                            ),
-                            borderRadius: BorderRadius.circular(20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: formsAsync.when(
+              data: (forms) {
+                if (forms.isEmpty) {
+                  return Center(
+                    child: InkWell(
+                      onTap: () {
+                        showCreateFormDialog();
+                      },
+                      borderRadius: BorderRadius.circular(20),
+                      child: Container(
+                        width: 200,
+                        height: 200,
+                        padding: EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          border: DashedBorder(
+                            color: AppTheme.secondary.withAlpha(100),
                           ),
-                          child: Center(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                HeroIcon(
-                                  HeroIcons.plusCircle,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Center(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              HeroIcon(
+                                HeroIcons.plusCircle,
+                                color: AppTheme.secondary.withAlpha(100),
+                                size: 50,
+                              ),
+                              Text(
+                                'Создать вашу первую форму!',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
                                   color: AppTheme.secondary.withAlpha(100),
-                                  size: 50,
                                 ),
-                                Text(
-                                  'Создать вашу первую форму!',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    color: AppTheme.secondary.withAlpha(100),
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
+                    ),
+                  );
+                }
+                return GridView.builder(
+                  gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                    mainAxisExtent: 180,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 16,
+                    maxCrossAxisExtent: 200,
+                  ),
+                  itemCount: forms.length,
+                  shrinkWrap: true,
+                  itemBuilder: (context, index) {
+                    return FormCard(
+                      form: forms[index],
                     );
-                  }
-                  return Column(
+                  },
+                );
+              },
+              error: (er, st) {
+                return Center(
+                  child: Column(
+                    crossAxisAlignment: .center,
+                    mainAxisSize: .min,
                     children: [
-                      GridView.builder(
-                        physics: NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                          mainAxisExtent: 180,
-                          mainAxisSpacing: 16,
-                          crossAxisSpacing: 16,
-                          maxCrossAxisExtent: 200,
-                          // crossAxisCount: context.isDesktop
-                          //     ? 4
-                          //     : context.isTablet
-                          //     ? 2
-                          //     : 1,
-                        ),
-                        itemCount: forms.length,
-                        shrinkWrap: true,
-                        itemBuilder: (context, index) {
-                          return FormCard(form: forms[index]);
-                        },
+                      SelectableText('Ошибка: $er'),
+                      const SizedBox(
+                        height: 8,
+                      ),
+                      FFButton(
+                        isLoading: ref.read(formControllerProvider).isLoading,
+                        onPressed: () async =>
+                            await ref.refresh(formControllerProvider),
+                        text: 'Повторить',
                       ),
                     ],
-                  );
-                },
-                error: (er, st) {
-                  throw Exception(er.toString());
-                },
-                loading: () => Center(
-                  child: LoadingAnimationWidget.waveDots(
-                    color: AppTheme.primary,
-                    size: 40,
                   ),
+                );
+              },
+              loading: () => Center(
+                child: LoadingAnimationWidget.waveDots(
+                  color: AppTheme.primary,
+                  size: 40,
                 ),
               ),
             ),

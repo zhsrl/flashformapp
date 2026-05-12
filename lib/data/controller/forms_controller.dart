@@ -8,7 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final formControllerProvider =
-    AsyncNotifierProvider<FormController, List<FormModel>>(FormController.new);
+    AsyncNotifierProvider.autoDispose<FormController, List<FormModel>>(
+      FormController.new,
+    );
 
 class FormController extends AsyncNotifier<List<FormModel>> {
   @override

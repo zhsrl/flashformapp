@@ -98,8 +98,6 @@ class FormModel {
     data: json['data'],
     name: json['name'] as String,
     slug: json['slug'] as String,
-    title: json['data']['main']['title'] as String,
-    subtitle: json['data']['main']['subtitle'] as String,
 
     isActive: json['is_active'] as bool? ?? true,
     createdAt: json['created_at'] != null

@@ -44,7 +44,7 @@ class EditorBrandingView extends ConsumerWidget {
                 formState: formState,
               ),
               BuildLabelSettingsBlock(
-                isAvailable: true,
+                isAvailable: usage.canRemoveBranding,
                 formState: formState,
                 controller: controller,
               ),

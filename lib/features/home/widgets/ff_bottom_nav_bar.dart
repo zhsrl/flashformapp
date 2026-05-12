@@ -10,8 +10,8 @@ class FFBottomItem {
 
     this.title = 'Item',
   });
-  HeroIcons icon;
-  String title;
+  final HeroIcons icon;
+  final String title;
 }
 
 class FFBottomNavBar extends StatefulWidget {
@@ -32,8 +32,6 @@ class FFBottomNavBar extends StatefulWidget {
 }
 
 class _FFBottomNavBarState extends State<FFBottomNavBar> {
-  int? _hoveredIndex;
-
   late List<FFBottomItem> _items;
 
   @override
@@ -55,6 +53,7 @@ class _FFBottomNavBarState extends State<FFBottomNavBar> {
   }) {
     return GestureDetector(
       onTap: () => onTap?.call(index),
+      behavior: HitTestBehavior.opaque,
       child: Container(
         padding: EdgeInsets.all(8),
         child: Column(

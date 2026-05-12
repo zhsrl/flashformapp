@@ -552,7 +552,7 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
                           formState: formState,
                           controller: controller,
                         ),
-                        // PreviewViewMobile(focusNode: _focusNode),
+
                         PreviewView(focusNode: _focusNode),
                         EditorSettingsView(
                           formId: widget.formId,

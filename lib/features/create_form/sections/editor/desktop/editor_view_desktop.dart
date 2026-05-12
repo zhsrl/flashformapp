@@ -33,7 +33,7 @@ class _SettingsPanelViewState extends ConsumerState<EditorView>
   late TabController _tabController;
   late final ScrollController _mainScrollController;
   late final ScrollController _brandingScrollController;
-  late final ScrollController _blocksScrollController;
+
   late final ScrollController _settingsScrollController;
 
   @override
@@ -46,7 +46,7 @@ class _SettingsPanelViewState extends ConsumerState<EditorView>
     );
     _mainScrollController = ScrollController();
     _brandingScrollController = ScrollController();
-    _blocksScrollController = ScrollController();
+
     _settingsScrollController = ScrollController();
   }
 

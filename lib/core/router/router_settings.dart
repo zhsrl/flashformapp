@@ -94,6 +94,7 @@ final routerProvider = Provider<GoRouter>(
             return adaptivePage(
               context: context,
               child: HomePage(child: child),
+              key: state.pageKey,
             );
           },
           routes: [
@@ -102,6 +103,7 @@ final routerProvider = Provider<GoRouter>(
               pageBuilder: (context, state) => adaptivePage(
                 context: context,
                 child: FormsScreen(),
+                key: state.pageKey,
               ),
             ),
             GoRoute(
@@ -109,6 +111,7 @@ final routerProvider = Provider<GoRouter>(
               pageBuilder: (context, state) => adaptivePage(
                 context: context,
                 child: LeadsScreen(),
+                key: state.pageKey,
               ),
             ),
             GoRoute(
@@ -116,6 +119,7 @@ final routerProvider = Provider<GoRouter>(
               pageBuilder: (context, state) => adaptivePage(
                 context: context,
                 child: SettingsScreen(),
+                key: state.pageKey,
               ),
             ),
           ],

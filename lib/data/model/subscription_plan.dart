@@ -20,8 +20,8 @@ enum SubscriptionPlan {
   // Сумма для платежа в тенге (0 для бесплатного плана)
   int get amountKzt => switch (this) {
     spark => 0,
-    go => 4990,
-    pro => 13990,
+    go => 990,
+    pro => 2990,
   };
 
   // Текущий биллинговый период
@@ -35,7 +35,7 @@ enum SubscriptionPlan {
   int get formsLimit => switch (this) {
     spark => 2,
     go => 10,
-    pro => 1000,
+    pro => 5000,
   };
 
   // Лимит лидов в месяц (null = безлимит)
@@ -89,8 +89,8 @@ enum SubscriptionPlan {
 
   String get displayPrice => switch (this) {
     spark => 'Бесплатно',
-    go => '10\$ / 5.000 KZT / 850 RUB',
-    pro => '29\$ / 14.000 KZT / 2.500 RUB',
+    go => '$amountKzt KZT',
+    pro => '$amountKzt KZT',
   };
 
   List<String> get availableIntegrations => switch (this) {
@@ -105,6 +105,7 @@ enum SubscriptionPlan {
     return [
       '$formsLimit страниц',
       if (leadsLimit != null) '$leadsLimit лидов каждый месяц',
+      if (formsLimit == null) 'Неограниченное количество страниц',
       if (hasExport) 'Экспорт данных в CSV',
       if (canRemoveBranding) 'Убрать логотип Made on Flashform',
     ];

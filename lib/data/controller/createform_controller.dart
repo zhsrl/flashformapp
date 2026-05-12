@@ -481,29 +481,33 @@ class CreateFormController extends StateNotifier<CreateFormState> {
     ];
   }
 
-  Future<bool> publishForm(String formId) async {
+  Future<({bool success, String? error})> publishForm(String formId) async {
     final imageNotifier = ref.read(imageControllerProvider.notifier);
     final imageState = ref.read(imageControllerProvider);
 
     // Validation before publishing
     if (state.actionType == 'form' && state.fields.isEmpty) {
-      debugPrint('❌ Form validation failed: No fields added');
-      return false;
+      const error = 'В форму не добавлены никакие поля.';
+      debugPrint('❌ Form validation failed: $error');
+      return (success: false, error: error);
     }
 
     if (state.formTitle == null || state.formTitle!.isEmpty) {
-      debugPrint('❌ Form validation failed: Form title is empty');
-      return false;
+      const error = 'Заголовок формы пуст';
+      debugPrint('❌ Form validation failed: $error');
+      return (success: false, error: error);
     }
 
     if (state.formButtonText == null || state.formButtonText!.isEmpty) {
-      debugPrint('❌ Form validation failed: Button text is empty');
-      return false;
+      const error = 'Текст кнопки пуст';
+      debugPrint('❌ Form validation failed: $error');
+      return (success: false, error: error);
     }
 
     if (state.title == null || state.title!.isEmpty) {
-      debugPrint('❌ Form validation failed: Main title is empty');
-      return false;
+      const error = 'Основной заголовок пуст';
+      debugPrint('❌ Form validation failed: $error');
+      return (success: false, error: error);
     }
 
     state = state.copyWith(isPublishing: true);
@@ -627,10 +631,11 @@ class CreateFormController extends StateNotifier<CreateFormState> {
       imageNotifier.resetPickedImage();
       clearChanges();
 
-      return true;
+      return (success: true, error: null);
     } catch (e) {
-      debugPrint('Error publishing form: $e');
-      return false;
+      final errorMessage = 'Error publishing form: $e';
+      debugPrint(errorMessage);
+      return (success: false, error: e.toString());
     } finally {
       state = state.copyWith(isPublishing: false);
     }

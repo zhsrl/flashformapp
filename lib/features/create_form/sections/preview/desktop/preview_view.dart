@@ -54,49 +54,51 @@ class _PreviewViewState extends ConsumerState<PreviewView>
     final uiControllers = ref.watch(formUIControllersProvider);
 
     return Expanded(
-      child: Column(
-        children: [
-          if (!context.isMobile)
-            FFTabBar(
-              width: 350,
-              controller: _tabController,
-              onTap: (index) => setState(() {
-                _tabIndex = index;
-              }),
-              isSecondTheme: true,
-              tabs: [
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    HeroIcon(HeroIcons.devicePhoneMobile),
-                    const SizedBox(
-                      width: 6,
-                    ),
-                    Text('Мобильный'),
-                  ],
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    HeroIcon(HeroIcons.computerDesktop),
-                    const SizedBox(
-                      width: 6,
-                    ),
-                    Text('Десктоп'),
-                  ],
-                ),
-              ],
+      child: Align(
+        alignment: .center,
+        child: Column(
+          mainAxisSize: .min,
+          children: [
+            if (!context.isMobile)
+              FFTabBar(
+                width: 350,
+                controller: _tabController,
+                onTap: (index) => setState(() {
+                  _tabIndex = index;
+                }),
+                isSecondTheme: true,
+                tabs: [
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      HeroIcon(HeroIcons.devicePhoneMobile),
+                      const SizedBox(
+                        width: 6,
+                      ),
+                      Text('Мобильный'),
+                    ],
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      HeroIcon(HeroIcons.computerDesktop),
+                      const SizedBox(
+                        width: 6,
+                      ),
+                      Text('Десктоп'),
+                    ],
+                  ),
+                ],
+              ),
+            const SizedBox(
+              height: 16,
             ),
-          const SizedBox(
-            height: 16,
-          ),
-          // 3. Основной контент превью
-          Expanded(
-            child: ScrollConfiguration(
-              behavior: ScrollConfiguration.of(
-                context,
-              ).copyWith(scrollbars: false),
-              child: SingleChildScrollView(
+            // 3. Основной контент превью
+            Expanded(
+              child: ScrollConfiguration(
+                behavior: ScrollConfiguration.of(
+                  context,
+                ).copyWith(scrollbars: false),
                 child: _buildDeviceFrame(
                   formState,
                   imageState,
@@ -105,8 +107,8 @@ class _PreviewViewState extends ConsumerState<PreviewView>
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -128,6 +130,7 @@ class _PreviewViewState extends ConsumerState<PreviewView>
       duration: const Duration(milliseconds: 500),
       curve: Curves.linearToEaseOut,
       width: isDesktop ? context.screenWidth : 350, // Адаптивная ширина
+      height: context.screenHeight,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: formState.theme == 'light'
@@ -136,167 +139,134 @@ class _PreviewViewState extends ConsumerState<PreviewView>
         borderRadius: BorderRadius.circular(25),
         border: Border.all(width: 1, color: AppTheme.border),
       ),
-      child: Stack(
-        alignment: Alignment.topCenter,
-        children: [
-          // FIRST PAGE DETAILS
-          Column(
-            children: [
-              Container(
-                width: 400,
+      child: SingleChildScrollView(
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // FIRST PAGE DETAILS
+            Column(
+              children: [
+                Container(
+                  width: 400,
 
-                decoration: BoxDecoration(
-                  color: formState.theme == 'light'
-                      ? Color(0xFFEFEFEF)
-                      : Color(0xFF292D30),
-                  borderRadius: BorderRadius.circular(40),
-                ),
+                  decoration: BoxDecoration(
+                    color: formState.theme == 'light'
+                        ? Color(0xFFEFEFEF)
+                        : Color(0xFF292D30),
+                    borderRadius: BorderRadius.circular(40),
+                  ),
 
-                padding: EdgeInsets.all(32),
+                  padding: EdgeInsets.all(32),
 
-                child: Column(
-                  mainAxisSize: .min,
-                  children: [
-                    if (hasLogo || formState.hasBadge)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          if (hasLogo)
-                            _buildLogoImage(formState, logoImageState),
-                          if (formState.hasBadge)
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.transparent,
-                                borderRadius: BorderRadius.circular(100),
-                                border: Border.all(
-                                  width: 1.5,
-                                  color: formState.theme == 'light'
-                                      ? Colors.black
-                                      : Colors.white,
+                  child: Column(
+                    mainAxisSize: .min,
+                    crossAxisAlignment: .start,
+                    children: [
+                      if (hasLogo || formState.hasBadge)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            if (hasLogo)
+                              _buildLogoImage(formState, logoImageState),
+                            if (formState.hasBadge)
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.transparent,
+                                  borderRadius: BorderRadius.circular(100),
+                                  border: Border.all(
+                                    width: 1.5,
+                                    color: formState.theme == 'light'
+                                        ? Colors.black
+                                        : Colors.white,
+                                  ),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 3,
+                                ),
+                                child: ListenableBuilder(
+                                  listenable: uiControllers.badgeController,
+                                  builder: (context, child) {
+                                    return Text(
+                                      uiControllers.badgeController.text,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: formState.theme == 'light'
+                                            ? Colors.black
+                                            : Colors.white,
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 3,
-                              ),
-                              child: ListenableBuilder(
-                                listenable: uiControllers.badgeController,
-                                builder: (context, child) {
-                                  return Text(
-                                    uiControllers.badgeController.text,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: formState.theme == 'light'
-                                          ? Colors.black
-                                          : Colors.white,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                        ],
-                      ),
-                    if (hasLogo || formState.hasBadge)
-                      const SizedBox(height: 16),
-
-                    ListenableBuilder(
-                      listenable: uiControllers.titleController,
-                      builder: (_, __) => Text(
-                        uiControllers.titleController.text,
-                        textAlign: TextAlign.start,
-
-                        style: TextStyle(
-                          height: 1.1,
-                          letterSpacing: -0.5,
-                          fontSize: 34,
-                          color: formState.theme == 'light'
-                              ? Colors.black
-                              : Colors.white,
-                          fontWeight: FontWeight.w700,
+                          ],
                         ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
+                      if (hasLogo || formState.hasBadge)
+                        const SizedBox(height: 16),
 
-                    // Subtitle
-                    ListenableBuilder(
-                      listenable: uiControllers.subtitleController,
-                      builder: (_, __) => Text(
-                        uiControllers.subtitleController.text,
-                        textAlign: TextAlign.start,
-                        style: TextStyle(
-                          height: 1.2,
-                          letterSpacing: -0.015,
-                          fontSize: 16,
-                          color: formState.theme == 'light'
-                              ? Colors.black
-                              : Colors.white,
-                        ),
-                      ),
-                    ),
-
-                    // FIRST BUTTON
-                    Container(
-                      width: isDesktop
-                          ? context.screenWidth
-                          : 350, // Адаптивная ширина
-                      margin: EdgeInsets.only(
-                        top: 32,
-                      ),
-                      height: 60,
-                      child: ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          elevation: 0,
-                          backgroundColor: formState.primaryColor, // Из стейта
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(500),
-                          ),
-                        ),
+                      SizedBox(
+                        width: 300,
                         child: ListenableBuilder(
-                          listenable: uiControllers.mainFirstButtonController,
+                          listenable: uiControllers.titleController,
                           builder: (_, __) => Text(
-                            uiControllers.mainFirstButtonController.text,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
+                            uiControllers.titleController.text,
+                            textAlign: TextAlign.start,
+
+                            style: TextStyle(
+                              height: 1.1,
+                              letterSpacing: -0.5,
+                              fontSize: 34,
+                              color: formState.theme == 'light'
+                                  ? Colors.black
+                                  : Colors.white,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    // SECOND BUTTON
-                    if (formState.hasSecondButton)
+                      const SizedBox(height: 8),
+
+                      // Subtitle
+                      ListenableBuilder(
+                        listenable: uiControllers.subtitleController,
+                        builder: (_, __) => Text(
+                          uiControllers.subtitleController.text,
+                          textAlign: TextAlign.start,
+                          style: TextStyle(
+                            height: 1.2,
+                            letterSpacing: -0.015,
+                            fontSize: 16,
+                            color: formState.theme == 'light'
+                                ? Colors.black
+                                : Colors.white,
+                          ),
+                        ),
+                      ),
+
+                      // FIRST BUTTON
                       Container(
                         width: isDesktop
                             ? context.screenWidth
                             : 350, // Адаптивная ширина
                         margin: EdgeInsets.only(
-                          top: 8,
+                          top: 32,
                         ),
                         height: 60,
-                        child: OutlinedButton(
+                        child: ElevatedButton(
                           onPressed: () {},
-                          style: OutlinedButton.styleFrom(
+                          style: ElevatedButton.styleFrom(
                             elevation: 0,
-                            foregroundColor: Colors.white,
+                            backgroundColor:
+                                formState.primaryColor, // Из стейта
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(500),
-                              side: BorderSide(
-                                width: 2,
-                                color: formState.theme == 'dark'
-                                    ? Colors.white
-                                    : Colors.black,
-                              ),
                             ),
                           ),
                           child: ListenableBuilder(
-                            listenable:
-                                uiControllers.mainSecondButtonController,
+                            listenable: uiControllers.mainFirstButtonController,
                             builder: (_, __) => Text(
-                              uiControllers.mainSecondButtonController.text,
+                              uiControllers.mainFirstButtonController.text,
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
@@ -306,94 +276,134 @@ class _PreviewViewState extends ConsumerState<PreviewView>
                           ),
                         ),
                       ),
-                  ],
-                ),
-              ),
-              const SizedBox(
-                height: 16,
-              ),
-              // Hero Image
-              _buildHeroImage(formState, imageState, _tabIndex),
-
-              SizedBox(
-                width: _tabController.index == 0
-                    ? 350
-                    : 400, // Контент всегда ограничен шириной мобилки для читаемости
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Action Widget (Button or Form)
-                    // _buildWidgetByActionType(formState, uiControllers),
-                    // Footer
-                    if (formState.hasFooter) _buildFooter(formState),
-                    // Branding
-                    _buildFlashformBrandingWidget(formState),
-                  ],
-                ),
-              ),
-            ],
-          ),
-
-          // SUCCESS OVERLAY LAYER
-          ListenableBuilder(
-            listenable: widget.focusNode,
-            builder: (context, child) {
-              final hasFocus = widget.focusNode.hasFocus;
-              return IgnorePointer(
-                ignoring: !hasFocus,
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 200),
-                  opacity: hasFocus ? 1 : 0,
-                  child: Container(
-                    height: context.screenHeight,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      color: Colors.black.withAlpha(100),
-                    ),
-                    child: Center(
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        width: 300,
-                        decoration: BoxDecoration(
-                          color: formState.theme == 'light'
-                              ? Colors.white
-                              : AppTheme.secondary,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const HeroIcon(
-                              HeroIcons.checkCircle,
-                              style: HeroIconStyle.solid,
-                              color: Colors.green,
-                              size: 80,
-                            ),
-                            const SizedBox(height: 16),
-                            ListenableBuilder(
-                              listenable: uiControllers.successTextController,
-                              builder: (_, __) => Text(
-                                uiControllers.successTextController.text,
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: formState.theme == 'light'
-                                      ? Colors.black
-                                      : Colors.white,
+                      // SECOND BUTTON
+                      if (formState.hasSecondButton)
+                        Container(
+                          width: isDesktop
+                              ? context.screenWidth
+                              : 350, // Адаптивная ширина
+                          margin: EdgeInsets.only(
+                            top: 8,
+                          ),
+                          height: 60,
+                          child: OutlinedButton(
+                            onPressed: () {},
+                            style: OutlinedButton.styleFrom(
+                              elevation: 0,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(500),
+                                side: BorderSide(
+                                  width: 2,
+                                  color: formState.theme == 'dark'
+                                      ? Colors.white
+                                      : Colors.black,
                                 ),
                               ),
                             ),
-                          ],
+                            child: ListenableBuilder(
+                              listenable:
+                                  uiControllers.mainSecondButtonController,
+                              builder: (_, __) => Text(
+                                uiControllers.mainSecondButtonController.text,
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(
+                  height: 16,
+                ),
+                // Hero Image
+                _buildHeroImage(formState, imageState, _tabIndex),
+
+                SizedBox(
+                  width: _tabController.index == 0
+                      ? 350
+                      : 400, // Контент всегда ограничен шириной мобилки для читаемости
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Action Widget (Button or Form)
+                      // _buildWidgetByActionType(formState, uiControllers),
+                      // Footer
+                      if (formState.hasFooter) _buildFooter(formState),
+                      // Branding
+                      _buildFlashformBrandingWidget(formState),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+
+            // SUCCESS OVERLAY LAYER
+            ListenableBuilder(
+              listenable: widget.focusNode,
+              builder: (context, child) {
+                final hasFocus = widget.focusNode.hasFocus;
+                return IgnorePointer(
+                  ignoring: !hasFocus,
+                  child: AnimatedOpacity(
+                    duration: const Duration(milliseconds: 200),
+                    opacity: hasFocus ? 1 : 0,
+                    child: Container(
+                      height: context.screenHeight,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        color: Colors.black.withAlpha(100),
+                      ),
+                      child: Center(
+                        child: Container(
+                          padding: const EdgeInsets.all(16),
+                          width: 300,
+                          decoration: BoxDecoration(
+                            color: formState.theme == 'light'
+                                ? Colors.white
+                                : AppTheme.secondary,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const HeroIcon(
+                                HeroIcons.checkCircle,
+                                style: HeroIconStyle.solid,
+                                color: Colors.green,
+                                size: 80,
+                              ),
+                              const SizedBox(height: 16),
+                              ListenableBuilder(
+                                listenable: uiControllers.successTextController,
+                                builder: (_, __) => Text(
+                                  uiControllers.successTextController.text,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                    color: formState.theme == 'light'
+                                        ? Colors.black
+                                        : Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
-          ),
-        ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -432,7 +442,8 @@ class _PreviewViewState extends ConsumerState<PreviewView>
       );
     }
 
-    return _buildPlaceholder(formState, index);
+    // return _buildPlaceholder(formState, index);
+    return SizedBox();
   }
 
   Widget _buildLogoImage(

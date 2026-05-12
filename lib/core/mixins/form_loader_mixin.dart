@@ -44,14 +44,14 @@ mixin FormLoaderMixin {
       final yandexMetrika = integrationsData?['ya_metrika_id'] as Map?;
       final footerLegal = (data['footer'] as Map?)?['legal-info'] as Map?;
 
-      // ===== ОСНОВНЫЕ ДАННЫЕ =====
+      // ===== ОСНОВНЫЕ ДАННЫЕ ====
       uiControllers.titleController.text =
           formMainData?['title'] ?? 'Заголовок сайта';
       uiControllers.subtitleController.text =
           formMainData?['subtitle'] ?? 'Описание';
       uiControllers.formTitleController.text =
           formData?['title'] ?? 'Заголовок формы';
-      uiControllers.badgeController.text = formMainData?['label'] ?? '';
+      uiControllers.badgeController.text = formMainData?['label'] ?? 'Тег';
 
       uiControllers.mainFirstButtonController.text =
           mainFirstButton?['text'] ?? '';

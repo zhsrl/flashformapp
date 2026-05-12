@@ -69,51 +69,31 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                               color: Colors.white,
                             ),
                           ),
-                          if (usage.plan != SubscriptionPlan.pro)
-                            Text(
-                              '${usage.formsUsed}/${usage.formsLimit}',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 12,
-                              ),
-                            )
-                          else
-                            Text(
-                              'безлимит',
-                              style: TextStyle(
-                                color: Colors.white.withAlpha(100),
-                                fontSize: 12,
-                              ),
+
+                          Text(
+                            '${usage.formsUsed}/${usage.formsLimit}',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
                             ),
+                          ),
                         ],
                       ),
                       const SizedBox(
                         height: 8,
                       ),
-                      if (usage.plan != SubscriptionPlan.pro)
-                        LinearProgressIndicator(
-                          value: usage.formsProgress,
-                          minHeight: 8,
-                          borderRadius: BorderRadius.circular(400),
-                          backgroundColor: AppTheme.tertiary,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            usage.isFormsLimitReached
-                                ? Colors.red
-                                : AppTheme.primary,
-                          ),
-                        )
-                      else
-                        LinearProgressIndicator(
-                          value: 100,
-                          minHeight: 8,
-                          borderRadius: BorderRadius.circular(400),
-                          backgroundColor: AppTheme.tertiary,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            usage.isFormsLimitReached
-                                ? Colors.red
-                                : AppTheme.primary,
-                          ),
+
+                      LinearProgressIndicator(
+                        value: usage.formsProgress,
+                        minHeight: 8,
+                        borderRadius: BorderRadius.circular(400),
+                        backgroundColor: AppTheme.fourty,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          usage.isFormsLimitReached
+                              ? Colors.red
+                              : AppTheme.primary,
                         ),
+                      ),
 
                       if (usage.isFormsLimitReached) ...[
                         const SizedBox(
@@ -192,7 +172,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                       if (usage.plan != SubscriptionPlan.pro)
                         LinearProgressIndicator(
                           value: usage.leadsProgress,
-                          backgroundColor: AppTheme.tertiary,
+                          backgroundColor: AppTheme.fourty,
                           minHeight: 8,
                           borderRadius: BorderRadius.circular(400),
                           valueColor: AlwaysStoppedAnimation<Color>(
@@ -206,7 +186,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                           value: 100,
                           minHeight: 8,
                           borderRadius: BorderRadius.circular(400),
-                          backgroundColor: AppTheme.tertiary,
+                          backgroundColor: AppTheme.fourty,
                           valueColor: AlwaysStoppedAnimation<Color>(
                             usage.isFormsLimitReached
                                 ? Colors.red

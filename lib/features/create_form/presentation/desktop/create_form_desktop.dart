@@ -79,20 +79,21 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView>
 
   Future<void> _onPublishTap() async {
     // Просто вызываем умный метод контроллера
-    final success = await ref
+    final result = await ref
         .read(createFormProvider.notifier)
         .publishForm(widget.formId);
 
     if (!mounted) return;
 
-    if (success) {
+    if (result.success) {
       // Если успех — показываем диалог (он никуда не делся!)
       _showLinkDialog(widget.formId);
     } else {
+      final errorMessage = result.error ?? 'Unknown error';
       showSnackbar(
         context,
         type: SnackbarType.error,
-        message: 'Ошибка публикации',
+        message: 'Ошибка публикации: $errorMessage',
       );
     }
   }

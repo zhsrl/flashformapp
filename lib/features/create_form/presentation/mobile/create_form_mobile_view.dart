@@ -89,20 +89,21 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
 
   Future<void> _onPublishTap() async {
     // Просто вызываем умный метод контроллера
-    final success = await ref
+    final result = await ref
         .read(createFormProvider.notifier)
         .publishForm(widget.formId);
 
     if (!mounted) return;
 
-    if (success) {
+    if (result.success) {
       // Если успех — показываем диалог (он никуда не делся!)
       _showLinkDialog(widget.formId);
     } else {
+      final errorMessage = result.error ?? 'Unknown error';
       showSnackbar(
         context,
         type: SnackbarType.error,
-        message: 'mobile.publish_error'.tr(),
+        message: 'Ошибка публикации: $errorMessage',
       );
     }
   }

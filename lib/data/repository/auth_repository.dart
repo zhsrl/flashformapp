@@ -3,6 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 final supabaseAuthProvider = Provider<Supabase>((ref) => Supabase.instance);
+final currentUserIdProvider = Provider<String?>((ref) {
+  final auth = Supabase.instance.client.auth;
+
+  if (auth.currentUser != null) {
+    return auth.currentUser!.id;
+  }
+
+  return null;
+});
 final authRepoProvider = Provider<AuthRepository>(
   (ref) => AuthRepository(ref.watch(supabaseAuthProvider)),
 );

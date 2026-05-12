@@ -5,6 +5,7 @@ import 'package:flashform_app/data/controller/user_controller.dart';
 import 'package:flashform_app/data/model/payment.dart';
 import 'package:flashform_app/data/model/subscription_plan.dart';
 import 'package:flashform_app/features/settings/utils/subscription_plans_presenter.dart';
+import 'package:flashform_app/features/settings/widgets/payment_dialog.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
 import 'package:flutter/material.dart';
@@ -246,8 +247,8 @@ class _PlanCardState extends State<PlanCard> {
 
   String get _priceMain => switch (widget.plan) {
     SubscriptionPlan.spark => '',
-    SubscriptionPlan.go => '5000',
-    SubscriptionPlan.pro => '14000',
+    SubscriptionPlan.go => widget.plan.amountKzt.toString(),
+    SubscriptionPlan.pro => widget.plan.amountKzt.toString(),
   };
 
   String get _priceSuffix => widget.plan.isFree ? 'бесплатно' : 'KZT/месяц';
@@ -376,12 +377,22 @@ class _PlanCardState extends State<PlanCard> {
                         width: context.screenWidth,
                         child: FFButton(
                           isLoading: widget.isBusy && widget.isSelectedPlan,
-                          // onPressed: widget.isCurrentPlan || widget.isBusy
-                          //     ? null
-                          //     : widget.onAction,
-                          onPressed: () {
-                            showSubscriptionKaspiQR(context);
-                          },
+                          onPressed: widget.isCurrentPlan
+                              ? null
+                              : () {
+                                  if (widget.plan.isFree) {
+                                    widget.onAction();
+                                  } else {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => PaymentDialog(
+                                        planId: widget.plan.name,
+                                        amount: widget.plan.amountKzt,
+                                        planName: widget.plan.displayName,
+                                      ),
+                                    );
+                                  }
+                                },
                           secondTheme: _goPlan,
                           text: widget.isCurrentPlan
                               ? 'Текущий тариф'
@@ -390,55 +401,6 @@ class _PlanCardState extends State<PlanCard> {
                               : 'Оформить план',
                         ),
                       ),
-                      // SizedBox(
-                      //   width: context.screenWidth,
-                      //   child: ElevatedButton(
-                      //     onPressed: widget.isCurrentPlan || widget.isBusy
-                      //         ? null
-                      //         : widget.onAction,
-                      //     style: ElevatedButton.styleFrom(
-                      //       elevation: 0,
-                      //       minimumSize: const Size.fromHeight(46),
-                      //       backgroundColor: _goPlan
-                      //           ? const Color(0xFFCCFF4D)
-                      //           : Colors.white,
-                      //       disabledBackgroundColor: _goPlan
-                      //           ? const Color(0xFF9ABF38)
-                      //           : const Color(0xFFF2F4F7),
-                      //       foregroundColor: const Color(0xFF111827),
-                      //       shape: RoundedRectangleBorder(
-                      //         borderRadius: BorderRadius.circular(999),
-                      //         side: BorderSide(
-                      //           color: _goPlan
-                      //               ? Colors.transparent
-                      //               : const Color(0xFFE7E7E7),
-                      //         ),
-                      //       ),
-                      //     ),
-                      //     child: widget.isBusy && widget.isSelectedPlan
-                      //         ? SizedBox(
-                      //             height: 18,
-                      //             width: 18,
-                      //             child: CircularProgressIndicator(
-                      //               strokeWidth: 2.2,
-                      //               color: _goPlan
-                      //                   ? const Color(0xFF111827)
-                      //                   : AppTheme.secondary,
-                      //             ),
-                      //           )
-                      //         : Text(
-                      //             widget.isCurrentPlan
-                      //                 ? 'Текущий тариф'
-                      //                 : widget.plan.isFree
-                      //                 ? 'Выбрать план'
-                      //                 : 'Оформить план',
-                      //             style: const TextStyle(
-                      //               fontSize: 16,
-                      //               fontWeight: FontWeight.w700,
-                      //             ),
-                      //           ),
-                      //   ),
-                      // ),
                     ],
                   ),
                 ),

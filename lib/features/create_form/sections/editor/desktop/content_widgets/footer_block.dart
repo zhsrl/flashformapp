@@ -456,6 +456,7 @@ class _LinkItemState extends State<LinkItem> {
   @override
   void initState() {
     super.initState();
+
     _labelController = TextEditingController(text: widget.labelNotifier.value);
     _urlController = TextEditingController(text: widget.urlNotifier.value);
 

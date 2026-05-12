@@ -37,7 +37,7 @@ class FormService {
           'title': 'Заголовок формы',
           'button': {
             'text': 'Оставить заявку',
-            'color': 'FFd0f20b',
+            'color': 'FF2332db',
           },
           'fields': [],
           'success_text': '',
@@ -53,8 +53,8 @@ class FormService {
         'main': {
           'image': null,
           'label': null,
-          'title': 'Заголовок',
-          'subtitle': 'Описание',
+          'title': 'Заголовок страницы',
+          'subtitle': 'Описание страницы',
           'button_1': {
             'url': null,
             'text': 'Кнопка',
@@ -63,7 +63,7 @@ class FormService {
           },
           'button_2': {
             'url': null,
-            'text': null,
+            'text': 'Кнопка 2',
             'type': 'anchor',
             'anchor': null,
             'enabled': false,
@@ -71,7 +71,7 @@ class FormService {
         },
         'branding': {
           'theme': 'light',
-          'primary_color': 'FFd0f20b',
+          'primary_color': 'FF2332db',
           'logo': null,
         },
         'blocks': [],

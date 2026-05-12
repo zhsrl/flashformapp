@@ -1,8 +1,6 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/image_controller.dart';
-import 'package:flashform_app/data/model/create_form_state.dart';
-import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,12 +38,12 @@ class _ImagePickerWidgetState extends ConsumerState<ImagePickerWidget> {
   @override
   Widget build(BuildContext context) {
     final imageState = ref.watch(imageControllerProvider);
-    final formState = ref.watch(createFormProvider);
     final notifier = ref.read(imageControllerProvider.notifier);
     final createFormNotifier = ref.read(createFormProvider.notifier);
 
     final displayUrl = imageState.imageUrl ?? widget.imageUrl;
-    final hasImage = displayUrl != null || imageState.localImageBytes != null;
+    final hasLocalImage = imageState.localImageBytes != null;
+    final hasImage = displayUrl != null || hasLocalImage;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -76,14 +74,21 @@ class _ImagePickerWidgetState extends ConsumerState<ImagePickerWidget> {
               child: FFButton(
                 isLoading: imageState.isLoading,
                 onPressed: () async {
+                  if (hasLocalImage) {
+                    notifier.resetPickedImage();
+                    return;
+                  }
+
                   await ref.read(imageControllerProvider.notifier).pickImage();
                   createFormNotifier.markAsChanged();
                 },
-                text: hasImage ? 'Обновить' : 'Добавить фото',
+                text: hasLocalImage
+                    ? 'Сбросить'
+                    : (hasImage ? 'Обновить' : 'Добавить фото'),
                 marginBottom: 0,
               ),
             ),
-            if (hasImage) ...[
+            if (!hasLocalImage && hasImage) ...[
               const SizedBox(width: 8),
               SizedBox(
                 height: 45,
@@ -96,7 +101,6 @@ class _ImagePickerWidgetState extends ConsumerState<ImagePickerWidget> {
                           notifier,
                           displayUrl,
                           createFormNotifier,
-                          formState,
                         ),
                   style: IconButton.styleFrom(
                     elevation: 0,
@@ -212,9 +216,15 @@ class _ImagePickerWidgetState extends ConsumerState<ImagePickerWidget> {
     ImageController notifier,
     String? urlToDelete,
     CreateFormController createFormNotifier,
-    CreateFormState
-    createFormState, // <--- УБЕРИТЕ ЭТОТ АРГУМЕНТ, он путает вас
   ) async {
+    final imageState = ref.read(imageControllerProvider);
+
+    if (imageState.localImageBytes != null) {
+      notifier.resetPickedImage();
+      createFormNotifier.markAsChanged();
+      return;
+    }
+
     if (urlToDelete == null) return;
 
     try {
@@ -224,18 +234,8 @@ class _ImagePickerWidgetState extends ConsumerState<ImagePickerWidget> {
       // 2. Обновляем стейт формы
       createFormNotifier.updateHeroImage(null);
 
-      // 3. ПРОВЕРКА (ПРАВИЛЬНАЯ)
-      // Читаем напрямую из ref, чтобы увидеть АКТУАЛЬНЫЕ данные
-      final newState = ref.read(createFormProvider);
-      debugPrint(
-        'Hero image url (OLD variable): ${createFormState.heroImageUrl}',
-      ); // Будет старый
-      debugPrint(
-        'Hero image url (NEW state): ${newState.heroImageUrl}',
-      ); // Будет null
-
       notifier.reset();
-      widget.onImageDeleted!.call();
+      widget.onImageDeleted?.call();
     } catch (e) {
       // ...
     }

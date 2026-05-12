@@ -71,8 +71,11 @@ class ImageController extends StateNotifier<ImageUploadState> {
     debugPrint('🔄 [ImageController] Сброс состояния выбранное изображение');
 
     state = ImageUploadState(
+      imageUrl: state.imageUrl,
       localImageBytes: null,
       isLoading: false,
+      uploadProgress: null,
+      errorMessage: null,
     );
   }
 

@@ -1,6 +1,7 @@
 import 'package:dashed_border/dashed_border.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flashform_app/core/app_theme.dart';
+import 'package:flashform_app/core/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
 
@@ -129,7 +130,7 @@ class _EditorAdditionalBlocksViewState
               ),
               GestureDetector(
                 onTap: () {
-                  debugPrint('Footer opened: $_isFooterOpen');
+                  logger.d('Footer opened: $_isFooterOpen');
                   setState(() {
                     _isFooterOpen = !_isFooterOpen;
                   });

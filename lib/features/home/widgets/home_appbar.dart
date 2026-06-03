@@ -6,6 +6,7 @@ import 'package:flashform_app/data/model/subscription_plan.dart';
 import 'package:flashform_app/features/home/widgets/subscription_widget.dart';
 import 'package:flashform_app/features/settings/utils/subscription_plans_presenter.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
+import 'package:flashform_app/features/widgets/ff_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -229,10 +230,7 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
                 loading: () => SizedBox(
                   height: 100,
                   child: Center(
-                    child: LoadingAnimationWidget.waveDots(
-                      color: Colors.white,
-                      size: 30,
-                    ),
+                    child: FFLoading(),
                   ),
                 ),
               ),
@@ -332,13 +330,13 @@ class HomeAppBar extends StatelessWidget implements PreferredSizeWidget {
             final userState = ref.watch(userControllerProvider);
             final user = userState.user;
 
-            if (user == null) {
+            if (user == null || !user.isPlanActive) {
               return SizedBox();
             }
 
             return GestureDetector(
               onTap: () => showUsageDialog(context),
-              child: SubscriptionWidget(plan: user.plan),
+              child: SubscriptionWidget(user: user),
             );
           },
         ),

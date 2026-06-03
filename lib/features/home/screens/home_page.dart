@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/app_validator.dart';
+import 'package:flashform_app/core/utils/logger.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
 import 'package:flashform_app/data/controller/plan_usage_controller.dart';
@@ -74,6 +75,77 @@ class _HomePageState extends ConsumerState<HomePage> {
   Future<void> _openSubscriptionPlans() async {
     if (!mounted) return;
     await showSubscriptionPlansPresenter(context);
+  }
+
+  void _showTrialActivationIntroDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          backgroundColor: Colors.white,
+          title: Text(
+            'Активируйте 7-дневный пробный период',
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          content: SizedBox(
+            width: 380,
+            child: Text(
+              'Чтобы создать форму, активируйте бесплатный пробный период на тарифе Go.',
+              style: TextStyle(color: Colors.grey[700]),
+            ),
+          ),
+          actions: [
+            FFButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                _openSubscriptionPlans();
+              },
+              text: 'Активировать',
+              secondTheme: true,
+              marginBottom: 0,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _handleCreateForm() async {
+    final user = ref.read(userControllerProvider).user;
+
+    if (user != null) {
+      if (user.isTrialAvailable) {
+        _showTrialActivationIntroDialog();
+        return;
+      }
+
+      if (!user.isPlanActive) {
+        await _openSubscriptionPlans();
+        return;
+      }
+    }
+
+    final usageAsync = ref.read(planUsageProvider);
+
+    await usageAsync.when(
+      data: (usage) {
+        if (usage.isFormsLimitReached) {
+          showFormLimitDialog();
+        } else {
+          showCreateFormDialog();
+        }
+      },
+      loading: () {},
+      error: (er, st) {
+        showSnackbar(
+          context,
+          type: SnackbarType.error,
+          message: 'Error: $er',
+        );
+      },
+    );
   }
 
   showFormLimitDialog() {
@@ -177,7 +249,7 @@ class _HomePageState extends ConsumerState<HomePage> {
 
                                   if (!context.mounted) return;
 
-                                  debugPrint('Form created! ID: $newFormId');
+                                  logger.i('Form created! ID: $newFormId');
 
                                   if (newFormId != null) {
                                     Navigator.pop(context);
@@ -222,43 +294,14 @@ class _HomePageState extends ConsumerState<HomePage> {
         final location = router.routeInformationProvider.value.uri.path;
 
         return Scaffold(
-          // floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
           floatingActionButton: context.isMobile
               ? FloatingActionButton(
                   onPressed: () async {
-                    final usageAsync = ref.read(planUsageProvider);
-
-                    await usageAsync.when(
-                      data: (usage) {
-                        if (usage.isFormsLimitReached) {
-                          showFormLimitDialog();
-                        } else {
-                          showCreateFormDialog();
-                        }
-                      },
-                      loading: () {},
-
-                      error: (er, st) {
-                        showSnackbar(
-                          context,
-                          type: SnackbarType.error,
-                          message: 'Error: $er',
-                        );
-                      },
-                    );
+                    await _handleCreateForm();
                   },
                   backgroundColor: AppTheme.secondary,
                   foregroundColor: AppTheme.primary,
                   child: HeroIcon(HeroIcons.plus),
-                  // child: Row(
-                  //   children: [
-                  //     HeroIcon(HeroIcons.plus),
-                  //     const SizedBox(
-                  //       width: 8,
-                  //     ),
-                  //     Text('Создать'),
-                  //   ],
-                  // ),
                 )
               : null,
           bottomNavigationBar: context.isMobile
@@ -313,26 +356,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   },
 
                   onCreateForm: () async {
-                    final usageAsync = ref.read(planUsageProvider);
-
-                    await usageAsync.when(
-                      data: (usage) {
-                        if (usage.isFormsLimitReached) {
-                          showFormLimitDialog();
-                        } else {
-                          showCreateFormDialog();
-                        }
-                      },
-                      loading: () {},
-
-                      error: (er, st) {
-                        showSnackbar(
-                          context,
-                          type: SnackbarType.error,
-                          message: 'Error: $er',
-                        );
-                      },
-                    );
+                    await _handleCreateForm();
                   },
                 ),
             ],

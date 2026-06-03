@@ -7,6 +7,7 @@ import 'package:flashform_app/data/model/lead.dart';
 import 'package:flashform_app/data/repository/leads_repository.dart';
 import 'package:flashform_app/features/tables/views/desktop/leads_detail_view_desktop.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
+import 'package:flashform_app/features/widgets/ff_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -87,10 +88,7 @@ class _LeadsDetailViewMobileState extends ConsumerState<LeadsDetailViewMobile> {
       ),
       body: leadsState.isLoading && leadsState.leads.isEmpty
           ? Center(
-              child: LoadingAnimationWidget.waveDots(
-                color: AppTheme.secondary,
-                size: 30,
-              ),
+              child: FFLoading(),
             )
           : leadsState.leads.isEmpty
           ? const Center(

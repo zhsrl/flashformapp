@@ -62,6 +62,8 @@ dependencies:
   flutter_native_splash: ^2.4.7
   http: ^1.6.0
   qr_flutter: ^4.1.0
+  logger: ^2.4.0
+  cached_network_image: ^3.4.1
 
 dev_dependencies:
   flutter_test:
@@ -94,6 +96,7 @@ flutter:
     - assets/images/meta.svg
     - assets/images/metrika.svg
     - assets/images/telegram.svg
+    - assets/images/gsheets.svg
     - assets/images/kaspiqr.png
     - assets/images/logopng.png
     - assets/images/fulllogopng.png

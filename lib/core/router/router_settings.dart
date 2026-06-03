@@ -7,6 +7,7 @@ import 'package:flashform_app/features/auth/presentation/pages/signup_page.dart'
 import 'package:flashform_app/features/create_form/presentation/create_form_page.dart';
 import 'package:flashform_app/features/forms/views/forms_screen.dart';
 import 'package:flashform_app/features/home/screens/home_page.dart';
+import 'package:flashform_app/features/integrations/google/google_oauth_callback_page.dart';
 import 'package:flashform_app/features/auth/presentation/pages/signin_page.dart';
 import 'package:flashform_app/features/settings/settings_screen.dart';
 import 'package:flashform_app/features/tables/leads_detail_screen.dart';
@@ -66,13 +67,21 @@ final routerProvider = Provider<GoRouter>(
           ),
         ),
         GoRoute(
+          path: '/oauth/google',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: GoogleOAuthCallbackPage(),
+          ),
+        ),
+        GoRoute(
           path: '/create-form/:id',
 
           pageBuilder: (context, state) {
             final id = state.pathParameters['id'];
+            final openDrawer = state.uri.queryParameters['drawer'];
             return NoTransitionPage(
               child: CreateFormPage(
                 formId: id!,
+                openDrawer: openDrawer,
               ),
             );
           },

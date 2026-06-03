@@ -1,4 +1,6 @@
 import 'dart:typed_data';
+
+import 'package:flashform_app/core/utils/logger.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/data/repository/storage_repository.dart';
 import 'package:flashform_app/data/service/image_service.dart';
@@ -58,7 +60,7 @@ class ImageController extends StateNotifier<ImageUploadState> {
   final FormRepository _formRepository;
 
   void reset() {
-    debugPrint('🔄 [ImageController] Сброс состояния');
+    logger.d('🔄 [ImageController] Сброс состояния');
 
     state = ImageUploadState(
       imageUrl: null,
@@ -68,7 +70,7 @@ class ImageController extends StateNotifier<ImageUploadState> {
   }
 
   void resetPickedImage() {
-    debugPrint('🔄 [ImageController] Сброс состояния выбранное изображение');
+    logger.d('🔄 [ImageController] Сброс состояния выбранное изображение');
 
     state = ImageUploadState(
       imageUrl: state.imageUrl,
@@ -102,12 +104,12 @@ class ImageController extends StateNotifier<ImageUploadState> {
         state = state.copyWith(
           isLoading: false,
         );
-        debugPrint('ℹ️ User cancelled image picker');
+        logger.i('ℹ️ User cancelled image picker');
         return null;
       }
 
       final sizeInMB = _service.getImageSizeInMB(compressedBytes);
-      debugPrint(
+      logger.d(
         'Размер сжатого изображения: ${sizeInMB.toStringAsFixed(2)} MB',
       );
 
@@ -122,13 +124,13 @@ class ImageController extends StateNotifier<ImageUploadState> {
       String errorMessage;
       if (e.toString().contains('Permission')) {
         errorMessage = '❌ Permission denied: Need access to gallery/camera';
-        debugPrint(errorMessage);
+        logger.e(errorMessage);
       } else if (e.toString().contains('compress')) {
         errorMessage = '❌ Image compression failed: ${e.toString()}';
-        debugPrint(errorMessage);
+        logger.e(errorMessage);
       } else {
         errorMessage = '❌ Image pick error: ${e.toString()}';
-        debugPrint(errorMessage);
+        logger.e(errorMessage);
       }
 
       state = state.copyWith(
@@ -156,7 +158,7 @@ class ImageController extends StateNotifier<ImageUploadState> {
         state = state.copyWith(
           isLoading: false,
         );
-        debugPrint('⚠️ Upload cancelled: No image bytes provided');
+        logger.w('⚠️ Upload cancelled: No image bytes provided');
         return null;
       }
 
@@ -172,7 +174,7 @@ class ImageController extends StateNotifier<ImageUploadState> {
         localImageBytes: null,
       );
 
-      debugPrint('✅ Image uploaded successfully: $imageUrl');
+      logger.i('✅ Image uploaded successfully: $imageUrl');
       return imageUrl;
     } catch (e) {
       // Differentiate between error types
@@ -180,18 +182,18 @@ class ImageController extends StateNotifier<ImageUploadState> {
       if (e.toString().contains('network') ||
           e.toString().contains('timeout')) {
         errorMessage = '❌ Network error: Check your connection';
-        debugPrint(errorMessage);
+        logger.e(errorMessage);
       } else if (e.toString().contains('Permission') ||
           e.toString().contains('permission')) {
         errorMessage = '❌ Permission denied: Cannot access storage';
-        debugPrint(errorMessage);
+        logger.e(errorMessage);
       } else if (e.toString().contains('size') ||
           e.toString().contains('quota')) {
         errorMessage = '❌ Storage quota exceeded';
-        debugPrint(errorMessage);
+        logger.e(errorMessage);
       } else {
         errorMessage = '❌ Upload failed: ${e.toString()}';
-        debugPrint(errorMessage);
+        logger.e(errorMessage);
       }
 
       state = state.copyWith(
@@ -211,14 +213,14 @@ class ImageController extends StateNotifier<ImageUploadState> {
 
       // 1. Обновляем БД только если есть ID формы
       if (formId != null) {
-        debugPrint('Удаляем ссылку из БД...');
+        logger.d('Удаляем ссылку из БД...');
         await _formRepository.removeImageReference(formId).then((v) {
-          debugPrint('ссылка удалена');
+          logger.i('ссылка удалена');
         });
       }
 
       // 2. Удаляем файл из хранилища (выполняется всегда)
-      debugPrint('Удаляем файл из Storage...');
+      logger.d('Удаляем файл из Storage...');
       await _storageRepository.deleteImage(imageUrl);
 
       state = state.copyWith(

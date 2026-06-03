@@ -2,6 +2,7 @@ import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
 import 'package:flashform_app/data/controller/formui_controller.dart';
 import 'package:flashform_app/data/controller/plan_usage_controller.dart';
+import 'package:flashform_app/core/utils/logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -23,18 +24,18 @@ mixin FormLoaderMixin {
       final integrationsData = settingsData?['integrations'] as Map?;
 
       if (!isMounted()) {
-        debugPrint('⚠️ loadFormData: Widget был размонтирован');
+        logger.w('⚠️ loadFormData: Widget был размонтирован');
         return;
       }
 
       final uiControllers = ref.read(formUIControllersProvider);
 
-      debugPrint('📌 loadFormData: Форма загружена - ${form.name}');
+      logger.d('📌 loadFormData: Форма загружена - ${form.name}');
 
-      debugPrint('📌 loadFormData: Загружаю данные в контроллер...');
+      logger.d('📌 loadFormData: Загружаю данные в контроллер...');
       ref.read(createFormProvider.notifier).initializeFromModel(form);
 
-      debugPrint('📌 loadFormData: Загружаю данные в uiControllers...');
+      logger.d('📌 loadFormData: Загружаю данные в uiControllers...');
 
       // Загружаем success_action из новой структуры
       final successAction = formData?['success_action'] as Map?;
@@ -102,19 +103,19 @@ mixin FormLoaderMixin {
         final usage = (planUsageAsync as AsyncData).value;
         final formState = ref.read(createFormProvider);
         if (formState.hasFooter && !usage.hasFooter) {
-          debugPrint(
+          logger.w(
             '⚠️ Footer data preserved: Form has footer but user subscription expired',
           );
-          debugPrint(
+          logger.w(
             '   Footer will NOT be shown on public site until user re-subscribes',
           );
         }
       }
 
-      debugPrint('✅ loadFormData: Все данные загружены успешно!');
+      logger.i('✅ loadFormData: Все данные загружены успешно!');
     } catch (e, stackTrace) {
-      debugPrint('❌ loadFormData: Ошибка - $e');
-      debugPrint('❌ stackTrace: $stackTrace');
+      logger.e('❌ loadFormData: Ошибка - $e');
+      logger.e('❌ stackTrace: $stackTrace');
     } finally {
       onLoadComplete();
     }

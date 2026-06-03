@@ -18,11 +18,12 @@ class PlanUsage {
   final int leadsUsed;
 
   // Лимиты из плана
-  int get formsLimit => plan.formsLimit;
+  int? get formsLimit => plan.formsLimit;
   int? get leadsLimit => plan.leadsPerMonthLimit;
 
   // Превышен ли лимит форм
-  bool get isFormsLimitReached => formsUsed >= formsLimit;
+  bool get isFormsLimitReached =>
+      formsLimit != null && formsUsed >= formsLimit!;
 
   // Превышен ли лимит лидов (null = безлимит у Pro)
   bool get isLeadsLimitReached =>
@@ -37,10 +38,13 @@ class PlanUsage {
   bool get canChangeSlug => plan.canChangeSlug;
 
   bool get hasFooter => plan.hasFooter;
+  bool get hasMetaPixelIntegration => plan.hasMetaPixelIntegration;
   bool get hasYaMetrikaIntegration => plan.hasYaMetrikaIntegration;
   bool get hasTelegramBotIntegration => plan.hasTelegramBotIntegration;
+  bool get hasGoogleSheetsIntegration => plan.hasGoogleSheetsIntegration;
   // Прогресс форм (0.0 — 1.0)
-  double get formsProgress => (formsUsed / formsLimit).clamp(0.0, 1.0);
+  double? get formsProgress =>
+      formsLimit != null ? (formsUsed / formsLimit!).clamp(0.0, 1.0) : null;
 
   // Прогресс лидов (0.0 — 1.0), null если безлимит
   double? get leadsProgress =>
@@ -62,7 +66,9 @@ class PlanUsageController extends AsyncNotifier<PlanUsage> {
     final formsAsync = ref.watch(formControllerProvider);
     final leadsRepo = ref.read(leadsRepoProvider);
 
-    final plan = user?.plan ?? SubscriptionPlan.spark;
+    final plan = (user?.isTrialActive ?? false)
+        ? SubscriptionPlan.go
+        : (user?.plan ?? SubscriptionPlan.trial);
     final formsUsed = formsAsync.value?.length ?? 0;
     final leadsUsed = await leadsRepo.getMonthlyLeadsCount();
 

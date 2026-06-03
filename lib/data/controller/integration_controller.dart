@@ -18,6 +18,18 @@ final yandexMetrikaControllerProvider =
       return YandexMetrikaController(ref);
     });
 
+enum IntegrationDrawerType {
+  none,
+  telegram,
+  googleSheets,
+  metaPixel,
+  yandexMetrika,
+}
+
+final integrationDrawerProvider = StateProvider<IntegrationDrawerType>(
+  (ref) => IntegrationDrawerType.none,
+);
+
 class MetaPixelController extends StateNotifier<AsyncValue<String>> {
   MetaPixelController(this._ref) : super(const AsyncValue.data(''));
 
@@ -26,7 +38,7 @@ class MetaPixelController extends StateNotifier<AsyncValue<String>> {
   Future<void> save(String formId) async {
     final formState = _ref.read(createFormProvider);
 
-    if (formState.yandexMetrikaId == '') {
+    if (formState.metaPixelId == '') {
       state = const AsyncValue.data('');
       return;
     }
@@ -68,7 +80,7 @@ class YandexMetrikaController extends StateNotifier<AsyncValue<String>> {
   Future<void> save(String formId) async {
     final formState = _ref.read(createFormProvider);
 
-    if (formState.metaPixelId == '') {
+    if (formState.yandexMetrikaId == '') {
       state = const AsyncValue.data('');
       return;
     }

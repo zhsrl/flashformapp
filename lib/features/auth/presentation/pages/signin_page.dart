@@ -2,6 +2,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/app_validator.dart';
 import 'package:flashform_app/core/utils/auth_error_localizer.dart';
+import 'package:flashform_app/core/utils/logger.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/core/utils/utils.dart';
 import 'package:flashform_app/data/controller/auth_controller.dart';
@@ -36,13 +37,13 @@ class _SigninPageState extends ConsumerState<SigninPage> {
   }
 
   Future<void> signIn(String email, String password) async {
-    debugPrint('auth started');
+    logger.d('auth started');
     await ref.read(authControllerProvider.notifier).signIn(email, password);
 
     final authState = ref.read(authControllerProvider);
     if (authState.hasError) {
       final message = localizeAuthError(authState.error!);
-      debugPrint('Signin error: $message');
+      logger.w('Signin error: $message');
 
       if (mounted) {
         showSnackbar(context, type: SnackbarType.error, message: message);

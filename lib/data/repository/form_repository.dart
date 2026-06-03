@@ -1,6 +1,6 @@
 import 'package:flashform_app/data/model/form.dart';
 import 'package:flashform_app/data/repository/auth_repository.dart';
-import 'package:flutter/material.dart';
+import 'package:flashform_app/core/utils/logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -45,7 +45,7 @@ class FormRepository {
     // try-catch не нужен: ошибка вернется в контроллер
     final response = await _client.from('forms').insert(data).select().single();
 
-    debugPrint('Created Form: $response');
+    logger.d('Created Form: $response');
     return FormModel.fromJson(response);
   }
 

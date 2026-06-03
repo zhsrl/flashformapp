@@ -2,6 +2,7 @@ import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/features/home/widgets/home_appbar.dart';
 import 'package:flashform_app/features/tables/providers/stats_provider.dart';
 import 'package:flashform_app/features/tables/widgets/lead_card.dart';
+import 'package:flashform_app/features/widgets/ff_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -58,10 +59,7 @@ class LeadsViewDesktop extends ConsumerWidget {
           );
         },
         loading: () => Center(
-          child: LoadingAnimationWidget.waveDots(
-            color: AppTheme.secondary,
-            size: 50,
-          ),
+          child: FFLoading(),
         ),
         error: (error, stackTrace) => Center(
           child: Column(

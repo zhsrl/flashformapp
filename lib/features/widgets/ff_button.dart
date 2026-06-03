@@ -1,5 +1,6 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
+import 'package:flashform_app/features/widgets/ff_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
@@ -60,10 +61,7 @@ class _FFButtonState extends State<FFButton> {
         ),
 
         child: widget.isLoading
-            ? LoadingAnimationWidget.waveDots(
-                color: AppTheme.primary,
-                size: 24,
-              )
+            ? FFLoading()
             : Text(
                 widget.text,
                 style: TextStyle(

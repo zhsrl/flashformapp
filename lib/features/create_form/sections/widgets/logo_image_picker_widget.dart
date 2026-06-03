@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/data/controller/logo_image_controller.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
@@ -137,10 +138,9 @@ class _LogoImagePickerWidgetState extends ConsumerState<LogoImagePickerWidget> {
     if (url != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(10),
-        child: Image.network(
-          url,
+        child: CachedNetworkImage(
+          imageUrl: url,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildPlaceholder(),
         ),
       );
     }

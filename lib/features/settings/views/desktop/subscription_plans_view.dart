@@ -1,10 +1,10 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
+import 'package:flashform_app/data/controller/plan_usage_controller.dart';
 import 'package:flashform_app/data/controller/subscription_controller.dart';
 import 'package:flashform_app/data/controller/user_controller.dart';
 import 'package:flashform_app/data/model/payment.dart';
 import 'package:flashform_app/data/model/subscription_plan.dart';
-import 'package:flashform_app/features/settings/utils/subscription_plans_presenter.dart';
 import 'package:flashform_app/features/settings/widgets/payment_dialog.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
@@ -22,7 +22,10 @@ class SubscriptionPlansView extends ConsumerStatefulWidget {
 }
 
 class _SubscriptionPlansViewState extends ConsumerState<SubscriptionPlansView> {
-  final List<SubscriptionPlan> plans = SubscriptionPlan.values;
+  final List<SubscriptionPlan> plans = [
+    SubscriptionPlan.go,
+    SubscriptionPlan.pro,
+  ];
   late final ProviderSubscription<SubscriptionControllerState> _subListener;
 
   @override
@@ -69,17 +72,6 @@ class _SubscriptionPlansViewState extends ConsumerState<SubscriptionPlansView> {
       subscriptionControllerProvider.notifier,
     );
 
-    if (plan.isFree) {
-      subscriptionNotifier.selectPlan(plan);
-      showSnackbar(
-        context,
-        type: SnackbarType.info,
-        message:
-            'План ${plan.displayName} выбран. Для бесплатного плана оплата не требуется',
-      );
-      return;
-    }
-
     final isSuccess = await subscriptionNotifier.subscribeToPlan(
       plan: plan,
       provider: PaymentProvider.tiptop,
@@ -92,6 +84,8 @@ class _SubscriptionPlansViewState extends ConsumerState<SubscriptionPlansView> {
   Widget build(BuildContext context) {
     final subscriptionState = ref.watch(subscriptionControllerProvider);
     final userState = ref.watch(userControllerProvider);
+    final user = userState.user;
+    final isTrialAvailable = user?.isTrialAvailable ?? false;
 
     final currentPlan =
         userState.user?.plan ?? subscriptionState.activeSubscription?.plan;
@@ -145,10 +139,30 @@ class _SubscriptionPlansViewState extends ConsumerState<SubscriptionPlansView> {
                                   isCurrentPlan: plans[i] == currentPlan,
                                   isSelectedPlan: plans[i] == selectedPlan,
                                   isBusy: subscriptionState.isActionInProgress,
+                                  isTrialAvailable: isTrialAvailable,
                                   onAction: () => _handlePlanAction(
                                     plan: plans[i],
                                     currentPlan: currentPlan,
                                   ),
+                                  onActivateTrial: () async {
+                                    final userNotifier = ref.read(
+                                      userControllerProvider.notifier,
+                                    );
+
+                                    final updatedUser = await userNotifier
+                                        .activateTrial();
+
+                                    if (!mounted || updatedUser == null) {
+                                      return;
+                                    }
+
+                                    await ref
+                                        .read(planUsageProvider.notifier)
+                                        .refresh();
+
+                                    if (!mounted) return;
+                                    Navigator.pop(context);
+                                  },
                                 ),
                               ),
                           ],
@@ -167,10 +181,30 @@ class _SubscriptionPlansViewState extends ConsumerState<SubscriptionPlansView> {
                                   isCurrentPlan: plans[i] == currentPlan,
                                   isSelectedPlan: plans[i] == selectedPlan,
                                   isBusy: subscriptionState.isActionInProgress,
+                                  isTrialAvailable: isTrialAvailable,
                                   onAction: () => _handlePlanAction(
                                     plan: plans[i],
                                     currentPlan: currentPlan,
                                   ),
+                                  onActivateTrial: () async {
+                                    final userNotifier = ref.read(
+                                      userControllerProvider.notifier,
+                                    );
+
+                                    final updatedUser = await userNotifier
+                                        .activateTrial();
+
+                                    if (!mounted || updatedUser == null) {
+                                      return;
+                                    }
+
+                                    await ref
+                                        .read(planUsageProvider.notifier)
+                                        .refresh();
+
+                                    if (!mounted) return;
+                                    Navigator.pop(context);
+                                  },
                                 ),
                               ),
                             ),
@@ -213,14 +247,18 @@ class PlanCard extends StatefulWidget {
     required this.isCurrentPlan,
     required this.isSelectedPlan,
     required this.isBusy,
+    required this.isTrialAvailable,
     required this.onAction,
+    required this.onActivateTrial,
   });
 
   final SubscriptionPlan plan;
   final bool isCurrentPlan;
   final bool isSelectedPlan;
   final bool isBusy;
+  final bool isTrialAvailable;
   final VoidCallback onAction;
+  final VoidCallback onActivateTrial;
 
   @override
   State<PlanCard> createState() => _PlanCardState();
@@ -230,39 +268,39 @@ class _PlanCardState extends State<PlanCard> {
   bool _isHovered = false;
 
   bool get _goPlan => widget.plan == SubscriptionPlan.go;
-  bool get _sparkPlan => widget.plan == SubscriptionPlan.spark;
-  bool get _proPlan => widget.plan == SubscriptionPlan.pro;
 
   HeroIcons get _planIcon => switch (widget.plan) {
-    SubscriptionPlan.spark => HeroIcons.star,
     SubscriptionPlan.go => HeroIcons.fire,
     SubscriptionPlan.pro => HeroIcons.bolt,
+    _ => HeroIcons.star,
   };
 
   String get _planSubtitle => switch (widget.plan) {
-    SubscriptionPlan.spark => 'Для старта и первых лидов',
     SubscriptionPlan.go => 'Для масштабирования и роста',
     SubscriptionPlan.pro => 'Для команд и полного контроля',
+    _ => 'Для старта и первых лидов',
   };
 
   String get _priceMain => switch (widget.plan) {
-    SubscriptionPlan.spark => '',
     SubscriptionPlan.go => widget.plan.amountKzt.toString(),
     SubscriptionPlan.pro => widget.plan.amountKzt.toString(),
+    _ => '',
   };
 
-  String get _priceSuffix => widget.plan.isFree ? 'бесплатно' : 'KZT/месяц';
+  String get _priceSuffix => 'KZT/месяц';
 
   List<String> get _displayFeatures => [
-    if (widget.plan == SubscriptionPlan.go) 'Все возможности Spark',
     if (widget.plan == SubscriptionPlan.pro) 'Все возможности Go',
     ...widget.plan.featureList,
   ];
 
   Map<String, dynamic> get _displayIntegrations => {
     'Meta Pixel': 'assets/images/meta.svg',
-    if (widget.plan == .go || widget.plan == .pro)
+
+    if (widget.plan == .pro || widget.plan == .go)
       'Яндекс Метрика': 'assets/images/metrika.svg',
+    if (widget.plan == .pro) 'Google Sheets': 'assets/images/gsheets.svg',
+
     if (widget.plan == .pro)
       'Telegram бот для уведомления': 'assets/images/telegram.svg',
   };
@@ -380,24 +418,25 @@ class _PlanCardState extends State<PlanCard> {
                           onPressed: widget.isCurrentPlan
                               ? null
                               : () {
-                                  if (widget.plan.isFree) {
-                                    widget.onAction();
-                                  } else {
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => PaymentDialog(
-                                        planId: widget.plan.name,
-                                        amount: widget.plan.amountKzt,
-                                        planName: widget.plan.displayName,
-                                      ),
-                                    );
+                                  if (_goPlan && widget.isTrialAvailable) {
+                                    widget.onActivateTrial();
+                                    return;
                                   }
+
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => PaymentDialog(
+                                      planId: widget.plan.name,
+                                      amount: widget.plan.amountKzt,
+                                      planName: widget.plan.displayName,
+                                    ),
+                                  );
                                 },
                           secondTheme: _goPlan,
                           text: widget.isCurrentPlan
                               ? 'Текущий тариф'
-                              : widget.plan.isFree
-                              ? 'Выбрать план'
+                              : (_goPlan && widget.isTrialAvailable)
+                              ? 'Активировать бесплатный период'
                               : 'Оформить план',
                         ),
                       ),

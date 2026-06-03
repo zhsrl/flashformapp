@@ -7,6 +7,7 @@ import 'package:flashform_app/features/create_form/sections/editor/desktop/conte
 import 'package:flashform_app/features/create_form/sections/editor/desktop/content_widgets/branding_widgets/primarycolor_block.dart';
 import 'package:flashform_app/features/create_form/sections/editor/desktop/content_widgets/branding_widgets/theme_block.dart';
 import 'package:flashform_app/features/create_form/sections/editor/desktop/content_widgets/label_block.dart';
+import 'package:flashform_app/features/widgets/ff_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -56,10 +57,7 @@ class EditorBrandingView extends ConsumerWidget {
         return SizedBox();
       },
       loading: () => Center(
-        child: LoadingAnimationWidget.waveDots(
-          color: AppTheme.secondary,
-          size: 30,
-        ),
+        child: FFLoading(),
       ),
     );
   }

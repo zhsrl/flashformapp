@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/image_controller.dart';
@@ -134,10 +135,10 @@ class _ImagePickerWidgetState extends ConsumerState<ImagePickerWidget> {
     } else if (url != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(10),
-        child: Image.network(
-          url,
+        child: CachedNetworkImage(
+          imageUrl: url,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildPlaceholder(),
+          // errorBuilder: (_, __, ___) => _buildPlaceholder(),
         ),
       );
     }

@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:flashform_app/core/utils/logger.dart';
 import 'package:flashform_app/data/controller/image_controller.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/data/repository/storage_repository.dart';
@@ -100,7 +101,7 @@ class LogoImageController extends StateNotifier<ImageUploadState> {
       }
 
       final sizeInMB = _service.getImageSizeInMB(compressedBytes);
-      debugPrint('Compressed logo size: ${sizeInMB.toStringAsFixed(2)} MB');
+      logger.d('Compressed logo size: ${sizeInMB.toStringAsFixed(2)} MB');
 
       state = state.copyWith(
         isLoading: false,

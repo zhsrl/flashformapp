@@ -9,9 +9,11 @@ class CreateFormPage extends StatefulWidget {
   const CreateFormPage({
     super.key,
     required this.formId,
+    this.openDrawer,
   });
 
   final String formId;
+  final String? openDrawer;
 
   @override
   State<CreateFormPage> createState() => _CreateFormPageState();
@@ -26,10 +28,17 @@ class _CreateFormPageState extends State<CreateFormPage> {
       ],
 
       child: ResponsiveLayout(
-        mobile: CreateFormMobileView(formId: widget.formId),
-        tablet: CreateFormDesktopView(formId: widget.formId),
+        mobile: CreateFormMobileView(
+          formId: widget.formId,
+          openDrawer: widget.openDrawer,
+        ),
+        tablet: CreateFormDesktopView(
+          formId: widget.formId,
+          openDrawer: widget.openDrawer,
+        ),
         desktop: CreateFormDesktopView(
           formId: widget.formId,
+          openDrawer: widget.openDrawer,
         ),
       ),
     );

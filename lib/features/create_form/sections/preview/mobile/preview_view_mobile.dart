@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
@@ -212,12 +213,11 @@ class _PreviewViewState extends ConsumerState<PreviewViewMobile>
       return Container(
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(15)),
-        child: Image.network(
-          formState.heroImageUrl!,
+        child: CachedNetworkImage(
+          imageUrl: formState.heroImageUrl!,
           width: 318,
           height: 318,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildPlaceholder(formState),
         ),
       );
     }

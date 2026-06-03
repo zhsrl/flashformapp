@@ -1,7 +1,13 @@
 import 'package:flashform_app/core/mixins/form_loader_mixin.dart';
 import 'package:flashform_app/data/controller/formui_controller.dart';
+import 'package:flashform_app/data/controller/integration_controller.dart';
+import 'package:flashform_app/data/controller/user_controller.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
+import 'package:flashform_app/features/create_form/sections/editor/desktop/views/google_sheets_integration_settings_view.dart';
+import 'package:flashform_app/features/create_form/sections/editor/desktop/views/meta_pixel_integration_settings_view.dart';
 import 'package:flashform_app/features/create_form/sections/editor/desktop/views/telegram_integration_settings_view.dart';
+import 'package:flashform_app/features/create_form/sections/editor/desktop/views/yandex_metrika_integration_settings_view.dart';
+import 'package:flashform_app/features/widgets/ff_loading.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:heroicons/heroicons.dart';
 import 'package:flashform_app/core/app_theme.dart';
@@ -25,9 +31,11 @@ class CreateFormDesktopView extends ConsumerStatefulWidget {
   const CreateFormDesktopView({
     super.key,
     required this.formId,
+    this.openDrawer,
   });
 
   final String formId;
+  final String? openDrawer;
 
   @override
   ConsumerState<CreateFormDesktopView> createState() =>
@@ -39,6 +47,7 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView>
   bool _isloadingInitialData = true;
   bool isFormNameChange = false;
   bool isCopy = false;
+  bool _didOpenDrawerFromQuery = false;
 
   final FocusNode _focusNode = FocusNode();
 
@@ -50,7 +59,24 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView>
         setState(() {
           _isloadingInitialData = false;
         });
+        _scheduleOpenDrawerFromQuery();
       }
+    });
+  }
+
+  void _scheduleOpenDrawerFromQuery() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_didOpenDrawerFromQuery || widget.openDrawer == null) return;
+      if (_isloadingInitialData) return;
+
+      _didOpenDrawerFromQuery = true;
+      final drawerType = widget.openDrawer == 'google'
+          ? IntegrationDrawerType.googleSheets
+          : IntegrationDrawerType.telegram;
+
+      ref.read(integrationDrawerProvider.notifier).state = drawerType;
+      Scaffold.of(context).openEndDrawer();
     });
   }
 
@@ -260,10 +286,7 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Center(
-                      child: LoadingAnimationWidget.waveDots(
-                        color: AppTheme.secondary,
-                        size: 30,
-                      ),
+                      child: FFLoading(),
                     ),
                   ],
                 ),
@@ -416,6 +439,9 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView>
   @override
   Widget build(BuildContext context) {
     final formState = ref.watch(createFormProvider);
+    final drawerType = ref.watch(integrationDrawerProvider);
+    final user = ref.watch(userControllerProvider).user;
+
     ref.watch(formUIControllersProvider);
 
     return Scaffold(
@@ -423,6 +449,7 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView>
       appBar: EditorAppBar(
         formName: formState.name,
         automaticallyImplyLeading: true,
+        user: user,
         isPublishing: formState.isPublishing,
         onTapMore: _showDeleteFormDialog,
         onTapLink: () {
@@ -454,13 +481,10 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView>
           await _onPublishTap();
         },
       ),
-      endDrawer: TelegramBotIntegrationSettingsView(),
+      endDrawer: _buildEndDrawer(drawerType),
       body: _isloadingInitialData
           ? Center(
-              child: LoadingAnimationWidget.waveDots(
-                color: AppTheme.secondary,
-                size: 40,
-              ),
+              child: FFLoading(),
             )
           : Padding(
               padding: EdgeInsetsGeometry.all(16),
@@ -480,13 +504,30 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView>
                     const SizedBox(
                       width: 16,
                     ),
-                    PreviewView(
-                      focusNode: _focusNode,
+                    Expanded(
+                      child: PreviewView(
+                        focusNode: _focusNode,
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
     );
+  }
+
+  Widget? _buildEndDrawer(IntegrationDrawerType drawerType) {
+    switch (drawerType) {
+      case IntegrationDrawerType.telegram:
+        return TelegramBotIntegrationSettingsView();
+      case IntegrationDrawerType.googleSheets:
+        return GoogleSheetsIntegrationSettingsView(formId: widget.formId);
+      case IntegrationDrawerType.metaPixel:
+        return MetaPixelIntegrationSettingsView(formId: widget.formId);
+      case IntegrationDrawerType.yandexMetrika:
+        return YandexMetrikaIntegrationSettingsView(formId: widget.formId);
+      case IntegrationDrawerType.none:
+        return null;
+    }
   }
 }

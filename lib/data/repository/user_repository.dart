@@ -22,6 +22,13 @@ class UserRepository {
     }
 
     try {
+      // Очистить истекшие trial'ы перед загрузкой профиля
+      await _client
+          .rpc('clear_expired_trials')
+          .catchError(
+            (_) {}, // игнорируем ошибки, профиль загружаем всё равно
+          );
+
       final response = await _client
           .from('users')
           .select()
@@ -46,6 +53,17 @@ class UserRepository {
         .eq('id', currentUser.id)
         .select()
         .single();
+
+    return User.fromJson(response);
+  }
+
+  Future<User> activateTrial() async {
+    final currentUser = _client.auth.currentUser;
+    if (currentUser == null) {
+      throw const AuthException('User not logged in');
+    }
+
+    final response = await _client.rpc('activate_trial').single();
 
     return User.fromJson(response);
   }

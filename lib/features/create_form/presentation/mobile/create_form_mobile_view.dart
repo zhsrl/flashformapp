@@ -5,15 +5,20 @@ import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
 import 'package:flashform_app/data/controller/formui_controller.dart';
+import 'package:flashform_app/data/controller/integration_controller.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/features/create_form/sections/editor/desktop/editor_view_desktop.dart';
 import 'package:flashform_app/features/create_form/sections/editor/desktop/views/editor_branding_view.dart';
 import 'package:flashform_app/features/create_form/sections/editor/desktop/views/editor_settings_view.dart';
+import 'package:flashform_app/features/create_form/sections/editor/desktop/views/google_sheets_integration_settings_view.dart';
+import 'package:flashform_app/features/create_form/sections/editor/desktop/views/meta_pixel_integration_settings_view.dart';
 import 'package:flashform_app/features/create_form/sections/editor/desktop/views/telegram_integration_settings_view.dart';
+import 'package:flashform_app/features/create_form/sections/editor/desktop/views/yandex_metrika_integration_settings_view.dart';
 import 'package:flashform_app/features/create_form/sections/editor/mobile/editor_view_mobile.dart';
 import 'package:flashform_app/features/create_form/sections/preview/desktop/preview_view.dart';
 import 'package:flashform_app/features/create_form/sections/preview/mobile/preview_view_mobile.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
+import 'package:flashform_app/features/widgets/ff_loading.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
 import 'package:flashform_app/features/widgets/ff_tabbar.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
@@ -30,9 +35,11 @@ class CreateFormMobileView extends ConsumerStatefulWidget {
   const CreateFormMobileView({
     super.key,
     required this.formId,
+    this.openDrawer,
   });
 
   final String formId;
+  final String? openDrawer;
 
   @override
   ConsumerState<CreateFormMobileView> createState() =>
@@ -44,6 +51,7 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
   bool _isloadingInitialData = true;
   bool isFormNameChange = false;
   bool isCopy = false;
+  bool _didOpenDrawerFromQuery = false;
 
   final FocusNode _focusNode = FocusNode();
   int _tabIndex = 0;
@@ -64,8 +72,25 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
         setState(() {
           _isloadingInitialData = false;
         });
+        _scheduleOpenDrawerFromQuery();
       },
     );
+  }
+
+  void _scheduleOpenDrawerFromQuery() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (_didOpenDrawerFromQuery || widget.openDrawer == null) return;
+      if (_isloadingInitialData) return;
+
+      _didOpenDrawerFromQuery = true;
+      final drawerType = widget.openDrawer == 'google'
+          ? IntegrationDrawerType.googleSheets
+          : IntegrationDrawerType.telegram;
+
+      ref.read(integrationDrawerProvider.notifier).state = drawerType;
+      Scaffold.of(context).openEndDrawer();
+    });
   }
 
   Future<void> _updateFormName(String name) async {
@@ -326,10 +351,7 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Center(
-                      child: LoadingAnimationWidget.waveDots(
-                        color: AppTheme.secondary,
-                        size: 30,
-                      ),
+                      child: FFLoading(),
                     ),
                   ],
                 ),
@@ -437,8 +459,9 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
     final formState = ref.watch(createFormProvider);
     final controller = ref.read(createFormProvider.notifier);
     ref.watch(formUIControllersProvider);
+    final drawerType = ref.watch(integrationDrawerProvider);
     return Scaffold(
-      endDrawer: TelegramBotIntegrationSettingsView(),
+      endDrawer: _buildEndDrawer(drawerType),
       backgroundColor: AppTheme.background,
       appBar: AppBar(
         leading: IconButton(
@@ -504,10 +527,7 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
 
       body: _isloadingInitialData
           ? Center(
-              child: LoadingAnimationWidget.waveDots(
-                color: AppTheme.secondary,
-                size: 40,
-              ),
+              child: FFLoading(),
             )
           : Padding(
               padding: EdgeInsets.all(16),
@@ -572,5 +592,20 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
   void dispose() {
     _formNameController.dispose();
     super.dispose();
+  }
+
+  Widget? _buildEndDrawer(IntegrationDrawerType drawerType) {
+    switch (drawerType) {
+      case IntegrationDrawerType.telegram:
+        return TelegramBotIntegrationSettingsView();
+      case IntegrationDrawerType.googleSheets:
+        return GoogleSheetsIntegrationSettingsView(formId: widget.formId);
+      case IntegrationDrawerType.metaPixel:
+        return MetaPixelIntegrationSettingsView(formId: widget.formId);
+      case IntegrationDrawerType.yandexMetrika:
+        return YandexMetrikaIntegrationSettingsView(formId: widget.formId);
+      case IntegrationDrawerType.none:
+        return null;
+    }
   }
 }

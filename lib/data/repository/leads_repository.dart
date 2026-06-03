@@ -4,9 +4,9 @@ import 'dart:typed_data';
 import 'package:csv/csv.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:file_saver/file_saver.dart';
+import 'package:flashform_app/core/utils/logger.dart';
 import 'package:flashform_app/data/model/lead.dart';
 import 'package:flashform_app/data/repository/auth_repository.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -171,7 +171,7 @@ class LeadsRepository {
     String? city,
     String? country,
   }) async {
-    debugPrint('Exporting data to CSV...');
+    logger.i('Exporting data to CSV...');
     var query = _client
         .from('leads')
         .select('created_at, answers, utm_data, geo')
@@ -200,7 +200,7 @@ class LeadsRepository {
     final data = await query.order('created_at', ascending: false);
 
     if (data.isEmpty) {
-      debugPrint('No data to export');
+      logger.i('No data to export');
       return;
     }
 
@@ -286,9 +286,9 @@ class LeadsRepository {
         bytes: uint8list,
       );
 
-      debugPrint('CSV export completed successfully');
+      logger.i('CSV export completed successfully');
     } catch (e) {
-      debugPrint('Export error: $e');
+      logger.e('Export error: $e');
       throw Exception('Ошибка экспорта: $e');
     }
   }

@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
+import 'package:flashform_app/core/utils/logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -56,7 +56,7 @@ class StorageRepository {
     String imageUrl,
   ) async {
     try {
-      debugPrint('Удаляем фото...');
+      logger.d('Удаляем фото...');
       final user = Supabase.instance.client.auth.currentUser;
 
       if (user == null) return;
@@ -67,18 +67,18 @@ class StorageRepository {
       final publicIndex = segments.indexOf('public');
 
       if (publicIndex == -1 || publicIndex >= segments.length - 1) {
-        debugPrint('Неверный формат URL');
+        logger.e('Неверный формат URL');
         throw Exception('Неверный формат URL изображения');
       }
 
       final bucketIndex = publicIndex + 1;
       final filePath = segments.sublist(bucketIndex + 1).join('/');
 
-      debugPrint('🔍 Извлеченный путь к файлу: $filePath');
+      logger.d('🔍 Извлеченный путь к файлу: $filePath');
 
       await _supabase.storage.from(_bucketName).remove([filePath]);
 
-      debugPrint('Удалили успешно...');
+      logger.i('Удалили успешно...');
     } on StorageException catch (e) {
       throw Exception('Exception delete image: ${e.message}');
     } catch (e) {
@@ -103,7 +103,7 @@ class StorageRepository {
         );
       }
     } catch (e) {
-      debugPrint('Ошибка при проверке bucket: $e');
+      logger.e('Ошибка при проверке bucket: $e');
     }
   }
 }

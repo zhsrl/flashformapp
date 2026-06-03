@@ -1,4 +1,5 @@
 import 'package:flashform_app/core/app_theme.dart';
+import 'package:flashform_app/core/utils/logger.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
 import 'package:flashform_app/data/controller/image_controller.dart';
 import 'package:flashform_app/data/controller/plan_usage_controller.dart';
@@ -6,6 +7,7 @@ import 'package:flashform_app/data/model/create_form_state.dart'
     show CreateFormState, MainPageButtonModel;
 import 'package:flashform_app/data/model/form.dart';
 import 'package:flashform_app/data/model/form_link.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -283,7 +285,9 @@ class CreateFormController extends StateNotifier<CreateFormState> {
           (settingsData['integrations'] as Map?)?.cast<String, dynamic>() ??
           <String, dynamic>{};
 
-      debugPrint('main data: $mainData');
+      if (kDebugMode) {
+        logger.d('main data: $mainData');
+      }
 
       final rawFields = (formData['fields'] as List? ?? [])
           .whereType<Map>()
@@ -416,7 +420,7 @@ class CreateFormController extends StateNotifier<CreateFormState> {
         footerLinks: footerLinks,
       );
     } catch (e) {
-      debugPrint('❌ Error initializing form from model: $e');
+      logger.e('❌ Error initializing form from model: $e');
       rethrow;
     }
   }
@@ -488,25 +492,25 @@ class CreateFormController extends StateNotifier<CreateFormState> {
     // Validation before publishing
     if (state.actionType == 'form' && state.fields.isEmpty) {
       const error = 'В форму не добавлены никакие поля.';
-      debugPrint('❌ Form validation failed: $error');
+      logger.w('❌ Form validation failed: $error');
       return (success: false, error: error);
     }
 
     if (state.formTitle == null || state.formTitle!.isEmpty) {
       const error = 'Заголовок формы пуст';
-      debugPrint('❌ Form validation failed: $error');
+      logger.w('❌ Form validation failed: $error');
       return (success: false, error: error);
     }
 
     if (state.formButtonText == null || state.formButtonText!.isEmpty) {
       const error = 'Текст кнопки пуст';
-      debugPrint('❌ Form validation failed: $error');
+      logger.w('❌ Form validation failed: $error');
       return (success: false, error: error);
     }
 
     if (state.title == null || state.title!.isEmpty) {
       const error = 'Основной заголовок пуст';
-      debugPrint('❌ Form validation failed: $error');
+      logger.w('❌ Form validation failed: $error');
       return (success: false, error: error);
     }
 
@@ -624,7 +628,7 @@ class CreateFormController extends StateNotifier<CreateFormState> {
         },
       };
 
-      debugPrint('Response fields: ${response['form']}');
+      logger.d('Response fields: ${response['form']}');
 
       await ref.read(formControllerProvider.notifier).publishForm(response);
 
@@ -634,7 +638,7 @@ class CreateFormController extends StateNotifier<CreateFormState> {
       return (success: true, error: null);
     } catch (e) {
       final errorMessage = 'Error publishing form: $e';
-      debugPrint(errorMessage);
+      logger.e(errorMessage);
       return (success: false, error: e.toString());
     } finally {
       state = state.copyWith(isPublishing: false);

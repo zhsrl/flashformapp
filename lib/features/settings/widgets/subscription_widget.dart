@@ -31,7 +31,7 @@ class _ProfileSubscriptionWidgetState extends State<ProfileSubscriptionWidget> {
           ? HeroIcons.bolt
           : HeroIcons.star,
       style: HeroIconStyle.solid,
-      color: plan == SubscriptionPlan.spark
+      color: plan == SubscriptionPlan.trial
           ? Colors.white
           : plan == SubscriptionPlan.go
           ? AppTheme.secondary
@@ -46,10 +46,10 @@ class _ProfileSubscriptionWidgetState extends State<ProfileSubscriptionWidget> {
           ? 'Go'
           : plan == SubscriptionPlan.pro
           ? 'Pro'
-          : 'Spark',
+          : 'Trial',
       style: TextStyle(
         fontWeight: FontWeight.bold,
-        color: plan == SubscriptionPlan.spark
+        color: plan == SubscriptionPlan.trial
             ? Colors.white
             : plan == SubscriptionPlan.go
             ? AppTheme.secondary
@@ -61,12 +61,49 @@ class _ProfileSubscriptionWidgetState extends State<ProfileSubscriptionWidget> {
 
   @override
   Widget build(BuildContext context) {
-    SubscriptionPlan plan = widget.user.plan;
+    final user = widget.user;
+
+    if (user.isTrialAvailable) {
+      return _TrialStatusCard(
+        title: 'Активируй 7-дневный пробный период',
+        subtitle: 'Получите доступ к тарифу Go на 7 дней бесплатно',
+        buttonText: 'Активировать',
+        onPressed: widget.onOpenSubscriptionPlans,
+        backgroundColor: AppTheme.primary,
+        textColor: Colors.white,
+      );
+    }
+
+    if (user.isTrialActive) {
+      final daysLeft = _daysLeft(user.trialExpiresAt!);
+
+      return _TrialStatusCard(
+        title: 'Пробный период активен',
+        subtitle: 'Осталось $daysLeft ${_pluralDays(daysLeft)}',
+        buttonText: 'Сменить тариф',
+        onPressed: widget.onOpenSubscriptionPlans,
+        backgroundColor: AppTheme.primary,
+        textColor: Colors.black,
+      );
+    }
+
+    if (user.isTrialUsed && !user.hasPaidAccess) {
+      return _TrialStatusCard(
+        title: 'Пробный период использован',
+        subtitle: 'Выберите тариф, чтобы продолжить работу',
+        buttonText: 'Выбрать тариф',
+        onPressed: widget.onOpenSubscriptionPlans,
+        backgroundColor: AppTheme.secondary,
+        textColor: Colors.white,
+      );
+    }
+
+    SubscriptionPlan? plan = user.plan;
 
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: plan == SubscriptionPlan.spark
+        color: plan == SubscriptionPlan.trial
             ? Colors.deepOrange
             : plan == SubscriptionPlan.go
             ? AppTheme.primary
@@ -83,29 +120,29 @@ class _ProfileSubscriptionWidgetState extends State<ProfileSubscriptionWidget> {
               Text(
                 'Текущий план',
                 style: TextStyle(
-                  color: plan == SubscriptionPlan.spark
+                  color: plan == SubscriptionPlan.trial
                       ? Colors.white
                       : plan == SubscriptionPlan.go
                       ? Colors.black
                       : Colors.white.withAlpha(50),
                 ),
               ),
-
-              Row(
-                children: [
-                  getIcon(plan),
-                  const SizedBox(
-                    width: 8,
-                  ),
-                  getPlanTitle(plan),
-                ],
-              ),
-              if (plan != SubscriptionPlan.spark)
+              if (plan != null)
+                Row(
+                  children: [
+                    getIcon(plan),
+                    const SizedBox(
+                      width: 8,
+                    ),
+                    getPlanTitle(plan),
+                  ],
+                ),
+              if (plan != SubscriptionPlan.trial)
                 Text(
                   'Оплачено до ${DateFormat('dd.MM.yyyy').format(widget.user.planExpiresAt!)}',
                   style: TextStyle(
                     fontSize: 10,
-                    color: plan == SubscriptionPlan.spark
+                    color: plan == SubscriptionPlan.trial
                         ? Colors.white
                         : plan == SubscriptionPlan.go
                         ? Colors.black
@@ -119,9 +156,92 @@ class _ProfileSubscriptionWidgetState extends State<ProfileSubscriptionWidget> {
             onPressed: widget.onOpenSubscriptionPlans,
             text: 'Сменить тариф',
             secondTheme:
-                plan == SubscriptionPlan.spark || plan == SubscriptionPlan.go
+                plan == SubscriptionPlan.trial || plan == SubscriptionPlan.go
                 ? false
                 : true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  int _daysLeft(DateTime expiresAt) {
+    final diff = expiresAt.difference(DateTime.now());
+    if (diff.isNegative) return 0;
+    final days = (diff.inSeconds / Duration.secondsPerDay).ceil();
+    return days > 0 ? days : 0;
+  }
+
+  String _pluralDays(int days) {
+    final mod10 = days % 10;
+    final mod100 = days % 100;
+    if (mod10 == 1 && mod100 != 11) return 'день';
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) {
+      return 'дня';
+    }
+    return 'дней';
+  }
+}
+
+class _TrialStatusCard extends StatelessWidget {
+  const _TrialStatusCard({
+    required this.title,
+    required this.subtitle,
+    required this.buttonText,
+    required this.onPressed,
+    required this.backgroundColor,
+    required this.textColor,
+  });
+
+  final String title;
+  final String subtitle;
+  final String buttonText;
+  final VoidCallback onPressed;
+  final Color backgroundColor;
+  final Color textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.secondary,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            flex: 3,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    fontSize: context.isMobile ? 18 : 22,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  subtitle,
+                  style: TextStyle(
+                    color: Colors.white.withAlpha(200),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: FFButton(
+              marginBottom: 0,
+              onPressed: onPressed,
+              text: buttonText,
+              secondTheme: true,
+            ),
           ),
         ],
       ),

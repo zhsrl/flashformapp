@@ -7,6 +7,7 @@ import 'package:flashform_app/data/model/create_form_state.dart';
 import 'package:flashform_app/data/model/form.dart';
 import 'package:flashform_app/data/model/form_link.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
+import 'package:flashform_app/features/widgets/ff_loading.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -700,10 +701,7 @@ class _CopyFooterDialogState extends ConsumerState<CopyFooterDialog> {
                 );
               },
               loading: () => Center(
-                child: LoadingAnimationWidget.waveDots(
-                  color: AppTheme.secondary,
-                  size: 30,
-                ),
+                child: FFLoading(),
               ),
               error: (error, stack) => Center(
                 child: Text(

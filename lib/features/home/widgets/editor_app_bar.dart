@@ -1,5 +1,7 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/app_validator.dart';
+import 'package:flashform_app/data/model/subscription_plan.dart';
+import 'package:flashform_app/data/model/user.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/responsive_layout.dart';
 import 'package:flutter/material.dart';
@@ -11,6 +13,7 @@ class EditorAppBar extends StatefulWidget implements PreferredSizeWidget {
     super.key,
     this.formName = '',
     this.automaticallyImplyLeading,
+    this.user,
     required this.onPublish,
     required this.onToggleEditMode,
     required this.onSaveFormName,
@@ -21,6 +24,8 @@ class EditorAppBar extends StatefulWidget implements PreferredSizeWidget {
     required this.onBack,
     this.isFormNameChange,
   });
+
+  final User? user;
 
   final String? formName;
   final bool? automaticallyImplyLeading;
@@ -54,6 +59,7 @@ class _EditorAppBarState extends State<EditorAppBar> {
 
   @override
   Widget build(BuildContext context) {
+    final user = widget.user;
     return AppBar(
       backgroundColor: AppTheme.background,
       elevation: 0,
@@ -171,6 +177,30 @@ class _EditorAppBarState extends State<EditorAppBar> {
       actionsPadding: EdgeInsets.only(right: 10),
 
       actions: [
+        if (user != null && (user.plan == null || !user.isPlanActive))
+          Container(
+            padding: .all(8),
+            decoration: BoxDecoration(
+              color: Colors.orange.withAlpha(100),
+              borderRadius: .circular(10),
+            ),
+            child: Row(
+              children: [
+                HeroIcon(
+                  HeroIcons.eye,
+                  color: Colors.deepOrange,
+                ),
+                const SizedBox(
+                  width: 4,
+                ),
+                Text(
+                  'Режим чтения',
+                  style: TextStyle(color: Colors.deepOrange),
+                ),
+              ],
+            ),
+          ),
+
         PopupMenuButton<String>(
           icon: Container(
             decoration: BoxDecoration(
@@ -214,16 +244,17 @@ class _EditorAppBarState extends State<EditorAppBar> {
           width: 8,
         ),
 
-        SizedBox(
-          width: 170,
-          child: FFButton(
-            onPressed: widget.onPublish,
-            isLoading: widget.isPublishing ?? false,
-            text: 'Опубликовать',
-            secondTheme: true,
-            marginBottom: 0,
+        if (user != null && user.plan != null && user.isPlanActive)
+          SizedBox(
+            width: 170,
+            child: FFButton(
+              onPressed: widget.onPublish,
+              isLoading: widget.isPublishing ?? false,
+              text: 'Опубликовать',
+              secondTheme: true,
+              marginBottom: 0,
+            ),
           ),
-        ),
         const SizedBox(
           width: 8,
         ),

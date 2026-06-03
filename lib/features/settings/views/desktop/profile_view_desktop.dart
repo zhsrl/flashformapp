@@ -1,13 +1,14 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/app_validator.dart';
+import 'package:flashform_app/core/utils/logger.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/auth_controller.dart';
 import 'package:flashform_app/data/controller/user_controller.dart';
 import 'package:flashform_app/data/model/subscription_plan.dart';
 import 'package:flashform_app/data/model/user.dart';
-import 'package:flashform_app/features/home/widgets/subscription_widget.dart';
 import 'package:flashform_app/features/settings/widgets/subscription_widget.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
+import 'package:flashform_app/features/widgets/ff_loading.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/material.dart';
@@ -59,7 +60,7 @@ class _SettingsProfileViewState extends ConsumerState<SettingsProfileView> {
 
     // Обработка состояния загрузки
     if (userState.isLoading) {
-      return Center(child: CircularProgressIndicator());
+      return Center(child: FFLoading());
     }
 
     // Обработка ошибки
@@ -70,10 +71,7 @@ class _SettingsProfileViewState extends ConsumerState<SettingsProfileView> {
     final user = userState.user;
     if (user == null) {
       return Center(
-        child: LoadingAnimationWidget.waveDots(
-          color: AppTheme.secondary,
-          size: 30,
-        ),
+        child: FFLoading(),
       );
     }
 
@@ -171,7 +169,7 @@ class _SettingsProfileViewState extends ConsumerState<SettingsProfileView> {
             child: FFButton(
               onPressed: () {
                 String name = _nameController.text;
-                debugPrint('Entered name: $name');
+                logger.d('Entered name: $name');
                 ref
                     .read(userControllerProvider.notifier)
                     .updateProfile(

@@ -1,21 +1,24 @@
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/data/model/subscription_plan.dart';
+import 'package:flashform_app/data/model/user.dart';
 import 'package:flutter/material.dart';
 import 'package:heroicons/heroicons.dart';
 
 class SubscriptionWidget extends StatelessWidget {
   const SubscriptionWidget({
     super.key,
-    required this.plan,
+    required this.user,
   });
 
-  final SubscriptionPlan plan;
+  final User user;
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor = plan == SubscriptionPlan.spark
-        ? Colors.deepOrange
-        : plan == SubscriptionPlan.pro
+    final effectivePlan = user.isTrialActive ? SubscriptionPlan.go : user.plan;
+
+    Color backgroundColor = effectivePlan == SubscriptionPlan.trial
+        ? Colors.grey
+        : effectivePlan == SubscriptionPlan.pro
         ? AppTheme.secondary
         : AppTheme.primary;
 
@@ -28,19 +31,19 @@ class SubscriptionWidget extends StatelessWidget {
       ),
       child: Row(
         children: [
-          if (plan == SubscriptionPlan.spark)
+          if (effectivePlan == SubscriptionPlan.trial)
             HeroIcon(
               HeroIcons.star,
               color: Colors.white,
               style: HeroIconStyle.solid,
             ),
-          if (plan == SubscriptionPlan.go)
+          if (effectivePlan == SubscriptionPlan.go)
             HeroIcon(
               HeroIcons.fire,
               color: AppTheme.secondary,
               style: HeroIconStyle.solid,
             ),
-          if (plan == SubscriptionPlan.pro)
+          if (effectivePlan == SubscriptionPlan.pro)
             HeroIcon(
               HeroIcons.bolt,
               color: AppTheme.primary,
@@ -51,15 +54,15 @@ class SubscriptionWidget extends StatelessWidget {
             width: 6,
           ),
           Text(
-            plan == SubscriptionPlan.spark
-                ? 'Spark'
-                : plan == SubscriptionPlan.go
+            effectivePlan == SubscriptionPlan.trial
+                ? 'Нет тарифа'
+                : effectivePlan == SubscriptionPlan.go
                 ? 'Go'
                 : 'Pro',
             style: TextStyle(
-              color: plan == SubscriptionPlan.spark
+              color: effectivePlan == SubscriptionPlan.trial
                   ? Colors.white
-                  : plan == SubscriptionPlan.pro
+                  : effectivePlan == SubscriptionPlan.pro
                   ? AppTheme.primary
                   : AppTheme.secondary,
               fontWeight: FontWeight.bold,

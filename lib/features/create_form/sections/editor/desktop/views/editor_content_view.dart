@@ -7,6 +7,7 @@ import 'package:flashform_app/features/create_form/sections/editor/desktop/conte
 import 'package:flashform_app/features/create_form/sections/editor/desktop/content_widgets/main_widgets/description_block.dart';
 import 'package:flashform_app/features/create_form/sections/editor/desktop/content_widgets/main_content_block.dart';
 import 'package:flashform_app/features/create_form/sections/editor/desktop/content_widgets/main_widgets/offer_block.dart';
+import 'package:flashform_app/features/widgets/ff_loading.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -106,10 +107,7 @@ class EditorContentView extends ConsumerWidget {
         );
       },
       loading: () => Center(
-        child: LoadingAnimationWidget.waveDots(
-          color: AppTheme.secondary,
-          size: 30,
-        ),
+        child: FFLoading(),
       ),
     );
   }

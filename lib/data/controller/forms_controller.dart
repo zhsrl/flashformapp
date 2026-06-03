@@ -4,7 +4,7 @@ import 'package:flashform_app/data/model/form.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/data/repository/storage_repository.dart';
 import 'package:flashform_app/data/service/form_service.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flashform_app/core/utils/logger.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 final formControllerProvider =
@@ -106,20 +106,20 @@ class FormController extends AsyncNotifier<List<FormModel>> {
         try {
           // Если есть фото — удаляем из Storage
           if (imageUrl != null && imageUrl.isNotEmpty) {
-            debugPrint('🗑️ Deleting image: $imageUrl');
+            logger.i('🗑️ Deleting image: $imageUrl');
             final storageRepo = ref.read(storageRepoProvider);
             await storageRepo.deleteImage(imageUrl);
-            debugPrint('✅ Image deleted successfully');
+            logger.i('✅ Image deleted successfully');
           }
 
-          debugPrint('🗑️ Deleting form: $formId');
+          logger.i('🗑️ Deleting form: $formId');
           final repository = ref.read(formRepoProvider);
           await repository.deleteForm(formId);
-          debugPrint('✅ Form deleted successfully');
+          logger.i('✅ Form deleted successfully');
 
           return repository.getAllForms();
         } catch (e) {
-          debugPrint('❌ Error deleting form: $e');
+          logger.e('❌ Error deleting form: $e');
           rethrow;
         }
       },

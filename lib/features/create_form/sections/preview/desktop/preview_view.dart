@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/createform_controller.dart';
@@ -53,62 +54,60 @@ class _PreviewViewState extends ConsumerState<PreviewView>
     final logoImageState = ref.watch(logoImageControllerProvider);
     final uiControllers = ref.watch(formUIControllersProvider);
 
-    return Expanded(
-      child: Align(
-        alignment: .center,
-        child: Column(
-          mainAxisSize: .min,
-          children: [
-            if (!context.isMobile)
-              FFTabBar(
-                width: 350,
-                controller: _tabController,
-                onTap: (index) => setState(() {
-                  _tabIndex = index;
-                }),
-                isSecondTheme: true,
-                tabs: [
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      HeroIcon(HeroIcons.devicePhoneMobile),
-                      const SizedBox(
-                        width: 6,
-                      ),
-                      Text('Мобильный'),
-                    ],
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      HeroIcon(HeroIcons.computerDesktop),
-                      const SizedBox(
-                        width: 6,
-                      ),
-                      Text('Десктоп'),
-                    ],
-                  ),
-                ],
-              ),
-            const SizedBox(
-              height: 16,
-            ),
-            // 3. Основной контент превью
-            Expanded(
-              child: ScrollConfiguration(
-                behavior: ScrollConfiguration.of(
-                  context,
-                ).copyWith(scrollbars: false),
-                child: _buildDeviceFrame(
-                  formState,
-                  imageState,
-                  logoImageState,
-                  uiControllers,
+    return Align(
+      alignment: .center,
+      child: Column(
+        mainAxisSize: .min,
+        children: [
+          if (!context.isMobile)
+            FFTabBar(
+              width: 350,
+              controller: _tabController,
+              onTap: (index) => setState(() {
+                _tabIndex = index;
+              }),
+              isSecondTheme: true,
+              tabs: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    HeroIcon(HeroIcons.devicePhoneMobile),
+                    const SizedBox(
+                      width: 6,
+                    ),
+                    Text('Мобильный'),
+                  ],
                 ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    HeroIcon(HeroIcons.computerDesktop),
+                    const SizedBox(
+                      width: 6,
+                    ),
+                    Text('Десктоп'),
+                  ],
+                ),
+              ],
+            ),
+          const SizedBox(
+            height: 16,
+          ),
+          // 3. Основной контент превью
+          Expanded(
+            child: ScrollConfiguration(
+              behavior: ScrollConfiguration.of(
+                context,
+              ).copyWith(scrollbars: false),
+              child: _buildDeviceFrame(
+                formState,
+                imageState,
+                logoImageState,
+                uiControllers,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -306,8 +305,10 @@ class _PreviewViewState extends ConsumerState<PreviewView>
                                   uiControllers.mainSecondButtonController,
                               builder: (_, __) => Text(
                                 uiControllers.mainSecondButtonController.text,
-                                style: const TextStyle(
-                                  color: Colors.black,
+                                style: TextStyle(
+                                  color: formState.theme == 'light'
+                                      ? Colors.black
+                                      : Colors.white,
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -433,11 +434,10 @@ class _PreviewViewState extends ConsumerState<PreviewView>
         width: index == 0 ? 350 : 400,
         height: index == 0 ? 350 : 400,
         decoration: BoxDecoration(borderRadius: BorderRadius.circular(40)),
-        child: Image.network(
-          formState.heroImageUrl!,
+        child: CachedNetworkImage(
+          imageUrl: formState.heroImageUrl!,
 
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => _buildPlaceholder(formState, index),
         ),
       );
     }
@@ -468,10 +468,9 @@ class _PreviewViewState extends ConsumerState<PreviewView>
                 localBytes,
                 fit: BoxFit.contain,
               )
-            : Image.network(
-                logoUrl!,
+            : CachedNetworkImage(
+                imageUrl: logoUrl!,
                 fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => const SizedBox.shrink(),
               ),
       ),
     );

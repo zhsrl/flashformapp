@@ -29,8 +29,8 @@ class UserControllerState {
 
 final userControllerProvider =
     StateNotifierProvider<UserController, UserControllerState>(
-  (ref) => UserController(ref.watch(userRepoProvider)),
-);
+      (ref) => UserController(ref.watch(userRepoProvider)),
+    );
 
 class UserController extends StateNotifier<UserControllerState> {
   UserController(this._repository) : super(const UserControllerState());
@@ -62,6 +62,22 @@ class UserController extends StateNotifier<UserControllerState> {
         error: e.toString(),
         isLoading: false,
       );
+    }
+  }
+
+  Future<User?> activateTrial() async {
+    state = state.copyWith(isLoading: true, clearError: true);
+
+    try {
+      final user = await _repository.activateTrial();
+      state = state.copyWith(user: user, isLoading: false);
+      return user;
+    } catch (e) {
+      state = state.copyWith(
+        error: e.toString(),
+        isLoading: false,
+      );
+      return null;
     }
   }
 }

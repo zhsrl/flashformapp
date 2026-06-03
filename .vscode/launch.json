@@ -8,14 +8,7 @@
       "name": "Web-server (Phone Access)",
       "request": "launch",
       "type": "dart",
-      "args": [
-        "-d",
-        "web-server",
-        "--web-hostname",
-        "0.0.0.0",
-        "--web-port",
-        "8080"
-      ]
+      "args": ["--web-port", "8080"]
     },
     {
       "name": "flashform_app",

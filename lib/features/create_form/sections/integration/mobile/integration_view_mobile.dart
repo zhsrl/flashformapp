@@ -51,7 +51,7 @@
 
 //         onConfirm: () async {
 //           if ((form.data?['settings']['meta-pixel-id'] as String).isNotEmpty) {
-//             debugPrint('confirmed');
+//             logger.d('confirmed');
 //             await ref
 //                 .watch(metaPixelControllerProvider.notifier)
 //                 .delete(widget.formId);

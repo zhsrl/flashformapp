@@ -18,13 +18,10 @@ import 'package:flashform_app/features/create_form/sections/editor/desktop/edito
 import 'package:flashform_app/features/home/widgets/editor_app_bar.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_snackbar.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CreateFormDesktopView extends ConsumerStatefulWidget {
@@ -54,6 +51,9 @@ class _CreateFormDesktopViewState extends ConsumerState<CreateFormDesktopView>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(userControllerProvider.notifier).loadProfile();
+    });
     loadFormData(widget.formId, ref, () => mounted, () {
       if (mounted) {
         setState(() {

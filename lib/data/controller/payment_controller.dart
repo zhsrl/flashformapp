@@ -1,3 +1,5 @@
+import 'package:flashform_app/data/model/payment.dart';
+import 'package:flashform_app/data/repository/payments_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flashform_app/data/service/payment_service.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -7,6 +9,15 @@ final paymentControllerProvider =
     StateNotifierProvider<PaymentController, AsyncValue<void>>((ref) {
       return PaymentController(ref.read(paymentServiceProvider));
     });
+
+final allPaymentsControllerProvider =
+    FutureProvider.autoDispose<List<Payment>?>(
+      (ref) async {
+        final repository = ref.watch(paymentsRepoProvider);
+
+        return await repository.getAllPayments();
+      },
+    );
 
 class PaymentController extends StateNotifier<AsyncValue<void>> {
   final PaymentService _paymentService;

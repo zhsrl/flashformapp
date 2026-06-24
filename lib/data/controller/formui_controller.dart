@@ -24,7 +24,7 @@ class FormUIControllers {
   late final TextEditingController subtitleController;
   late final TextEditingController mainFirstButtonController;
   late final TextEditingController mainSecondButtonController;
-  late final TextEditingController badgeController;
+  late final TextEditingController tagController;
   late final TextEditingController mainFirstButtonRedirectUrlController;
   late final TextEditingController mainSecondButtonRedirectUrlController;
 
@@ -56,7 +56,7 @@ class FormUIControllers {
     subtitleController = TextEditingController();
     mainFirstButtonController = TextEditingController();
     mainSecondButtonController = TextEditingController();
-    badgeController = TextEditingController();
+    tagController = TextEditingController();
 
     mainFirstButtonRedirectUrlController = TextEditingController();
     mainSecondButtonRedirectUrlController = TextEditingController();
@@ -89,8 +89,8 @@ class FormUIControllers {
       // _logicNotifier.markAsChanged(); // Помечаем, что есть изменения
     });
 
-    badgeController.addListener(() {
-      _logicNotifier.updateBadge(badgeController.text);
+    tagController.addListener(() {
+      _logicNotifier.updateBadge(tagController.text);
     });
 
     subtitleController.addListener(() {
@@ -209,7 +209,7 @@ class FormUIControllers {
     subtitleController.dispose();
     mainFirstButtonController.dispose();
     mainSecondButtonController.dispose();
-    badgeController.dispose();
+    tagController.dispose();
     mainFirstButtonRedirectUrlController.dispose();
     mainSecondButtonRedirectUrlController.dispose();
     formTitleController.dispose();

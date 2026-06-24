@@ -1,12 +1,13 @@
 import 'package:flashform_app/core/app_theme.dart';
+import 'package:flashform_app/core/utils/logger.dart';
 import 'package:flashform_app/features/home/widgets/home_appbar.dart';
 import 'package:flashform_app/features/tables/providers/stats_provider.dart';
 import 'package:flashform_app/features/tables/widgets/lead_card.dart';
+import 'package:flashform_app/features/widgets/ff_button.dart';
 import 'package:flashform_app/features/widgets/ff_loading.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class LeadsViewDesktop extends ConsumerWidget {
   const LeadsViewDesktop({super.key});
@@ -61,19 +62,32 @@ class LeadsViewDesktop extends ConsumerWidget {
         loading: () => Center(
           child: FFLoading(),
         ),
-        error: (error, stackTrace) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text('Ошибка загрузки'),
-              const SizedBox(height: 16),
-              Text(
-                error.toString(),
-                style: const TextStyle(color: Colors.red, fontSize: 12),
-              ),
-            ],
-          ),
-        ),
+        error: (error, stackTrace) {
+          logger.d(
+            'Leads warning log: ',
+            time: .now(),
+            error: error,
+            stackTrace: stackTrace,
+          );
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text('Ошибка загрузки'),
+                const SizedBox(height: 16),
+                Text(
+                  error.toString(),
+                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                ),
+                FFButton(
+                  isLoading: ref.read(statsProvider).isLoading,
+                  onPressed: () async => await ref.refresh(statsProvider),
+                  text: 'Повторить',
+                ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }

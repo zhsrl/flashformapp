@@ -161,14 +161,14 @@ class _PreviewViewState extends ConsumerState<PreviewView>
                     mainAxisSize: .min,
                     crossAxisAlignment: .start,
                     children: [
-                      if (hasLogo || formState.hasBadge)
+                      if (hasLogo || formState.hasTag)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             if (hasLogo)
                               _buildLogoImage(formState, logoImageState),
-                            if (formState.hasBadge)
+                            if (formState.hasTag)
                               Container(
                                 decoration: BoxDecoration(
                                   color: Colors.transparent,
@@ -185,10 +185,10 @@ class _PreviewViewState extends ConsumerState<PreviewView>
                                   vertical: 3,
                                 ),
                                 child: ListenableBuilder(
-                                  listenable: uiControllers.badgeController,
+                                  listenable: uiControllers.tagController,
                                   builder: (context, child) {
                                     return Text(
-                                      uiControllers.badgeController.text,
+                                      uiControllers.tagController.text,
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: formState.theme == 'light'
@@ -201,7 +201,7 @@ class _PreviewViewState extends ConsumerState<PreviewView>
                               ),
                           ],
                         ),
-                      if (hasLogo || formState.hasBadge)
+                      if (hasLogo || formState.hasTag)
                         const SizedBox(height: 16),
 
                       SizedBox(

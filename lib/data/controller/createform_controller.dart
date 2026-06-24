@@ -74,7 +74,7 @@ class CreateFormController extends StateNotifier<CreateFormState> {
   }
 
   void updateHasBadge(bool value) {
-    state = state.copyWith(hasBadge: value);
+    state = state.copyWith(hasTag: value);
   }
 
   void updateLogo(String? url) {
@@ -86,7 +86,7 @@ class CreateFormController extends StateNotifier<CreateFormState> {
   }
 
   void updateBadge(String value) {
-    state = state.copyWith(badge: value);
+    state = state.copyWith(tag: value);
     markAsChanged();
   }
 
@@ -387,8 +387,8 @@ class CreateFormController extends StateNotifier<CreateFormState> {
         title: mainData['title'] as String?,
         subtitle: mainData['subtitle'] as String?,
         heroImageUrl: mainData['image'] as String?,
-        badge: mainData['label'] as String?,
-        hasBadge: mainData['label'] != null,
+        tag: mainData['tag']['value'] as String?,
+        hasTag: mainData['tag']['enabled'] ?? false,
         mainFirstButton: mainFirstButton,
         mainSecondButton: mainSecondButton,
         hasSecondButton: hasSecondButton,
@@ -605,7 +605,11 @@ class CreateFormController extends StateNotifier<CreateFormState> {
           'title': state.title,
           'subtitle': state.subtitle,
           'image': state.heroImageUrl,
-          'label': state.badge,
+
+          'tag': {
+            'value': state.tag,
+            'enabled': state.hasTag,
+          },
           'button_1': {
             'text': state.mainFirstButton?.text,
             'type':

@@ -52,7 +52,7 @@ mixin FormLoaderMixin {
           formMainData?['subtitle'] ?? 'Описание';
       uiControllers.formTitleController.text =
           formData?['title'] ?? 'Заголовок формы';
-      uiControllers.badgeController.text = formMainData?['label'] ?? 'Тег';
+      uiControllers.tagController.text = formMainData?['tag']['value'] ?? 'Тег';
 
       uiControllers.mainFirstButtonController.text =
           mainFirstButton?['text'] ?? '';

@@ -74,7 +74,7 @@ class _ProfileSubscriptionWidgetState extends State<ProfileSubscriptionWidget> {
       );
     }
 
-    if (user.isTrialActive) {
+    if (user.isTrialActive && user.plan == null) {
       final daysLeft = _daysLeft(user.trialExpiresAt!);
 
       return _TrialStatusCard(
@@ -87,10 +87,13 @@ class _ProfileSubscriptionWidgetState extends State<ProfileSubscriptionWidget> {
       );
     }
 
-    if (user.isTrialUsed && !user.hasPaidAccess) {
+    if (user.isTrialUsed &&
+        !user.hasPaidAccess &&
+        !user.isPlanActive &&
+        user.plan == null) {
       return _TrialStatusCard(
-        title: 'Пробный период использован',
-        subtitle: 'Выберите тариф, чтобы продолжить работу',
+        title: 'Подписка истекла',
+        subtitle: 'Продлите тариф, чтобы продолжить работу',
         buttonText: 'Выбрать тариф',
         onPressed: widget.onOpenSubscriptionPlans,
         backgroundColor: AppTheme.secondary,

@@ -6,6 +6,7 @@ import 'package:flashform_app/data/controller/createform_controller.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
 import 'package:flashform_app/data/controller/formui_controller.dart';
 import 'package:flashform_app/data/controller/integration_controller.dart';
+import 'package:flashform_app/data/controller/user_controller.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/features/create_form/sections/editor/desktop/editor_view_desktop.dart';
 import 'package:flashform_app/features/create_form/sections/editor/desktop/views/editor_branding_view.dart';
@@ -458,6 +459,7 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
   Widget build(BuildContext context) {
     final formState = ref.watch(createFormProvider);
     final controller = ref.read(createFormProvider.notifier);
+    final user = ref.watch(userControllerProvider).user;
     ref.watch(formUIControllersProvider);
     final drawerType = ref.watch(integrationDrawerProvider);
     return Scaffold(
@@ -516,12 +518,36 @@ class _CreateFormMobileViewState extends ConsumerState<CreateFormMobileView>
           const SizedBox(
             width: 8,
           ),
-          IconButton.filled(
-            onPressed: () async {
-              await _onPublishTap();
-            },
-            icon: HeroIcon(HeroIcons.arrowUpOnSquare),
-          ),
+          if (user != null && (user.plan == null || !user.isPlanActive))
+            Container(
+              padding: .all(8),
+              decoration: BoxDecoration(
+                color: Colors.orange.withAlpha(100),
+                borderRadius: .circular(10),
+              ),
+              child: Row(
+                children: [
+                  HeroIcon(
+                    HeroIcons.eye,
+                    color: Colors.deepOrange,
+                  ),
+                  const SizedBox(
+                    width: 4,
+                  ),
+                  Text(
+                    'Режим чтения',
+                    style: TextStyle(color: Colors.deepOrange),
+                  ),
+                ],
+              ),
+            )
+          else
+            IconButton.filled(
+              onPressed: () async {
+                await _onPublishTap();
+              },
+              icon: HeroIcon(HeroIcons.arrowUpOnSquare),
+            ),
         ],
       ),
 

@@ -14,36 +14,37 @@ void showSnackbar(
   required SnackbarType type,
   String message = '',
 }) {
-  final (toastType, iconColor, icon) = switch (type) {
+  final (toastType, iconColor, icon, background) = switch (type) {
     SnackbarType.error => (
       ToastificationType.error,
-      Colors.red,
+      Colors.white,
       HeroIcons.exclamationTriangle,
+      Colors.red,
     ),
     SnackbarType.info => (
       ToastificationType.info,
-      Colors.blueAccent,
+      Colors.white,
       HeroIcons.questionMarkCircle,
+
+      Colors.blueAccent,
     ),
     SnackbarType.success => (
       ToastificationType.success,
-      AppTheme.primary,
+      AppTheme.secondary,
       HeroIcons.faceSmile,
+      AppTheme.primary,
     ),
   };
 
   toastification.show(
     type: toastType,
-    alignment: Alignment.bottomRight,
+    borderSide: BorderSide.none,
+    alignment: Alignment.topCenter,
     style: ToastificationStyle.flat,
-    backgroundColor: Colors.black,
+    backgroundColor: background,
     title: Text(
       message,
-      style: TextStyle(
-        fontWeight: FontWeight.w500,
-
-        color: Colors.white,
-      ),
+      style: TextStyle(fontWeight: FontWeight.w500, color: iconColor),
     ),
     icon: HeroIcon(
       icon,
@@ -51,6 +52,7 @@ void showSnackbar(
       size: 24,
     ),
     foregroundColor: Colors.white,
+    animationDuration: const Duration(milliseconds: 500),
     autoCloseDuration: const Duration(milliseconds: 3000),
   );
 }

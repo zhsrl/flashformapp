@@ -2,6 +2,7 @@ import 'package:flashform_app/core/app_theme.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/features/home/widgets/home_appbar.dart';
 import 'package:flashform_app/features/settings/utils/subscription_plans_presenter.dart';
+import 'package:flashform_app/features/settings/views/desktop/payment_history_view.dart';
 import 'package:flashform_app/features/settings/views/desktop/profile_view_desktop.dart';
 import 'package:flutter/material.dart';
 
@@ -9,6 +10,7 @@ enum EndDrawerType {
   none,
   changePassword,
   subscriptionPlans,
+  paymentHistory,
 }
 
 class SettingsViewDesktop extends StatefulWidget {
@@ -30,6 +32,13 @@ class _SettingsViewDesktopState extends State<SettingsViewDesktop>
     });
   }
 
+  void _openPaymentHistoryDrawer() {
+    setState(() => _endDrawerType = EndDrawerType.paymentHistory);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scaffoldKey.currentState?.openEndDrawer();
+    });
+  }
+
   void _openSubscriptionPlansDrawer() {
     showSubscriptionPlansPresenter(context);
   }
@@ -38,6 +47,8 @@ class _SettingsViewDesktopState extends State<SettingsViewDesktop>
     switch (_endDrawerType) {
       case EndDrawerType.changePassword:
         return ChangePasswordDialog();
+      case EndDrawerType.paymentHistory:
+        return PaymentHistoryView();
       case EndDrawerType.subscriptionPlans:
       case EndDrawerType.none:
         return SizedBox.shrink();
@@ -70,6 +81,7 @@ class _SettingsViewDesktopState extends State<SettingsViewDesktop>
               child: SettingsProfileView(
                 onOpenChangePassword: _openChangePasswordDrawer,
                 onOpenSubscriptionPlans: _openSubscriptionPlansDrawer,
+                onPaymentHistory: _openPaymentHistoryDrawer,
               ),
             ),
           ),

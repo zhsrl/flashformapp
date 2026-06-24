@@ -175,7 +175,11 @@ class _BuildButtonsBlockState extends ConsumerState<BuildButtonsBlock> {
               const SizedBox(height: 8),
               InkWell(
                 onTap: () {
-                  ref.read(editorTabIndexProvider.notifier).state = 3;
+                  if (context.isDesktop) {
+                    ref.read(editorTabIndexProvider.notifier).state = 2;
+                  } else {
+                    ref.read(editorTabIndexProvider.notifier).state = 3;
+                  }
                 },
                 child: Text(
                   'Перейти в настройки',

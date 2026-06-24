@@ -23,16 +23,16 @@ Page adaptivePage({
     name: name,
     key: key,
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      const begin = Offset(1.0, 0.0);
-      const end = Offset.zero;
       const curve = Curves.easeInOut;
 
-      final tween = Tween(begin: begin, end: end).chain(
+      // Меняем Offset на double для прозрачности (от 0.0 - невидимый, до 1.0 - полностью видимый)
+      final tween = Tween<double>(begin: 0.0, end: 1.0).chain(
         CurveTween(curve: curve),
       );
 
-      return SlideTransition(
-        position: animation.drive(tween),
+      // Используем FadeTransition вместо SlideTransition
+      return FadeTransition(
+        opacity: animation.drive(tween),
         child: child,
       );
     },

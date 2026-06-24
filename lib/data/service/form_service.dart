@@ -52,7 +52,11 @@ class FormService {
         },
         'main': {
           'image': null,
-          'label': null,
+
+          'tag': {
+            'value': null,
+            'enabled': false,
+          },
           'title': 'Ваш оффер',
           'subtitle': 'Текст',
           'button_1': {

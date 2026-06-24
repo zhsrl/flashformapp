@@ -80,12 +80,20 @@ class _SubscriptionPlansViewState extends ConsumerState<SubscriptionPlansView> {
     if (!mounted || !isSuccess) return;
   }
 
+  bool isTrialAvailable(UserControllerState userState) {
+    final user = userState.user;
+
+    if (user == null) return false;
+
+    if (user.isTrialActive && user.planExpiresAt == null) return true;
+
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     final subscriptionState = ref.watch(subscriptionControllerProvider);
     final userState = ref.watch(userControllerProvider);
-    final user = userState.user;
-    final isTrialAvailable = user?.isTrialAvailable ?? false;
 
     final currentPlan =
         userState.user?.plan ?? subscriptionState.activeSubscription?.plan;
@@ -139,7 +147,8 @@ class _SubscriptionPlansViewState extends ConsumerState<SubscriptionPlansView> {
                                   isCurrentPlan: plans[i] == currentPlan,
                                   isSelectedPlan: plans[i] == selectedPlan,
                                   isBusy: subscriptionState.isActionInProgress,
-                                  isTrialAvailable: isTrialAvailable,
+                                  isTrialAvailable: isTrialAvailable(userState),
+
                                   onAction: () => _handlePlanAction(
                                     plan: plans[i],
                                     currentPlan: currentPlan,
@@ -160,7 +169,11 @@ class _SubscriptionPlansViewState extends ConsumerState<SubscriptionPlansView> {
                                         .read(planUsageProvider.notifier)
                                         .refresh();
 
-                                    if (!mounted) return;
+                                    if (!mounted) {
+                                      return;
+                                    }
+
+                                    // ignore: use_build_context_synchronously
                                     Navigator.pop(context);
                                   },
                                 ),
@@ -181,7 +194,7 @@ class _SubscriptionPlansViewState extends ConsumerState<SubscriptionPlansView> {
                                   isCurrentPlan: plans[i] == currentPlan,
                                   isSelectedPlan: plans[i] == selectedPlan,
                                   isBusy: subscriptionState.isActionInProgress,
-                                  isTrialAvailable: isTrialAvailable,
+                                  isTrialAvailable: isTrialAvailable(userState),
                                   onAction: () => _handlePlanAction(
                                     plan: plans[i],
                                     currentPlan: currentPlan,

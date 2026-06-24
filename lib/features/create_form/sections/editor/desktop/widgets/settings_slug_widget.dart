@@ -1,15 +1,20 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flashform_app/core/app_theme.dart';
+import 'package:flashform_app/core/utils/logger.dart';
 import 'package:flashform_app/core/utils/responsive_helper.dart';
 import 'package:flashform_app/data/controller/forms_controller.dart';
 import 'package:flashform_app/data/controller/slug_validation_controller.dart';
 import 'package:flashform_app/data/repository/form_repository.dart';
 import 'package:flashform_app/features/widgets/ff_button.dart';
+import 'package:flashform_app/features/widgets/ff_snackbar.dart';
 import 'package:flashform_app/features/widgets/ff_textfield.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
+import 'package:top_snackbar_flutter/custom_snack_bar.dart';
+import 'package:top_snackbar_flutter/top_snack_bar.dart';
 
 class BuildSlugChangeWidget extends ConsumerStatefulWidget {
   const BuildSlugChangeWidget({
@@ -27,6 +32,7 @@ class BuildSlugChangeWidget extends ConsumerStatefulWidget {
 class _BuildSlugChangeWidgetState extends ConsumerState<BuildSlugChangeWidget> {
   final TextEditingController _slugController = TextEditingController();
   String? _lastSyncedSlug;
+  bool _isSaving = false;
 
   @override
   void dispose() {
@@ -34,11 +40,16 @@ class _BuildSlugChangeWidgetState extends ConsumerState<BuildSlugChangeWidget> {
     super.dispose();
   }
 
+  /// Синхронизирует значение из базы данных с текстовым полем контроллера
   void _syncController(String slug) {
     if (_lastSyncedSlug == slug) return;
 
+    // Перезаписываем контроллер, если он пустой, совпадает с прошлым засинканным,
+    // или если мы не находимся в процессе сохранения нового слага
     final shouldOverwrite =
-        _slugController.text.isEmpty || _slugController.text == _lastSyncedSlug;
+        _slugController.text.isEmpty ||
+        _slugController.text == _lastSyncedSlug ||
+        _lastSyncedSlug == null;
 
     if (shouldOverwrite) {
       _slugController.text = slug;
@@ -50,16 +61,24 @@ class _BuildSlugChangeWidgetState extends ConsumerState<BuildSlugChangeWidget> {
   }
 
   @override
-  Widget build(
-    BuildContext context,
-  ) {
+  Widget build(BuildContext context) {
     final slugAvailableState = ref.watch(slugValidationProvider);
     final currentFormId = ref.watch(currentFormIdProvider);
     final currentFormSlugState = ref.watch(
       currentFormSlugProvider(currentFormId),
     );
 
+    // Слушаем изменения слага из БД
     currentFormSlugState.whenData(_syncController);
+
+    // Наблюдаем за состоянием загрузки основного контроллера форм
+    final formsState = ref.watch(formControllerProvider);
+    final isControllerLoading = formsState.maybeWhen(
+      loading: () => true,
+      orElse: () => false,
+    );
+
+    final isLoading = _isSaving || isControllerLoading;
 
     return Container(
       width: context.screenWidth,
@@ -71,12 +90,12 @@ class _BuildSlugChangeWidgetState extends ConsumerState<BuildSlugChangeWidget> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: .start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'Ссылка',
             style: TextStyle(
-              fontWeight: .w500,
+              fontWeight: FontWeight.w500,
             ),
           ),
           const SizedBox(
@@ -92,16 +111,16 @@ class _BuildSlugChangeWidgetState extends ConsumerState<BuildSlugChangeWidget> {
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(16),
             child: Column(
-              crossAxisAlignment: .start,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 FFTextField(
-                  enabled: widget.isAvailable,
+                  enabled: widget.isAvailable && !isLoading,
                   formatters: [
-                    // FilteringTextInputFormatter.allow(
-                    //   RegExp(r'[a-zA-Z0-9\-]]'),
-                    // ),
+                    // Полезно разрешить только латиницу, цифры и дефис для URL-адреса
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'[a-zA-Z0-9\-]'),
+                    ),
                   ],
-
                   controller: _slugController,
                   onChanged: (value) {
                     ref
@@ -110,21 +129,20 @@ class _BuildSlugChangeWidgetState extends ConsumerState<BuildSlugChangeWidget> {
                   },
                   prefixText: 'fform.me/',
                 ),
-
+                const SizedBox(height: 8),
                 slugAvailableState.when(
                   data: (isAvailable) {
                     if (isAvailable == null) {
-                      return SizedBox();
+                      return const SizedBox();
                     }
 
                     return isAvailable
-                        ? Row(
+                        ? const Row(
                             children: [
                               Icon(
                                 Icons.check_circle,
                                 color: Colors.green,
                               ),
-
                               SizedBox(
                                 width: 8,
                               ),
@@ -136,13 +154,12 @@ class _BuildSlugChangeWidgetState extends ConsumerState<BuildSlugChangeWidget> {
                               ),
                             ],
                           )
-                        : Row(
+                        : const Row(
                             children: [
                               Icon(
-                                Icons.check_circle,
+                                Icons.error,
                                 color: Colors.red,
                               ),
-
                               SizedBox(
                                 width: 8,
                               ),
@@ -158,7 +175,7 @@ class _BuildSlugChangeWidgetState extends ConsumerState<BuildSlugChangeWidget> {
                   error: (er, st) {
                     return const Icon(Icons.wifi_off, color: Colors.orange);
                   },
-                  loading: () => Row(
+                  loading: () => const Row(
                     children: [
                       CupertinoActivityIndicator(),
                       SizedBox(
@@ -174,33 +191,79 @@ class _BuildSlugChangeWidgetState extends ConsumerState<BuildSlugChangeWidget> {
                   ),
                 ),
                 const SizedBox(
-                  height: 8,
+                  height: 12,
                 ),
                 SizedBox(
                   width: context.screenWidth,
                   child: FFButton(
-                    // isLoading: ref.read(formControllerProvider).isLoading,
-                    onPressed: widget.isAvailable
+                    isLoading: isLoading,
+                    onPressed: (widget.isAvailable && !isLoading)
                         ? () async {
-                            ref
-                                .read(formControllerProvider.notifier)
-                                .updateFormSlug(
-                                  _slugController.text,
-                                  currentFormId,
-                                );
+                            final newSlug = _slugController.text.trim();
+                            if (newSlug.isEmpty) return;
 
-                            ref.invalidate(
-                              currentFormSlugProvider(currentFormId),
-                            );
+                            setState(() {
+                              _isSaving = true;
+                            });
+
+                            try {
+                              // 1. Сначала дожидаемся успешного сохранения в БД
+                              await ref
+                                  .read(formControllerProvider.notifier)
+                                  .updateFormSlug(
+                                    newSlug,
+                                    currentFormId,
+                                  );
+
+                              // 2. Сбрасываем синхронизационный флаг, чтобы виджет принял новое значение
+                              _lastSyncedSlug = null;
+
+                              // 3. Инвалидируем провайдер слага, заставляя его прочитать свежие данные
+                              ref.invalidate(
+                                currentFormSlugProvider(currentFormId),
+                              );
+
+                              // 4. Сбрасываем плашку проверки слага в UI (так как он теперь наш сохраненный)
+
+                              ref.invalidate(slugValidationProvider);
+
+                              if (context.mounted) {
+                                showSnackbar(
+                                  context,
+                                  type: SnackbarType.success,
+                                  message: 'Ссылка успешно сохранена!',
+                                );
+                              }
+                            } catch (e, st) {
+                              if (context.mounted) {
+                                logger.d(
+                                  'ChangeSlugLog: ',
+                                  error: e,
+                                  stackTrace: st,
+                                );
+                                showSnackbar(
+                                  context,
+                                  type: SnackbarType.error,
+                                  message: 'Ошибка при сохранении: $e',
+                                );
+                              }
+                            } finally {
+                              if (mounted) {
+                                setState(() {
+                                  _isSaving = false;
+                                });
+                              }
+                            }
                           }
                         : null,
                     text: 'Сохранить',
                   ),
                 ),
+                const SizedBox(height: 8),
                 if (!widget.isAvailable)
                   Row(
                     children: [
-                      HeroIcon(
+                      const HeroIcon(
                         HeroIcons.informationCircle,
                         size: 15,
                         color: Colors.deepOrangeAccent,
@@ -210,7 +273,7 @@ class _BuildSlugChangeWidgetState extends ConsumerState<BuildSlugChangeWidget> {
                       ),
                       Text(
                         'forms.available_go_pro'.tr(),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 12,
                           color: Colors.deepOrangeAccent,
                         ),

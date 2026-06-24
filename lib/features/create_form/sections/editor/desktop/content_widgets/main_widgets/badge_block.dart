@@ -51,7 +51,7 @@ class _BuildBadgeBlockState extends State<BuildBadgeBlock> {
                 ),
               ),
               CupertinoSwitch(
-                value: widget.formState?.hasBadge ?? false,
+                value: widget.formState?.hasTag ?? false,
                 activeTrackColor: Colors.green,
 
                 onChanged: (value) {
@@ -62,12 +62,12 @@ class _BuildBadgeBlockState extends State<BuildBadgeBlock> {
               ),
             ],
           ),
-          if (widget.formState?.hasBadge == true)
+          if (widget.formState?.hasTag == true)
             Consumer(
               builder: (context, ref, child) {
                 return FFTextField(
                   maxLength: 25,
-                  controller: widget.uiControllers.badgeController,
+                  controller: widget.uiControllers.tagController,
                   onChanged: (value) {
                     ref.read(createFormProvider.notifier).markAsChanged();
                   },

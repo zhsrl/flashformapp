@@ -14,6 +14,7 @@ class Payment {
     this.providerTxId,
     this.paidAt,
     this.createdAt,
+    this.plan,
   });
 
   final String id;
@@ -26,10 +27,12 @@ class Payment {
   final String? providerTxId;
   final DateTime? paidAt;
   final DateTime? createdAt;
+  final String? plan;
 
   bool get isCompleted => status == PaymentStatus.completed;
 
   factory Payment.fromJson(Map<String, dynamic> json) {
+    final subscriptionsJson = json['subscriptions'] as Map<String, dynamic>?;
     return Payment(
       id: json['id'] as String,
       userId: json['user_id'] as String,
@@ -47,6 +50,7 @@ class Payment {
             )
           : null,
       providerTxId: json['provider_tx_id'] as String?,
+      plan: subscriptionsJson?['plan'],
       paidAt: json['paid_at'] != null
           ? DateTime.parse(json['paid_at'] as String)
           : null,
@@ -57,15 +61,15 @@ class Payment {
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'user_id': userId,
-        'subscription_id': subscriptionId,
-        'amount': amount,
-        'currency': currency,
-        'status': status.name,
-        'provider': provider?.name,
-        'provider_tx_id': providerTxId,
-        'paid_at': paidAt?.toIso8601String(),
-        'created_at': createdAt?.toIso8601String(),
-      };
+    'id': id,
+    'user_id': userId,
+    'subscription_id': subscriptionId,
+    'amount': amount,
+    'currency': currency,
+    'status': status.name,
+    'provider': provider?.name,
+    'provider_tx_id': providerTxId,
+    'paid_at': paidAt?.toIso8601String(),
+    'created_at': createdAt?.toIso8601String(),
+  };
 }

@@ -21,7 +21,7 @@ enum SubscriptionPlan {
   int get amountKzt => switch (this) {
     trial => 0,
     go => 1990,
-    pro => 3990,
+    pro => 1,
   };
 
   // Текущий биллинговый период

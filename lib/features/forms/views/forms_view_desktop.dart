@@ -173,7 +173,7 @@ class _FormsViewDesktopViewState extends ConsumerState<FormsViewDesktop> {
     final user = ref.read(userControllerProvider).user;
 
     if (user != null) {
-      if (user.isTrialAvailable) {
+      if (user.isTrialAvailable && user.planExpiresAt == null) {
         _showTrialActivationIntroDialog();
         return;
       }
@@ -271,7 +271,10 @@ class _FormsViewDesktopViewState extends ConsumerState<FormsViewDesktop> {
       body: Column(
         children: [
           // Виджет который показывает доступен бесплатный период
-          if (user != null && user.isTrialAvailable && !user.isTrialUsed)
+          if (user != null &&
+              user.isTrialAvailable &&
+              !user.isTrialUsed &&
+              user.planExpiresAt == null)
             if (context.isMobile)
               Container(
                 width: context.screenWidth,
@@ -364,7 +367,7 @@ class _FormsViewDesktopViewState extends ConsumerState<FormsViewDesktop> {
                                 width: 4,
                               ),
                               Text(
-                                'Тариф Spark: 7 дней бесплатно',
+                                'Тариф Go: 7 дней бесплатно',
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontWeight: FontWeight.w500,

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static Color background = Color(0xFFF0F0F0);
+  // static Color background = Color(0xFFF0F0F0);
+  static Color background = Color(0xFFf5f5fa);
   static Color eff2f7 = Color(0xFFeff2f7);
   static Color secondBackground = Color(0xFFf5f5fa);
   static Color border = Color(0xFF000000).withAlpha(14);

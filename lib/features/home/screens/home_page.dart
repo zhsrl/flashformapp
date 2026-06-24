@@ -139,6 +139,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       },
       loading: () {},
       error: (er, st) {
+        logger.d('Create form warning log: ', error: er, stackTrace: st);
         showSnackbar(
           context,
           type: SnackbarType.error,
@@ -261,6 +262,13 @@ class _HomePageState extends ConsumerState<HomePage> {
                                     context.go('/create-form/$newFormId');
                                   }
                                 }
+                              } catch (er, st) {
+                                debugPrint('Error create form: $er');
+                                logger.d(
+                                  'Create form log: ',
+                                  error: er,
+                                  stackTrace: st,
+                                );
                               } finally {
                                 if (mounted) {
                                   setDialogState(() {

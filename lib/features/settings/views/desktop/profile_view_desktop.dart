@@ -15,17 +15,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:heroicons/heroicons.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:logger/web.dart';
 
 class SettingsProfileView extends ConsumerStatefulWidget {
   const SettingsProfileView({
     super.key,
     this.onOpenChangePassword,
     this.onOpenSubscriptionPlans,
+    this.onPaymentHistory,
   });
 
   final VoidCallback? onOpenChangePassword;
   final VoidCallback? onOpenSubscriptionPlans;
+  final VoidCallback? onPaymentHistory;
 
   @override
   ConsumerState<SettingsProfileView> createState() =>
@@ -65,6 +67,7 @@ class _SettingsProfileViewState extends ConsumerState<SettingsProfileView> {
 
     // Обработка ошибки
     if (userState.error != null) {
+      Logger().d(time: .now(), userState.error);
       return Center(child: Text('Ошибка: ${userState.error}'));
     }
 
@@ -107,6 +110,7 @@ class _SettingsProfileViewState extends ConsumerState<SettingsProfileView> {
           const SizedBox(
             height: 16,
           ),
+
           FFTextField(
             title: 'Ваше имя',
             hintText: 'Имя',
@@ -182,9 +186,25 @@ class _SettingsProfileViewState extends ConsumerState<SettingsProfileView> {
           const SizedBox(
             height: 8,
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
+          Wrap(
+            alignment: WrapAlignment.center,
             children: [
+              TextButton.icon(
+                onPressed: widget.onPaymentHistory,
+                style: TextButton.styleFrom(
+                  foregroundColor: AppTheme.secondary,
+                ),
+                icon: HeroIcon(HeroIcons.language),
+                label: Text('Сменить язык'),
+              ),
+              TextButton.icon(
+                onPressed: widget.onPaymentHistory,
+                style: TextButton.styleFrom(
+                  foregroundColor: AppTheme.secondary,
+                ),
+                icon: HeroIcon(HeroIcons.creditCard),
+                label: Text('История платежей'),
+              ),
               TextButton.icon(
                 onPressed: widget.onOpenChangePassword,
                 style: TextButton.styleFrom(

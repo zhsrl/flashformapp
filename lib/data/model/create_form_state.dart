@@ -32,8 +32,8 @@ class CreateFormState {
   final MainPageButtonModel? mainSecondButton;
   final bool hasSecondButton;
 
-  final String? badge;
-  final bool hasBadge;
+  final String? tag;
+  final bool hasTag;
 
   // Branding
   final String theme; // 'light' | 'dark'
@@ -85,8 +85,8 @@ class CreateFormState {
     this.title,
     this.subtitle,
     this.formTitle,
-    this.badge,
-    this.hasBadge = false,
+    this.tag,
+    this.hasTag = false,
     this.logo,
     this.primaryColor,
     this.mainFirstButton,
@@ -134,8 +134,8 @@ class CreateFormState {
 
     MainPageButtonModel? mainSecondButton,
     bool? hasSecondButton,
-    String? badge,
-    bool? hasBadge,
+    String? tag,
+    bool? hasTag,
 
     // Branding
     String? theme,
@@ -177,8 +177,8 @@ class CreateFormState {
       title: title ?? this.title,
       subtitle: subtitle ?? this.subtitle,
       formTitle: formTitle ?? this.formTitle,
-      badge: badge ?? this.badge,
-      hasBadge: hasBadge ?? this.hasBadge,
+      tag: tag ?? this.tag,
+      hasTag: hasTag ?? this.hasTag,
       mainFirstButton: mainFirstButton ?? this.mainFirstButton,
       mainSecondButton: mainSecondButton ?? this.mainSecondButton,
       hasSecondButton: hasSecondButton ?? this.hasSecondButton,

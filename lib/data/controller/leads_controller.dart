@@ -1,3 +1,4 @@
+import 'package:flashform_app/core/utils/logger.dart';
 import 'package:flashform_app/data/model/lead.dart';
 import 'package:flashform_app/data/repository/leads_repository.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -126,7 +127,12 @@ class LeadsController extends StateNotifier<LeadsPaginationState> {
         totalCount: totalCount,
         isLoading: false,
       );
-    } catch (e) {
+    } catch (e, st) {
+      logger.d(
+        'leads_controller.dart| Load Leads Warning',
+        error: e,
+        stackTrace: st,
+      );
       state = state.copyWith(isLoading: false);
     }
   }
